@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>יומן מסחר | DJR</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f8f9fa; --card: #ffffff; --border: #e2e8f0;
+    --text: #1a202c; --muted: #718096; --green: #1D9E75;
+    --green-dark: #0F6E56; --green-light: #E1F5EE;
+    --blue-light: #E6F1FB; --blue: #185FA5; --blue-border: #85B7EB;
+    --red-light: #FCEBEB; --red: #A32D2D;
+    --amber-light: #FAEEDA; --amber: #854F0B;
+    --radius: 10px; --radius-sm: 7px;
+  }
+  body { font-family: -apple-system, 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  .app { display: flex; flex-direction: column; height: 100vh; max-width: 680px; margin: 0 auto; padding: 0; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--card); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .logo { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+  .logo span { color: var(--green); }
+  .lang-toggle { display: flex; gap: 3px; background: var(--bg); border-radius: var(--radius-sm); padding: 3px; border: 1px solid var(--border); }
+  .lang-btn { border: none; background: transparent; padding: 4px 10px; border-radius: 5px; font-size: 12px; cursor: pointer; color: var(--muted); }
+  .lang-btn.active { background: var(--card); color: var(--text); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .tg-setup { padding: 10px 16px; background: var(--blue-light); border-bottom: 1px solid var(--blue-border); flex-shrink: 0; }
+  .tg-setup-title { font-size: 12px; font-weight: 600; color: var(--blue); margin-bottom: 8px; }
+  .tg-fields { display: flex; gap: 8px; align-items: flex-end; }
+  .tg-field { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+  .tg-field label { font-size: 11px; color: var(--blue); }
+  .tg-field input { padding: 6px 10px; border: 1px solid var(--blue-border); border-radius: var(--radius-sm); font-size: 12px; background: white; color: var(--text); }
+  .test-btn { padding: 7px 14px; background: var(--blue); color: white; border: none; border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+  .test-btn:hover { background: #0C447C; }
+  .tg-status { font-size: 11px; margin-top: 6px; padding: 5px 10px; border-radius: var(--radius-sm); display: none; }
+  .tg-status.ok { background: #EAF3DE; color: #27500A; display: block; }
+  .tg-status.err { background: var(--red-light); color: var(--red); display: block; }
+  .tabs { display: flex; padding: 0 16px; background: var(--card); border-bottom: 1px solid var(--border); flex-shrink: 0; gap: 0; }
+  .tab { padding: 12px 14px; font-size: 13px; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; white-space: nowrap; }
+  .tab.active { color: var(--green); border-bottom-color: var(--green); font-weight: 600; }
+  .panels { flex: 1; overflow-y: auto; padding: 16px; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-group label { font-size: 12px; color: var(--muted); font-weight: 500; }
+  .form-group input, .form-group select, .form-group textarea { padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; background: white; color: var(--text); font-family: inherit; width: 100%; }
+  .form-group textarea { resize: vertical; min-height: 68px; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--green); }
+  .bias-btns { display: flex; gap: 8px; }
+  .bias-btn { flex: 1; padding: 9px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; cursor: pointer; background: white; color: var(--text); text-align: center; transition: all 0.15s; }
+  .bias-btn.bull.active { background: #EAF3DE; border-color: #3B6D11; color: #27500A; font-weight: 600; }
+  .bias-btn.bear.active { background: var(--red-light); border-color: #A32D2D; color: var(--red); font-weight: 600; }
+  .img-upload-area { border: 1.5px dashed var(--border); border-radius: var(--radius-sm); padding: 14px; text-align: center; cursor: pointer; background: var(--bg); position: relative; transition: border-color 0.15s; }
+  .img-upload-area:hover { border-color: var(--green); }
+  .img-upload-area input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .img-upload-label { font-size: 12px; color: var(--muted); pointer-events: none; }
+  .img-preview-wrap { margin-top: 8px; position: relative; display: inline-block; }
+  .img-preview-wrap img { max-height: 110px; max-width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border); display: block; }
+  .img-remove { position: absolute; top: 4px; left: 4px; background: #E24B4A; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .preview-label { font-size: 11px; color: var(--muted); margin: 10px 0 4px; }
+  .preview-box { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; font-size: 12px; line-height: 1.7; white-space: pre-wrap; color: var(--text); max-height: 160px; overflow-y: auto; }
+  .disclaimer { font-size: 11px; color: var(--muted); background: var(--green-light); padding: 7px 10px; border-radius: var(--radius-sm); border-right: 3px solid var(--green); margin-top: 10px; }
+  .send-btn { width: 100%; margin-top: 12px; padding: 12px; background: var(--green); color: white; border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+  .send-btn:hover { background: var(--green-dark); }
+  .send-btn:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+  .update-types { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+  .utype { padding: 5px 12px; border: 1px solid var(--border); border-radius: 20px; font-size: 12px; cursor: pointer; background: white; color: var(--muted); }
+  .utype.active { background: var(--green-light); border-color: var(--green-dark); color: var(--green-dark); font-weight: 600; }
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; text-align: center; }
+  .stat-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .stat-val { font-size: 22px; font-weight: 700; color: var(--text); }
+  .journal-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .journal-item:last-child { border-bottom: none; }
+  .ji-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .ji-time { font-size: 11px; color: var(--muted); }
+  .badge { font-size: 11px; padding: 2px 9px; border-radius: 20px; font-weight: 500; }
+  .badge-idea { background: var(--blue-light); color: var(--blue); }
+  .badge-open { background: var(--green-light); color: var(--green-dark); }
+  .badge-update { background: var(--amber-light); color: var(--amber); }
+  .ji-text { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .ji-img { width: 52px; height: 38px; object-fit: cover; border-radius: 5px; border: 1px solid var(--border); margin-top: 5px; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid white; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .empty-state { text-align: center; padding: 2rem; color: var(--muted); font-size: 13px; }
+  @media (max-width: 480px) {
+    .tg-fields { flex-direction: column; }
+    .form-grid { grid-template-columns: 1fr; }
+    .tabs { overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="logo">יומן<span>מסחר</span></div>
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('he')">עברית</button>
+      <button class="lang-btn" onclick="setLang('en')">English</button>
+    </div>
+  </div>
+
+  <div class="tg-setup">
+    <div class="tg-setup-title" id="tg-title">⚙️ הגדרות טלגרם</div>
+    <div class="tg-fields">
+      <div class="tg-field">
+        <label>Bot Token</label>
+        <input type="password" id="tg-token" placeholder="123456:ABC-DEF..." oninput="saveTgConfig()" />
+      </div>
+      <div class="tg-field">
+        <label id="lbl-chatid">Chat ID</label>
+        <input type="text" id="tg-chatid" placeholder="-5195169509" oninput="saveTgConfig()" />
+      </div>
+      <button class="test-btn" id="test-btn" onclick="testTelegram()">🔗 <span id="test-btn-text">בדוק</span></button>
+    </div>
+    <div class="tg-status" id="tg-status"></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('idea')" id="tab-idea">רעיון מוקדם</div>
+    <div class="tab" onclick="showTab('trade')" id="tab-trade">תיעוד פוזיציה</div>
+    <div class="tab" onclick="showTab('update')" id="tab-update">עדכון ניהול</div>
+    <div class="tab" onclick="showTab('journal')" id="tab-journal">יומן</div>
+  </div>
+
+  <div class="panels">
+
+    <div class="panel active" id="panel-idea">
+      <div class="card">
+        <div class="form-grid">
+          <div class="form-group full">
+            <label id="lbl-bias">כיוון ציפייה</label>
+            <div class="bias-btns">
+              <div class="bias-btn bull" id="bull-btn" onclick="setBias('bull')">📈 מגמה עולה</div>
+              <div class="bias-btn bear" id="bear-btn" onclick="setBias('bear')">📉 מגמה יורדת</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label id="lbl-zone">אזור עניין</label>
+            <input type="text" id="zone" placeholder="לדוג׳ 5780-5800" oninput="updateIdeaPreview()" />
+          </div>
+          <div class="form-group">
+            <label id="lbl-inv">רמת ביטול</label>
+            <input type="text" id="inv" placeholder="לדוג׳ 5750" oninput="updateIdeaPreview()" />
+          </div>
+          <div class="form-group">
+            <label id="lbl-obj">מטרה</label>
+            <input type="text" id="obj" placeholder="לדוג׳ 5850" oninput="updateIdeaPreview()" />
+          </div>
+          <div class="form-group">
+            <label id="lbl-tf">מסגרת זמן</label>
+            <select id="tf" onchange="updateIdeaPreview()">
+              <option>5 דקות</option><option>15 דקות</option><option>שעה</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label id="lbl-conf">נקודות עיקריות לתרחיש</label>
+            <textarea id="conf" placeholder="לדוג׳ פריצת התנגדות, תמיכה ב-VWAP..." oninput="updateIdeaPreview()"></textarea>
+          </div>
+          <div class="form-group full">
+            <label id="lbl-img1">צירוף תמונה</label>
+            <div class="img-upload-area">
+              <input type="file" accept="image/*" onchange="handleImg(event,'idea')" />
+              <div class="img-upload-label" id="img-label-idea">📎 לחץ לצירוף תמונה</div>
+            </div>
+            <div id="img-preview-idea"></div>
+          </div>
+        </div>
+        <div class="preview-label" id="prev-label1">תצוגה מקדימה</div>
+        <div class="preview-box" id="idea-preview">מלא את הפרטים לצפייה בתצוגה מקדימה...</div>
+        <div class="disclaimer" id="disc1">⚠️ כל הפרסומים הינם חלק מיומן מסחר אישי לצורכי לימוד בלבד. אין לראות בכך ייעוץ השקעות.</div>
+        <button class="send-btn" id="send-idea-btn" onclick="sendToTelegram('idea')">📤 שלח לטלגרם</button>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-trade">
+      <div class="card">
+        <div class="form-grid">
+          <div class="form-group">
+            <label id="lbl-ep">נקודת כניסה מתועדת</label>
+            <input type="text" id="ep" placeholder="לדוג׳ 5792.5" oninput="updateTradePreview()" />
+          </div>
+          <div class="form-group">
+            <label id="lbl-size">גודל פוזיציה</label>
+            <input type="text" id="size" placeholder="לדוג׳ 1 חוזה" oninput="updateTradePreview()" />
+          </div>
+          <div class="form-group">
+            <label id="lbl-rl">רמת סיכון</label>
+            <input type="text" id="rl" placeholder="לדוג׳ 5778" oninput="updateTradePreview()" />
+          </div>
+          <div class="form-group">
+            <label id="lbl-ob">יעד ראשוני</label>
+            <input type="text" id="ob" placeholder="לדוג׳ 5820" oninput="updateTradePreview()" />
+          </div>
+          <div class="form-group full">
+            <label id="lbl-reason">סיבת הכניסה</label>
+            <textarea id="reason" placeholder="לדוג׳ אישור על פריצת המבנה עם נפח תומך..." oninput="updateTradePreview()"></textarea>
+          </div>
+          <div class="form-group full">
+            <label id="lbl-img2">צירוף תמונה</label>
+            <div class="img-upload-area">
+              <input type="file" accept="image/*" onchange="handleImg(event,'trade')" />
+              <div class="img-upload-label" id="img-label-trade">📎 לחץ לצירוף תמונה</div>
+            </div>
+            <div id="img-preview-trade"></div>
+          </div>
+        </div>
+        <div class="preview-label">תצוגה מקדימה</div>
+        <div class="preview-box" id="trade-preview">מלא את הפרטים לצפייה בתצוגה מקדימה...</div>
+        <div class="disclaimer" id="disc2">⚠️ כל הפרסומים הינם חלק מיומן מסחר אישי לצורכי לימוד בלבד. אין לראות בכך ייעוץ השקעות.</div>
+        <button class="send-btn" id="send-trade-btn" onclick="sendToTelegram('trade')">📤 שלח לטלגרם</button>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-update">
+      <div class="card">
+        <div class="update-types" id="utypes-wrap">
+          <div class="utype active" onclick="setUtype(this,'sl')">הזזת רמת סיכון</div>
+          <div class="utype" onclick="setUtype(this,'partial')">סגירה חלקית</div>
+          <div class="utype" onclick="setUtype(this,'add')">הוספה לפוזיציה</div>
+          <div class="utype" onclick="setUtype(this,'close')">סגירת פוזיציה</div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label id="lbl-newlevel">רמה חדשה</label>
+            <input type="text" id="new-level" placeholder="לדוג׳ 5795" oninput="updateUpdatePreview()" />
+          </div>
+          <div class="form-group">
+            <label id="lbl-pnl">רווח/הפסד (נק׳)</label>
+            <input type="text" id="pnl" placeholder="לדוג׳ +12.5" oninput="updateUpdatePreview()" />
+          </div>
+          <div class="form-group full">
+            <label id="lbl-note">הערה</label>
+            <textarea id="note" placeholder="לדוג׳ הזזתי את רמת הסיכון לנקודת איזון..." oninput="updateUpdatePreview()"></textarea>
+          </div>
+          <div class="form-group full">
+            <label id="lbl-img3">צירוף תמונה</label>
+            <div class="img-upload-area">
+              <input type="file" accept="image/*" onchange="handleImg(event,'update')" />
+              <div class="img-upload-label" id="img-label-update">📎 לחץ לצירוף תמונה</div>
+            </div>
+            <div id="img-preview-update"></div>
+          </div>
+        </div>
+        <div class="preview-label">תצוגה מקדימה</div>
+        <div class="preview-box" id="update-preview">מלא את הפרטים לצפייה בתצוגה מקדימה...</div>
+        <div class="disclaimer" id="disc3">⚠️ כל הפרסומים הינם חלק מיומן מסחר אישי לצורכי לימוד בלבד. אין לראות בכך ייעוץ השקעות.</div>
+        <button class="send-btn" id="send-update-btn" onclick="sendToTelegram('update')">📤 שלח לטלגרם</button>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-journal">
+      <div class="stats-grid">
+        <div class="stat"><div class="stat-label" id="sl1">סה״כ היום</div><div class="stat-val" id="stat1">0</div></div>
+        <div class="stat"><div class="stat-label" id="sl2">פוזיציות</div><div class="stat-val" id="stat2">0</div></div>
+        <div class="stat"><div class="stat-label" id="sl3">עדכונים</div><div class="stat-val" id="stat3">0</div></div>
+      </div>
+      <div class="card">
+        <div id="journal-list"><div class="empty-state" id="empty-j">עדיין אין רשומות ביומן</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let lang = 'he';
+let bias = null;
+let utype = 'sl';
+let journal = [];
+let images = { idea: null, trade: null, update: null };
+
+const DISC = {
+  he: '⚠️ תוכן זה הינו חלק מיומן מסחר אישי לצורכי לימוד בלבד. אין לראות בכך ייעוץ השקעות. כל החלטה היא באחריות הקורא בלבד.',
+  en: '⚠️ This content is part of a personal trading journal for educational purposes only. This is not financial advice. All decisions are the sole responsibility of the reader.'
+};
+const UTYPES = {
+  he: { sl:'הזזת רמת סיכון', partial:'סגירה חלקית', add:'הוספה לפוזיציה', close:'סגירת פוזיציה' },
+  en: { sl:'Move risk level', partial:'Partial close', add:'Add to position', close:'Close position' }
+};
+
+function saveTgConfig() {
+  localStorage.setItem('tg_token', document.getElementById('tg-token').value);
+  localStorage.setItem('tg_chatid', document.getElementById('tg-chatid').value);
+}
+function loadTgConfig() {
+  const t = localStorage.getItem('tg_token');
+  const c = localStorage.getItem('tg_chatid');
+  if (t) document.getElementById('tg-token').value = t;
+  if (c) document.getElementById('tg-chatid').value = c;
+}
+function getTgConfig() {
+  return {
+    token: document.getElementById('tg-token').value.trim(),
+    chatId: document.getElementById('tg-chatid').value.trim()
+  };
+}
+
+async function testTelegram() {
+  const { token, chatId } = getTgConfig();
+  const statusEl = document.getElementById('tg-status');
+  const btn = document.getElementById('test-btn');
+  if (!token || !chatId) {
+    statusEl.className = 'tg-status err';
+    statusEl.textContent = lang === 'he' ? 'נא למלא Token ו-Chat ID' : 'Please fill Token and Chat ID';
+    return;
+  }
+  btn.disabled = true;
+  document.getElementById('test-btn-text').textContent = '...';
+  statusEl.className = 'tg-status';
+  try {
+    const msg = lang === 'he' ? '✅ יומן המסחר מחובר בהצלחה!' : '✅ Trading journal connected!';
+    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chatId, text: msg })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      statusEl.className = 'tg-status ok';
+      statusEl.textContent = lang === 'he' ? '✅ חיבור תקין! הודעת בדיקה נשלחה' : '✅ Connected! Test message sent';
+    } else {
+      statusEl.className = 'tg-status err';
+      statusEl.textContent = 'Error: ' + (data.description || 'Unknown');
+    }
+  } catch(e) {
+    statusEl.className = 'tg-status err';
+    statusEl.textContent = lang === 'he' ? 'שגיאת רשת' : 'Network error';
+  }
+  btn.disabled = false;
+  document.getElementById('test-btn-text').textContent = lang === 'he' ? 'בדוק' : 'Test';
+}
+
+async function sendToTelegram(type) {
+  const { token, chatId } = getTgConfig();
+  const btn = document.getElementById(`send-${type}-btn`);
+  const statusEl = document.getElementById('tg-status');
+  if (!token || !chatId) {
+    statusEl.className = 'tg-status err';
+    statusEl.textContent = lang === 'he' ? '⚠️ הגדר Token ו-Chat ID תחילה' : '⚠️ Set Token and Chat ID first';
+    return;
+  }
+  const prevText = btn.textContent;
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner"></span>${lang==='he'?'שולח...':'Sending...'}`;
+  let text = document.getElementById(`${type === 'idea' ? 'idea' : type === 'trade' ? 'trade' : 'update'}-preview`).textContent;
+  const img = images[type];
+  try {
+    let res, data;
+    if (img) {
+      const formData = new FormData();
+      formData.append('chat_id', chatId);
+      formData.append('caption', text);
+      const blob = await fetch(img).then(r => r.blob());
+      formData.append('photo', blob, 'chart.jpg');
+      res = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: 'POST', body: formData });
+    } else {
+      res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: chatId, text })
+      });
+    }
+    data = await res.json();
+    if (!data.ok) throw new Error(data.description);
+    addToJournal(type, text, img);
+    btn.innerHTML = lang==='he'?'✅ נשלח!':'✅ Sent!';
+    btn.style.background = '#27500A';
+    statusEl.className = 'tg-status ok';
+    statusEl.textContent = lang==='he'?'✅ נשלח בהצלחה לטלגרם!':'✅ Sent successfully to Telegram!';
+    setTimeout(() => { btn.textContent = prevText; btn.style.background = ''; btn.disabled = false; }, 2500);
+  } catch(e) {
+    btn.textContent = prevText;
+    btn.disabled = false;
+    statusEl.className = 'tg-status err';
+    statusEl.textContent = (lang==='he'?'שגיאה: ':'Error: ') + e.message;
+  }
+}
+
+function handleImg(e, type) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    images[type] = ev.target.result;
+    const label = document.getElementById(`img-label-${type}`);
+    if (label) label.textContent = '✅ ' + file.name;
+    const preview = document.getElementById(`img-preview-${type}`);
+    if (preview) preview.innerHTML = `<div class="img-preview-wrap"><img src="${ev.target.result}" /><button class="img-remove" onclick="removeImg('${type}')">✕</button></div>`;
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImg(type) {
+  images[type] = null;
+  const label = document.getElementById(`img-label-${type}`);
+  if (label) label.textContent = lang==='he'?'📎 לחץ לצירוף תמונה':'📎 Click to attach image';
+  const preview = document.getElementById(`img-preview-${type}`);
+  if (preview) preview.innerHTML = '';
+}
+
+function buildIdeaMsg() {
+  const isHe = lang === 'he';
+  let msg = isHe ? '📋 רעיון מוקדם | יומן מסחר\n' : '📋 Pre-Trade Idea | Trading Journal\n';
+  msg += '━━━━━━━━━━━━━━━\n';
+  if (bias) msg += (bias==='bull' ? (isHe?'כיוון ציפייה: 📈 עולה':'Bias: 📈 Bullish') : (isHe?'כיוון ציפייה: 📉 יורד':'Bias: 📉 Bearish')) + '\n';
+  const z=document.getElementById('zone').value, i=document.getElementById('inv').value,
+        o=document.getElementById('obj').value, tf=document.getElementById('tf').value,
+        c=document.getElementById('conf').value;
+  if (z) msg += (isHe?'אזור עניין':'Area of Interest') + `: ${z}\n`;
+  if (i) msg += (isHe?'ביטול':'Invalidation') + `: ${i}\n`;
+  if (o) msg += (isHe?'מטרה':'Objective') + `: ${o}\n`;
+  if (tf) msg += (isHe?'מסגרת זמן':'Timeframe') + `: ${tf}\n`;
+  if (c) msg += '\n' + (isHe?'נקודות עיקריות':'Key Confluences') + `:\n${c}\n`;
+  msg += '━━━━━━━━━━━━━━━\n' + DISC[lang];
+  return msg;
+}
+
+function buildTradeMsg() {
+  const isHe = lang === 'he';
+  let msg = isHe ? '📌 תיעוד כניסה | יומן מסחר\n' : '📌 Position Entry | Trading Journal\n';
+  msg += '━━━━━━━━━━━━━━━\n';
+  const ep=document.getElementById('ep').value, sz=document.getElementById('size').value,
+        rl=document.getElementById('rl').value, ob=document.getElementById('ob').value,
+        rs=document.getElementById('reason').value;
+  if (ep) msg += (isHe?'נקודת כניסה':'Entry Point') + `: ${ep}\n`;
+  if (sz) msg += (isHe?'גודל פוזיציה':'Position Size') + `: ${sz}\n`;
+  if (rl) msg += (isHe?'רמת סיכון':'Risk Level') + `: ${rl}\n`;
+  if (ob) msg += (isHe?'יעד ראשוני':'Initial Target') + `: ${ob}\n`;
+  if (rs) msg += '\n' + (isHe?'סיבת הכניסה':'Entry Reason') + `:\n${rs}\n`;
+  msg += '━━━━━━━━━━━━━━━\n' + DISC[lang];
+  return msg;
+}
+
+function buildUpdateMsg() {
+  const isHe = lang === 'he';
+  const utLabel = UTYPES[lang][utype];
+  let msg = isHe ? '🔄 עדכון ניהול | יומן מסחר\n' : '🔄 Management Update | Trading Journal\n';
+  msg += `${utLabel}\n━━━━━━━━━━━━━━━\n`;
+  const nl=document.getElementById('new-level').value, pnl=document.getElementById('pnl').value,
+        note=document.getElementById('note').value;
+  if (nl) msg += (isHe?'רמה חדשה':'New Level') + `: ${nl}\n`;
+  if (pnl) msg += (isHe?'תוצאה':'Result') + `: ${pnl}\n`;
+  if (note) msg += '\n' + (isHe?'הערה':'Note') + `:\n${note}\n`;
+  msg += '━━━━━━━━━━━━━━━\n' + DISC[lang];
+  return msg;
+}
+
+function updateIdeaPreview() { document.getElementById('idea-preview').textContent = buildIdeaMsg(); }
+function updateTradePreview() { document.getElementById('trade-preview').textContent = buildTradeMsg(); }
+function updateUpdatePreview() { document.getElementById('update-preview').textContent = buildUpdateMsg(); }
+
+function setBias(b) {
+  bias = b;
+  document.getElementById('bull-btn').classList.toggle('active', b==='bull');
+  document.getElementById('bear-btn').classList.toggle('active', b==='bear');
+  updateIdeaPreview();
+}
+
+function setUtype(el, t) {
+  utype = t;
+  document.querySelectorAll('.utype').forEach(u => u.classList.remove('active'));
+  el.classList.add('active');
+  updateUpdatePreview();
+}
+
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+function addToJournal(type, text, img) {
+  journal.unshift({ type, text, img, time: new Date().toLocaleTimeString(lang==='he'?'he-IL':'en-GB',{hour:'2-digit',minute:'2-digit'}) });
+  renderJournal();
+}
+
+function renderJournal() {
+  const list = document.getElementById('journal-list');
+  document.getElementById('stat1').textContent = journal.length;
+  document.getElementById('stat2').textContent = journal.filter(j=>j.type==='trade').length;
+  document.getElementById('stat3').textContent = journal.filter(j=>j.type==='update').length;
+  if (!journal.length) { list.innerHTML = `<div class="empty-state">${lang==='he'?'עדיין אין רשומות ביומן':'No journal entries yet'}</div>`; return; }
+  const badges = {
+    idea: `<span class="badge badge-idea">${lang==='he'?'רעיון':'Idea'}</span>`,
+    trade: `<span class="badge badge-open">${lang==='he'?'כניסה':'Entry'}</span>`,
+    update: `<span class="badge badge-update">${lang==='he'?'עדכון':'Update'}</span>`
+  };
+  list.innerHTML = journal.map(j => `
+    <div class="journal-item">
+      <div class="ji-header">${badges[j.type]}<span class="ji-time">${j.time}</span></div>
+      <div class="ji-text">${j.text.split('\n').slice(0,3).join(' | ')}</div>
+      ${j.img ? `<img class="ji-img" src="${j.img}" />` : ''}
+    </div>`).join('');
+}
+
+function setLang(l) {
+  lang = l;
+  document.documentElement.dir = l === 'he' ? 'rtl' : 'ltr';
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.lang-btn[onclick="setLang('${l}')"]`).classList.add('active');
+  const he = l === 'he';
+  document.getElementById('tg-title').textContent = he ? '⚙️ הגדרות טלגרם' : '⚙️ Telegram Settings';
+  document.getElementById('test-btn-text').textContent = he ? 'בדוק' : 'Test';
+  document.getElementById('tab-idea').textContent = he ? 'רעיון מוקדם' : 'Pre-Trade Idea';
+  document.getElementById('tab-trade').textContent = he ? 'תיעוד פוזיציה' : 'Document Position';
+  document.getElementById('tab-update').textContent = he ? 'עדכון ניהול' : 'Management Update';
+  document.getElementById('tab-journal').textContent = he ? 'יומן' : 'Journal';
+  document.getElementById('sl1').textContent = he ? 'סה״כ היום' : 'Total today';
+  document.getElementById('sl2').textContent = he ? 'פוזיציות' : 'Positions';
+  document.getElementById('sl3').textContent = he ? 'עדכונים' : 'Updates';
+  document.getElementById('send-idea-btn').textContent = he ? '📤 שלח לטלגרם' : '📤 Send to Telegram';
+  document.getElementById('send-trade-btn').textContent = he ? '📤 שלח לטלגרם' : '📤 Send to Telegram';
+  document.getElementById('send-update-btn').textContent = he ? '📤 שלח לטלגרם' : '📤 Send to Telegram';
+  document.getElementById('disc1').textContent = DISC[l];
+  document.getElementById('disc2').textContent = DISC[l];
+  document.getElementById('disc3').textContent = DISC[l];
+  ['idea','trade','update'].forEach(t => {
+    const lbl = document.getElementById(`img-label-${t}`);
+    if (lbl && !images[t]) lbl.textContent = he ? '📎 לחץ לצירוף תמונה' : '📎 Click to attach image';
+  });
+  document.querySelectorAll('.utype').forEach((el,i) => {
+    el.textContent = UTYPES[l][['sl','partial','add','close'][i]];
+  });
+  updateIdeaPreview(); updateTradePreview(); updateUpdatePreview();
+  renderJournal();
+}
+
+loadTgConfig();
+updateIdeaPreview();
+updateTradePreview();
+updateUpdatePreview();
+</script>
+</body>
+</html>
