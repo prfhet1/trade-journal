@@ -374,7 +374,7 @@ function calcRR(entry,sl,tp){const e=parseFloat(entry),s=parseFloat(sl),t=parseF
 
 function buildIdeaMsg(){
   const isHe=lang==='he',ticker=v('ticker'),tf=v('tf'),z=v('zone'),i=v('inv'),o=v('obj'),rr=v('rr'),c=v('conf');
-  let msg=isHe?'📋 תרחיש מקדים | יומן מסחר DJR\n':'📋 Pre-Trade Scenario | DJR Trading Journal\n';
+  let msg=isHe?'📋 רעיון מקדים | יומן מסחר DJR\n':'📋 Pre-Trade Idea | DJR Trading Journal\n';
   msg+='━━━━━━━━━━━━━━━\n';
   if(ticker||tf)msg+=`📊 ${ticker}${tf?' | ⏱ '+tf:''}\n`;
   if(bias)msg+=(bias==='bull'?(isHe?'כיוון מצופה: 📈 עולה':'Expected Bias: 📈 Bullish'):(isHe?'כיוון מצופה: 📉 יורד':'Expected Bias: 📉 Bearish'))+'\n';
@@ -433,22 +433,23 @@ function v(id){const el=document.getElementById(id);return el?el.value:'';}
 function setVal(id,val){const el=document.getElementById(id);if(el)el.value=val;}
 
 function syncFromIdea(){
-  // Auto-copy shared fields from idea to all other tabs
-  const ticker=v('ticker'),tf=v('tf'),sl=v('inv'),tp=v('obj');
+  const ticker=v('ticker'),tf=v('tf'),sl=v('inv'),tp=v('obj'),entry=v('zone').split('-')[0];
   // Trade tab
-  if(ticker){setVal('t-ticker',ticker);}
-  if(tf){setVal('t-tf',tf);}
-  if(sl){setVal('rl',sl);}
-  if(tp){setVal('ob',tp);}
+  if(ticker)setVal('t-ticker',ticker);
+  if(tf)setVal('t-tf',tf);
+  if(entry)setVal('ep',entry);
+  if(sl)setVal('rl',sl);
+  if(tp)setVal('ob',tp);
   // Update tab
-  if(ticker){setVal('u-ticker',ticker);}
-  if(sl){setVal('new-level',sl);}
-  if(tp){setVal('new-tp',tp);}
+  if(ticker)setVal('u-ticker',ticker);
+  if(sl)setVal('new-level',sl);
+  if(tp)setVal('new-tp',tp);
   // Close tab
-  if(ticker){setVal('c-ticker',ticker);}
-  if(tf){setVal('c-tf',tf);}
-  if(sl){setVal('c-sl',sl);}
-  // Recalc other previews
+  if(ticker)setVal('c-ticker',ticker);
+  if(tf)setVal('c-tf',tf);
+  if(entry)setVal('c-entry',entry);
+  if(sl)setVal('c-sl',sl);
+  // Recalc
   updateTradePreview();updateUpdatePreview();updateClosePreview();
 }
 function updateIdeaPreview(){setVal('rr',calcRR(v('zone').split('-')[0],v('inv'),v('obj')));syncFromIdea();document.getElementById('idea-preview').innerHTML=buildIdeaMsg();}
