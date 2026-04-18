@@ -463,8 +463,9 @@ function showTVBanner(d){
 function dismissBanner(){document.getElementById('tv-banner').classList.remove('show');}
 function applyTVData(){
   if(!pendingTVData)return;const d=pendingTVData;const type=d.action||'idea';
-  dismissBanner();showTab(type);
+dismissBanner();showTab(type);
   const badge=document.getElementById(`tv-badge-${type}`);if(badge)badge.classList.add('show');
+  setTimeout(function(){
   if(type==='idea'){
     if(d.ticker)setVal('ticker',d.ticker);if(d.timeframe)setVal('tf',d.timeframe);
     if(d.direction)setBias(d.direction);if(d.entry)setVal('zone',d.entry);
@@ -482,7 +483,7 @@ function applyTVData(){
     if(d.sl)setVal('c-sl',d.sl);updateClosePreview();
   }
   pendingTVData=null;
-}
+  },150);
 
 function setLang(l){
   lang=l;document.documentElement.dir=l==='he'?'rtl':'ltr';document.documentElement.lang=l;
