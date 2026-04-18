@@ -436,7 +436,7 @@ async function pollTVData(){
     var json=await r.json();
     var tvd=json.data;
     if(typeof tvd==='string'){try{tvd=JSON.parse(tvd);}catch(e){tvd=null;}}
-    if(tvd&&tvd.timestamp&&tvd.timestamp!==lastTVTs){
+    var age=Date.now()-tvd.timestamp;if(tvd&&tvd.timestamp&&tvd.timestamp!==lastTVTs&&age<30000){
       lastTVTs=tvd.timestamp;
       pendingTVData=tvd;
       showTVBanner(tvd);
