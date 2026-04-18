@@ -451,7 +451,7 @@ async function pollTVData(){
   let tvd = json.data;
 if(typeof tvd === 'string'){try{tvd=JSON.parse(tvd);}catch(e){tvd=null;}}
 if(tvd&&tvd.timestamp&&tvd.timestamp!==lastTVTs){
-      lastTVTs=json.data.timestamp;pendingTVData=json.data;showTVBanner(json.data);
+      let tvd=json.data;if(typeof tvd==='string'){try{tvd=JSON.parse(tvd);}catch(e){tvd=null;}}if(tvd){lastTVTs=tvd.timestamp;pendingTVData=tvd;showTVBanner(tvd);}
     }
   }catch(e){}
 }
