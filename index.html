@@ -135,9 +135,10 @@
   <div class="tg-setup">
     <div class="tg-setup-title" id="tg-title">⚙️ הגדרות טלגרם</div>
     <div class="tg-fields">
-      <div class="tg-field"><label>Bot Token</label><input type="password" id="tg-token" placeholder="123456:ABC-DEF..." oninput="saveTgConfig()" /></div>
-      <div class="tg-field"><label>Chat ID</label><input type="text" id="tg-chatid" placeholder="-5195169509" oninput="saveTgConfig()" /></div>
+      <div class="tg-field"><label>Bot Token</label><input type="password" id="tg-token" placeholder="123456:ABC-DEF..." oninput="saveTgConfig()" onblur="saveTgConfig()" /></div>
+      <div class="tg-field"><label>Chat ID</label><input type="text" id="tg-chatid" placeholder="-5195169509" oninput="saveTgConfig()" onblur="saveTgConfig()" /></div>
       <button class="test-btn" onclick="testTelegram()">🔗 <span id="test-btn-text">בדוק</span></button>
+      <button class="test-btn" onclick="saveTgConfig()" style="background:#1D9E75;">☁️</button>
     </div>
     <div class="tg-status" id="tg-status"></div>
   </div>
