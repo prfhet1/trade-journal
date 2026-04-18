@@ -447,7 +447,9 @@ function renderJournal(){
 async function pollTVData(){
   try{
     const r=await fetch(WEBHOOK_URL,{cache:'no-store'});const json=await r.json();
-    if(json.data&&json.data.timestamp&&json.data.timestamp!==lastTVTs){
+  let tvd = json.data;
+if(typeof tvd === 'string'){try{tvd=JSON.parse(tvd);}catch(e){tvd=null;}}
+if(tvd&&tvd.timestamp&&tvd.timestamp!==lastTVTs){
       lastTVTs=json.data.timestamp;pendingTVData=json.data;showTVBanner(json.data);
     }
   }catch(e){}
