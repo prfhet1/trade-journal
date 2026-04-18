@@ -544,6 +544,23 @@ function bold(s){
   var c=String(s);
   c=c.replace(/\\/g,'\\\\');
   c=c.replace(/\*/g,'\\*');
+  c=c.replace(/\./g,'\\.');
+  c=c.replace(/!/g,'\\!');
+  c=c.replace(/\(/g,'\\(');
+  c=c.replace(/\)/g,'\\)');
+  c=c.replace(/-/g,'\\-');
+  c=c.replace(/\+/g,'\\+');
+  c=c.replace(/=/g,'\\=');
+  c=c.replace(/~/g,'\\~');
+  c=c.replace(/>/g,'\\>');
+  c=c.replace(/#/g,'\\#');
+  c=c.replace(/\|/g,'\\|');
+  c=c.replace(/_/g,'\\_');
+  c=c.replace(/`/g,'\\`');
+  c=c.replace(/\[/g,'\\[');
+  c=c.replace(/\]/g,'\\]');
+  c=c.replace(/\{/g,'\\{');
+  c=c.replace(/\}/g,'\\}');
   return '*'+c+'*';
 }
 var SEP='━━━━━━━━━━━━━━━';
@@ -556,7 +573,7 @@ function buildIdea(){
   lines.push(bold(isHe?'📋 רעיון מקדים  יומן מסחר DJR':'📋 Pre-Trade Idea  DJR Journal'));
   lines.push(SEP);
   if(ticker||tf)lines.push('📊 '+bold(ticker)+(tf?'  ⏱ '+esc(tf):''));
-  if(bias)lines.push(bias==='bull'?(isHe?'כיוון מצופה: 📈 עולה':'Expected Bias: 📈 Bullish'):(isHe?'כיוון מצופה: 📉 יורד':'Expected Bias: 📉 Bearish'));
+  if(bias)lines.push(esc(bias==='bull'?(isHe?'כיוון מצופה: 📈 עולה':'Expected Bias: 📈 Bullish'):(isHe?'כיוון מצופה: 📉 יורד':'Expected Bias: 📉 Bearish')));
   if(z)lines.push('Entry: '+bold(z));
   if(sl)lines.push('Stop Loss: '+bold(sl));
   if(tp)lines.push('TP: '+bold(tp));
@@ -573,7 +590,7 @@ function buildTrade(){
   lines.push(bold(isHe?'📌 תיעוד עסקה  יומן מסחר DJR':'📌 Documented Trade  DJR Journal'));
   lines.push(SEP);
   if(ticker||tf)lines.push('📊 '+bold(ticker)+(tf?'  ⏱ '+esc(tf):''));
-  if(tradeBias)lines.push(tradeBias==='bull'?(isHe?'כיוון: 📈 עולה':'Direction: 📈 Long'):(isHe?'כיוון: 📉 יורד':'Direction: 📉 Short'));
+  if(tradeBias)lines.push(esc(tradeBias==='bull'?(isHe?'כיוון: 📈 עולה':'Direction: 📈 Long'):(isHe?'כיוון: 📉 יורד':'Direction: 📉 Short')));
   if(ep)lines.push('Entry: '+bold(ep));
   if(rl)lines.push('Stop Loss: '+bold(rl));
   if(ob)lines.push('TP: '+bold(ob));
@@ -588,7 +605,7 @@ function buildUpdate(){
   var ticker=gv('u-ticker'),nl=gv('new-sl'),ntp=gv('new-tp'),nrr=gv('new-rr'),note=gv('note'),pct=gv('pos-pct');
   var lines=[];
   lines.push(bold(isHe?'🔄 ניהול עסקה  יומן מסחר DJR':'🔄 Trade Management  DJR Journal'));
-  lines.push(esc(utLabel));lines.push(SEP);
+  lines.push(esc(utLabel||''));lines.push(SEP);
   if(ticker)lines.push('📊 '+bold(ticker));
   if(nl)lines.push('Updated Stop Loss: '+bold(nl));
   if(ntp)lines.push('Updated TP: '+bold(ntp));
