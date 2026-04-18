@@ -8,10 +8,8 @@ export default async function handler(req, res) {
   const TOKEN = process.env.KV_REST_API_TOKEN;
   if (!URL || !TOKEN) return res.status(500).json({ error: 'Upstash not configured' });
 
-  const headers = {
-    Authorization: `Bearer ${TOKEN}`,
-    'Content-Type': 'application/json'
-  };
+  const headers = { Authorization: `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+  const type = req.query.type || 'tv';
 
   async function kget(key) {
     try {
@@ -24,70 +22,25 @@ export default async function handler(req, res) {
 
   async function kset(key, value) {
     try {
-      await fetch(`${URL}/set/${key}`, {
-        method: 'POST', headers,
-        body: JSON.stringify(value)
-      });
+      await fetch(`${URL}/set/${key}`, { method: 'POST', headers, body: JSON.stringify(value) });
     } catch(e) {}
   }
 
-  const path = req.url.split('?')[0].replace('/api/webhook', '') || '/';
-
-  // ── TV DATA (TradingView webhook) ──────────────────────────────
-  if (path === '/' || path === '') {
-    if (req.method === 'GET') {
-      const data = await kget('tv_data');
-      return res.status(200).json({ data });
-    }
-    if (req.method === 'POST') {
-      let body = req.body;
-      if (typeof body === 'string') { try { body = JSON.parse(body); } catch(e) {} }
-      await kset('tv_data', JSON.stringify({ ...body, timestamp: Date.now() }));
-      return res.status(200).json({ ok: true });
-    }
+  if (req.method === 'GET') {
+    const data = await kget(type);
+    return res.status(200).json({ data });
   }
 
-  // ── SETTINGS (token, chatId) ───────────────────────────────────
-  if (path === '/settings') {
-    if (req.method === 'GET') {
-      const data = await kget('settings');
-      return res.status(200).json({ data });
+  if (req.method === 'POST') {
+    let body = req.body;
+    if (typeof body === 'string') { try { body = JSON.parse(body); } catch(e) {} }
+    if (type === 'tv') {
+      await kset('tv', JSON.stringify({ ...body, timestamp: Date.now() }));
+    } else {
+      await kset(type, JSON.stringify(body));
     }
-    if (req.method === 'POST') {
-      let body = req.body;
-      if (typeof body === 'string') { try { body = JSON.parse(body); } catch(e) {} }
-      await kset('settings', JSON.stringify(body));
-      return res.status(200).json({ ok: true });
-    }
+    return res.status(200).json({ ok: true });
   }
 
-  // ── JOURNAL ───────────────────────────────────────────────────
-  if (path === '/journal') {
-    if (req.method === 'GET') {
-      const data = await kget('journal');
-      return res.status(200).json({ data });
-    }
-    if (req.method === 'POST') {
-      let body = req.body;
-      if (typeof body === 'string') { try { body = JSON.parse(body); } catch(e) {} }
-      await kset('journal', JSON.stringify(body));
-      return res.status(200).json({ ok: true });
-    }
-  }
-
-  // ── WEEKLY NOTE ───────────────────────────────────────────────
-  if (path === '/weekly') {
-    if (req.method === 'GET') {
-      const data = await kget('weekly_note');
-      return res.status(200).json({ data });
-    }
-    if (req.method === 'POST') {
-      let body = req.body;
-      if (typeof body === 'string') { try { body = JSON.parse(body); } catch(e) {} }
-      await kset('weekly_note', JSON.stringify(body));
-      return res.status(200).json({ ok: true });
-    }
-  }
-
-  return res.status(404).json({ error: 'Not found' });
+  return res.status(405).json({ error: 'Method not allowed' });
 }
