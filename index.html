@@ -467,7 +467,9 @@ async function sendTg(type){
   try{
     var res,data;
     if(img){
-      var fd=new FormData();fd.append('chat_id',cfg.chatId);fd.append('caption',text);fd.append('parse_mode','MarkdownV2');
+      var fd=new FormData();fd.append('chat_id',cfg.chatId);
+      var plainCaption=text.replace(/\\([_*\[\]()~`>#+\-=|{}.!])/g,'$1').replace(/\*/g,'');
+      fd.append('caption',plainCaption);
       var blob=await fetch(img).then(function(r){return r.blob();});fd.append('photo',blob,'chart.jpg');
       res=await fetch('https://api.telegram.org/bot'+cfg.token+'/sendPhoto',{method:'POST',body:fd});
     } else {
