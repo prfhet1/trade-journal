@@ -298,12 +298,13 @@
     <!-- JOURNAL -->
     <div class="panel" id="panel-journal">
       <div class="stats-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:8px;">
-        <div class="stat"><div class="stat-label" id="sl1">סה״כ עסקאות שבועי</div><div class="stat-val" id="stat1">0</div></div>
+        <div class="stat"><div class="stat-label" id="sl1">עסקאות שבועיות</div><div class="stat-val" id="stat1">0</div></div>
         <div class="stat"><div class="stat-label">Win Rate</div><div class="stat-val" id="stat-wr" style="color:var(--green);">-</div></div>
       </div>
-      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px;">
-        <div class="stat"><div class="stat-label" id="sl2" style="color:#27500A;">מנצחות ✅</div><div class="stat-val" id="stat2" style="color:#27500A;">0</div></div>
-        <div class="stat"><div class="stat-label" id="sl3" style="color:#A32D2D;">מפסידות ❌</div><div class="stat-val" id="stat3" style="color:#A32D2D;">0</div></div>
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:12px;">
+        <div class="stat"><div class="stat-label" style="color:#27500A;">מנצחות ✅</div><div class="stat-val" id="stat2" style="color:#27500A;">0</div></div>
+        <div class="stat"><div class="stat-label" style="color:#A32D2D;">מפסידות ❌</div><div class="stat-val" id="stat3" style="color:#A32D2D;">0</div></div>
+        <div class="stat"><div class="stat-label">Avg R:R</div><div class="stat-val" id="stat-rr" style="color:var(--green);">-</div></div>
         <div class="stat"><div class="stat-label">עדכונים</div><div class="stat-val" id="stat4">0</div></div>
       </div>
       <div class="card" style="margin-bottom:10px;">
@@ -338,6 +339,8 @@ const WEBHOOK_URL = 'https://trade-journal-inky-tau.vercel.app/api/webhook';
 let lang='he', bias=null, tradeBias=null, utype='sl', journal=[], pendingTVData=null, lastTVTs=null;
 let images={idea:null,trade:null,update:null,close:null,weekly:null};
 
+function escMD(s){return String(s).replace(/([_*\[\]()~`>#+\-=|{}.!\\])/g,'\\$1');}
+function bold(s){return '*'+escMD(s)+'*';}
 const DISC={
   he:'⚠️ תוכן זה הינו חלק מיומן מסחר אישי לצורכי לימוד בלבד. אין לראות בכך ייעוץ השקעות. כל החלטה היא באחריות הקורא בלבד.',
   en:"⚠️ This content is part of a personal trading journal for educational purposes only. This is not financial advice. All decisions are the sole responsibility of the reader."
@@ -406,7 +409,7 @@ async function sendToTelegram(type){
   const text=document.getElementById(pid).innerText;const img=images[type];
   try{
     let res,data;
-    if(img){const fd=new FormData();fd.append('chat_id',chatId);fd.append('caption',text);const blob=await fetch(img).then(r=>r.blob());fd.append('photo',blob,'chart.jpg');res=await fetch(`https://api.telegram.org/bot${token}/sendPhoto`,{method:'POST',body:fd});}
+    if(img){const fd=new FormData();fd.append('chat_id',chatId);fd.append('caption',text);fd.append('parse_mode','MarkdownV2');const blob=await fetch(img).then(r=>r.blob());fd.append('photo',blob,'chart.jpg');res=await fetch(`https://api.telegram.org/bot${token}/sendPhoto`,{method:'POST',body:fd});}
     else{res=await fetch(`https://api.telegram.org/bot${token}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:chatId,text})});}
     data=await res.json();if(!data.ok)throw new Error(data.description);
     addToJournal(type,text,img);
@@ -577,22 +580,31 @@ async function syncJournalFromCloud(){
 }
 function getWeekStart(d){const dt=new Date(d);dt.setHours(0,0,0,0);dt.setDate(dt.getDate()-dt.getDay());return dt;}
 function getMonthKey(d){const dt=new Date(d);return dt.getFullYear()+'-'+(dt.getMonth()+1);}
+function extractRR(text){
+  const m=text&&text.match(/R:R Achieved[:\s]+1:([0-9.]+)/);
+  if(m)return parseFloat(m[1]);
+  const m2=text&&text.match(/R:R שהושג[:\s]+1:([0-9.]+)/);
+  if(m2)return parseFloat(m2[1]);
+  return null;
+}
 function renderJournal(){
   const list=document.getElementById('journal-list');
   const now=new Date();
   const weekStart=getWeekStart(now);
   const monthKey=getMonthKey(now);
   const weekJournal=journal.filter(j=>j.date&&new Date(j.date)>=weekStart);
-  const monthJournal=journal.filter(j=>j.date&&getMonthKey(j.date)===monthKey);
   const closes=weekJournal.filter(j=>j.type==='close');
   const wins=closes.filter(j=>j.text&&j.text.includes('✅')).length;
   const losses=closes.filter(j=>j.text&&j.text.includes('❌')).length;
   const wr=closes.length>0?Math.round((wins/closes.length)*100)+'%':'-';
+  const rrVals=closes.map(j=>extractRR(j.text)).filter(v=>v!==null);
+  const avgRR=rrVals.length>0?'1:'+(rrVals.reduce((a,b)=>a+b,0)/rrVals.length).toFixed(2):'-';
   document.getElementById('stat1').textContent=closes.length;
   document.getElementById('stat2').textContent=wins;
   document.getElementById('stat3').textContent=losses;
   document.getElementById('stat4').textContent=journal.filter(j=>j.type==='update').length;
   document.getElementById('stat-wr').textContent=wr;
+  document.getElementById('stat-rr').textContent=avgRR;
   if(!journal.length){list.innerHTML=`<div class="empty-state">${lang==='he'?'עדיין אין רשומות ביומן':'No journal entries yet'}</div>`;return;}
   const badges={idea:`<span class="badge badge-idea">${lang==='he'?'תרחיש':'Scenario'}</span>`,trade:`<span class="badge badge-open">${lang==='he'?'כניסה':'Entry'}</span>`,update:`<span class="badge badge-update">${lang==='he'?'עדכון':'Update'}</span>`,close:`<span class="badge badge-closed">${lang==='he'?'סגירה':'Close'}</span>`};
   list.innerHTML=journal.map(j=>`<div class="journal-item"><div class="ji-header">${badges[j.type]||''}<span class="ji-time">${j.time}</span></div><div class="ji-text">${j.text.split('\n').slice(0,3).join(' | ')}</div>${j.img?`<img class="ji-img" src="${j.img}"/>`:''}	</div>`).join('');
@@ -694,21 +706,24 @@ function buildStatsMsg(period, entries){
   const wins=closes.filter(j=>j.text&&j.text.includes('✅')).length;
   const losses=closes.filter(j=>j.text&&j.text.includes('❌')).length;
   const wr=closes.length>0?Math.round((wins/closes.length)*100)+'%':'N/A';
+  const rrVals=closes.map(j=>extractRR(j.text)).filter(v=>v!==null);
+  const avgRR=rrVals.length>0?'1:'+(rrVals.reduce((a,b)=>a+b,0)/rrVals.length).toFixed(2):'N/A';
   const ideas=entries.filter(j=>j.type==='idea').length;
   const updates=entries.filter(j=>j.type==='update').length;
   const label=period==='weekly'?(isHe?'📊 סיכום שבועי':'📊 Weekly Summary'):(isHe?'📈 סיכום חודשי':'📈 Monthly Summary');
-  let msg=label+' | יומן מסחר DJR\n';
+  let msg=bold(label+' | יומן מסחר DJR')+'\n';
   msg+='━━━━━━━━━━━━━━━\n';
-  msg+=(isHe?'עסקאות':'Trades')+': '+closes.length+'\n';
-  msg+=(isHe?'מנצחות ✅':'Winners ✅')+': '+wins+'\n';
-  msg+=(isHe?'מפסידות ❌':'Losers ❌')+': '+losses+'\n';
-  msg+='Win Rate: '+wr+'\n';
-  msg+=(isHe?'רעיונות':'Ideas')+': '+ideas+'\n';
-  msg+=(isHe?'עדכונים':'Updates')+': '+updates+'\n';
+  msg+=(isHe?'עסקאות':'Trades')+': '+bold(String(closes.length))+'\n';
+  msg+=(isHe?'מנצחות ✅':'Winners ✅')+': '+bold(String(wins))+'\n';
+  msg+=(isHe?'מפסידות ❌':'Losers ❌')+': '+bold(String(losses))+'\n';
+  msg+='Win Rate: '+bold(wr)+'\n';
+  msg+='Avg R:R: '+bold(avgRR)+'\n';
+  msg+=(isHe?'רעיונות':'Ideas')+': '+escMD(String(ideas))+'\n';
+  msg+=(isHe?'עדכונים':'Updates')+': '+escMD(String(updates))+'\n';
   const weeklyNote=document.getElementById('weekly-note-text')?.value;
-  if(weeklyNote)msg+='\n'+(isHe?'הערות':'Notes')+':\n'+weeklyNote+'\n';
+  if(weeklyNote)msg+='\n'+(isHe?'הערות':'Notes')+':\n'+escMD(weeklyNote)+'\n';
   msg+='━━━━━━━━━━━━━━━\n';
-  msg+=DISC[lang];
+  msg+=escMD(DISC[lang]);
   return msg;
 }
 async function sendWeeklyStats(){
@@ -724,7 +739,7 @@ async function sendWeeklyStats(){
     const blob=await fetch(img).then(r=>r.blob());fd.append('photo',blob,'weekly.jpg');
     await fetch('https://api.telegram.org/bot'+token+'/sendPhoto',{method:'POST',body:fd});
   } else {
-    await fetch('https://api.telegram.org/bot'+token+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:chatId,text:msg})});
+    await fetch('https://api.telegram.org/bot'+token+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:chatId,text:msg,parse_mode:'MarkdownV2'})});
   }
 }
 async function sendMonthlyStats(){
@@ -734,7 +749,7 @@ async function sendMonthlyStats(){
   const msg=buildStatsMsg('monthly',entries);
   const{token,chatId}=getTg();
   if(!token||!chatId){alert(lang==='he'?'הגדר Token ו-Chat ID תחילה':'Set Token and Chat ID first');return;}
-  await fetch('https://api.telegram.org/bot'+token+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:chatId,text:msg})});
+  await fetch('https://api.telegram.org/bot'+token+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:chatId,text:msg,parse_mode:'MarkdownV2'})});
 }
 function clearJournal(){
   if(confirm(lang==='he'?'האם אתה בטוח שברצונך למחוק את כל היומן?':'Are you sure you want to clear the journal?')){
