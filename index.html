@@ -207,8 +207,8 @@ body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;background:var(--bg);
               <div class="bb-btn bear" id="bear-t" onclick="setTradeBias('bear')">📉 יורד</div>
             </div>
           </div>
-          <div class="fg"><label id="l-tticker">נכס</label><input type="text" id="t-ticker" oninput="updatePrev('trade')"/></div>
-          <div class="fg"><label id="l-ttf">גרף</label><input type="text" id="t-tf" oninput="updatePrev('trade')"/></div>
+          <div class="fg"><label id="l-tticker">נכס</label><input type="text" id="t-ticker" value="US500" oninput="updatePrev('trade')"/></div>
+          <div class="fg"><label id="l-ttf">גרף</label><input type="text" id="t-tf" value="5min" oninput="updatePrev('trade')"/></div>
           <div class="fg"><label>Entry</label><input type="text" id="ep" placeholder="e.g. 5792.5" oninput="updatePrev('trade')"/></div>
           <div class="fg"><label>Stop Loss</label><input type="text" id="rl" placeholder="e.g. 5778" oninput="updatePrev('trade')"/></div>
           <div class="fg"><label>TP</label><input type="text" id="ob" placeholder="e.g. 5820" oninput="updatePrev('trade')"/></div>
@@ -241,7 +241,7 @@ body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;background:var(--bg);
           <div class="utype" onclick="setUtype(this,'add')" id="ut-add">Add to Position</div>
         </div>
         <div class="form-grid">
-          <div class="fg"><label id="l-uticker">נכס</label><input type="text" id="u-ticker" oninput="updatePrev('update')"/></div>
+          <div class="fg"><label id="l-uticker">נכס</label><input type="text" id="u-ticker" value="US500" oninput="updatePrev('update')"/></div>
           <div class="fg"><label>Updated Stop Loss</label><input type="text" id="new-sl" placeholder="e.g. 5790" oninput="updatePrev('update')"/></div>
           <div class="fg"><label>Updated TP</label><input type="text" id="new-tp" placeholder="e.g. 5860" oninput="updatePrev('update')"/></div>
           <div class="fg"><label>R:R</label><input type="text" id="new-rr" placeholder="auto or manual" oninput="updatePrev('update')"/></div>
@@ -269,8 +269,8 @@ body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;background:var(--bg);
     <div class="panel" id="panel-close">
       <div class="card">
         <div class="form-grid">
-          <div class="fg"><label id="l-cticker">נכס</label><input type="text" id="c-ticker" oninput="updatePrev('close')"/></div>
-          <div class="fg"><label id="l-ctf">גרף</label><input type="text" id="c-tf" oninput="updatePrev('close')"/></div>
+          <div class="fg"><label id="l-cticker">נכס</label><input type="text" id="c-ticker" value="US500" oninput="updatePrev('close')"/></div>
+          <div class="fg"><label id="l-ctf">גרף</label><input type="text" id="c-tf" value="5min" oninput="updatePrev('close')"/></div>
           <div class="fg"><label>Entry</label><input type="text" id="c-entry" placeholder="e.g. 5792.5" oninput="updatePrev('close')"/></div>
           <div class="fg"><label>Exit</label><input type="text" id="c-exit" placeholder="e.g. 5835" oninput="updatePrev('close')"/></div>
           <div class="fg"><label>Stop Loss</label><input type="text" id="c-sl" placeholder="e.g. 5778" oninput="updatePrev('close')"/></div>
@@ -516,12 +516,30 @@ function removeImg(type){
 
 // ── MARKDOWN HELPERS ──────────────────────────────────────────
 function esc(s){
+  if(s===null||s===undefined)return'';
   var c=String(s);
-  var sp=['_','*','[',']','(',')','.','+','-','=','{','}','!','|','~','`','#','>'];
-  sp.forEach(function(ch){c=c.split(ch).join('\\'+ch);});
+  c=c.replace(/\\/g,'\\\\');
+  c=c.replace(/_/g,'\\_');
+  c=c.replace(/\*/g,'\\*');
+  c=c.replace(/\[/g,'\\[');
+  c=c.replace(/\]/g,'\\]');
+  c=c.replace(/\(/g,'\\(');
+  c=c.replace(/\)/g,'\\)');
+  c=c.replace(/~/g,'\\~');
+  c=c.replace(/`/g,'\\`');
+  c=c.replace(/>/g,'\\>');
+  c=c.replace(/#/g,'\\#');
+  c=c.replace(/\+/g,'\\+');
+  c=c.replace(/-/g,'\\-');
+  c=c.replace(/=/g,'\\=');
+  c=c.replace(/\|/g,'\\|');
+  c=c.replace(/\{/g,'\\{');
+  c=c.replace(/\}/g,'\\}');
+  c=c.replace(/\./g,'\\.');
+  c=c.replace(/!/g,'\\!');
   return c;
 }
-function bold(s){return '*'+esc(s)+'*';}
+function bold(s){if(!s&&s!==0)return'';return '*'+esc(String(s))+'*';}
 var SEP='━━━━━━━━━━━━━━━';
 
 // ── MESSAGE BUILDERS ──────────────────────────────────────────
