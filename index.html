@@ -134,9 +134,9 @@
 
   <div class="tabs">
     <div class="tab active" onclick="showTab('idea')" id="tab-idea">רעיון מקדים</div>
-    <div class="tab" onclick="showTab('trade')" id="tab-trade">עדכון פוזיציה</div>
-    <div class="tab" onclick="showTab('update')" id="tab-update">ניהול פוזיציה</div>
-    <div class="tab" onclick="showTab('close')" id="tab-close">סגירת פוזיציה</div>
+    <div class="tab" onclick="showTab('trade')" id="tab-trade">תיעוד עסקה</div>
+    <div class="tab" onclick="showTab('update')" id="tab-update">ניהול עסקה</div>
+    <div class="tab" onclick="showTab('close')" id="tab-close">סגירת עסקה</div>
     <div class="tab" onclick="showTab('journal')" id="tab-journal">יומן</div>
   </div>
 
@@ -402,7 +402,7 @@ function buildTradeMsg(){
 }
 function buildUpdateMsg(){
   const isHe=lang==='he',utLabel=UTYPES[lang][utype],ticker=v('u-ticker'),nl=v('new-level'),nrr=v('new-rr'),note=v('note');
-  let msg=isHe?'🔄 ניהול פוזיציה | יומן מסחר DJR\n':'🔄 Management Update | DJR Trading Journal\n';
+  let msg=isHe?'🔄 ניהול עסקה | יומן מסחר DJR\n':'🔄 Management Update | DJR Trading Journal\n';
   msg+=`${utLabel}\n━━━━━━━━━━━━━━━\n`;
   if(ticker)msg+=`📊 ${ticker}\n`;
   if(nl)msg+=('Updated Stop Loss')+`: ${nl}\n`;
@@ -495,7 +495,7 @@ async function pollTVData(){
   }catch(e){}
 }
 function showTVBanner(d){
-  const typeLabel={idea:lang==='he'?'תרחיש מוקדם':'Pre-Trade Idea',trade:lang==='he'?'פוזיציה':'Position Entry',update:lang==='he'?'עדכון':'Update',close:lang==='he'?'סגירה':'Close'};
+  const typeLabel={idea:lang==='he'?'תרחיש מקדים':'Pre-Trade Idea',trade:lang==='he'?'פוזיציה':'Position Entry',update:lang==='he'?'עדכון':'Update',close:lang==='he'?'סגירה':'Close'};
   document.getElementById('tv-banner-msg').textContent=`📡 ${d.ticker||'TradingView'} → ${typeLabel[d.action||'idea']||d.action}`;
   document.getElementById('tv-open-btn').textContent=lang==='he'?'פתח טופס':'Open Form';
   document.getElementById('tv-banner').classList.add('show');
@@ -534,9 +534,9 @@ function setLang(l){
   document.getElementById('tg-title').textContent=he?'⚙️ הגדרות טלגרם':'⚙️ Telegram Settings';
   document.getElementById('test-btn-text').textContent=he?'בדוק':'Test';
   document.getElementById('tab-idea').textContent=he?'רעיון מקדים':'Pre-Trade Idea';
-  document.getElementById('tab-trade').textContent=he?'עדכון פוזיציה':'Position Update';
-  document.getElementById('tab-update').textContent=he?'ניהול פוזיציה':'Management Update';
-  document.getElementById('tab-close').textContent=he?'סגירת פוזיציה':'Close Position';
+  document.getElementById('tab-trade').textContent=he?'תיעוד עסקה':'Document Trade';
+  document.getElementById('tab-update').textContent=he?'ניהול עסקה':'Trade Management';
+  document.getElementById('tab-close').textContent=he?'סגירת עסקה':'Close Trade';
   document.getElementById('tab-journal').textContent=he?'יומן':'Journal';
   document.getElementById('sl1').textContent=he?'סה״כ היום':'Total today';
   document.getElementById('sl2').textContent=he?'פוזיציות':'Positions';
