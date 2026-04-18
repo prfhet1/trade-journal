@@ -410,8 +410,7 @@ function buildIdeaMsg(){
   if(o)msg+=('TP')+`: ${o}\n`;
   if(rr)msg+=('סיכון/סיכוי')+`: ${rr}\n`;
   const rel=v('related');
-  if(rel)msg+='נכסים אופציונאליים בהתאמה: '+rel+'
-';
+  if(rel)msg+='נכסים אופציונאליים בהתאמה: '+rel+'\n';
   if(c)msg+='\n'+(isHe?'ניתוח':'Analysis')+`:\n${c}\n`;
   return colorize(msg+'━━━━━━━━━━━━━━━\n'+DISC[lang]);
 }
