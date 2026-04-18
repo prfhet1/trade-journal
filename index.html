@@ -75,7 +75,7 @@
   .img-preview-wrap img { max-height: 110px; max-width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border); display: block; }
   .img-remove { position: absolute; top: 4px; right: 4px; background: #E24B4A; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 11px; cursor: pointer; }
   .preview-label { font-size: 11px; color: var(--muted); margin: 10px 0 4px; }
-  .preview-box { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; font-size: 12px; line-height: 1.7; white-space: pre-wrap; color: var(--text); max-height: 150px; overflow-y: auto; }
+  .preview-box { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; font-size: 12px; line-height: 1.7; color: var(--text); line-height: 1.8; max-height: 150px; overflow-y: auto; }
   .disclaimer { font-size: 11px; color: var(--muted); background: var(--green-light); padding: 7px 10px; border-radius: var(--radius-sm); border-right: 3px solid var(--green); margin-top: 10px; }
   .send-btn { width: 100%; margin-top: 12px; padding: 12px; background: var(--green); color: white; border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 600; cursor: pointer; }
   .send-btn:hover { background: var(--green-dark); }
@@ -296,6 +296,15 @@ const DISC={
   he:'⚠️ תוכן זה הינו חלק מיומן מסחר אישי לצורכי לימוד בלבד. אין לראות בכך ייעוץ השקעות. כל החלטה היא באחריות הקורא בלבד.',
   en:"⚠️ This content is part of a personal trading journal for educational purposes only. This is not financial advice. All decisions are the sole responsibility of the reader."
 };
+function colorize(text){
+  // Ticker in yellow, SL values in red, TP values in green
+  return text
+    .replace(/^(📊 )(.+?)( \|)/gm, '$1<span style="color:#EF9F27;font-weight:700;">$2</span>$3')
+    .replace(/(Stop Loss|Updated Stop Loss): (.+)/g, '$1: <span style="color:#E24B4A;font-weight:700;">$2</span>')
+    .replace(/(TP|Updated TP): (.+)/g, '$1: <span style="color:#1D9E75;font-weight:700;">$2</span>')
+    .replace(/\n/g, '<br>')
+    .replace(/━/g, '━');
+}
 const UTYPES={
   he:{sl:'Move Stop Loss',partial:'Partial Close',add:'Add to Position'},
   en:{sl:'Move risk level',partial:'Partial close',add:'Add to position'}
@@ -323,7 +332,7 @@ async function sendToTelegram(type){
   if(!token||!chatId){st.className='tg-status err';st.textContent=lang==='he'?'⚠️ הגדר Token ו-Chat ID תחילה':'⚠️ Set Token and Chat ID first';return;}
   const prev=btn.textContent;btn.disabled=true;btn.innerHTML=`<span class="spinner"></span>${lang==='he'?'שולח...':'Sending...'}`;
   const pid={idea:'idea-preview',trade:'trade-preview',update:'update-preview',close:'close-preview'}[type];
-  const text=document.getElementById(pid).textContent;const img=images[type];
+  const text=document.getElementById(pid).innerText;const img=images[type];
   try{
     let res,data;
     if(img){const fd=new FormData();fd.append('chat_id',chatId);fd.append('caption',text);const blob=await fetch(img).then(r=>r.blob());fd.append('photo',blob,'chart.jpg');res=await fetch(`https://api.telegram.org/bot${token}/sendPhoto`,{method:'POST',body:fd});}
@@ -365,18 +374,18 @@ function calcRR(entry,sl,tp){const e=parseFloat(entry),s=parseFloat(sl),t=parseF
 
 function buildIdeaMsg(){
   const isHe=lang==='he',ticker=v('ticker'),tf=v('tf'),z=v('zone'),i=v('inv'),o=v('obj'),rr=v('rr'),c=v('conf');
-  let msg=isHe?'📋 תרחיש מוקדם | יומן מסחר DJR\n':'📋 Pre-Market Scenario | DJR Trading Journal\n';
+  let msg=isHe?'📋 תרחיש מקדים | יומן מסחר DJR\n':'📋 Pre-Trade Scenario | DJR Trading Journal\n';
   msg+='━━━━━━━━━━━━━━━\n';
   if(ticker||tf)msg+=`📊 ${ticker}${tf?' | ⏱ '+tf:''}\n`;
   if(bias)msg+=(bias==='bull'?(isHe?'כיוון מצופה: 📈 עולה':'Expected Bias: 📈 Bullish'):(isHe?'כיוון מצופה: 📉 יורד':'Expected Bias: 📉 Bearish'))+'\n';
   if(z)msg+=(isHe?'Entry Zone':'Entry Zone')+`: ${z}\n`;
   if(i)msg+=('Stop Loss')+`: ${i}\n`;
   if(o)msg+=('TP')+`: ${o}\n`;
-  if(rr)msg+=(isHe?'יחס סיכון/תשואה':'Risk/Reward Ratio')+`: ${rr}\n`;
+  if(rr)msg+=('סיכון/סיכוי')+`: ${rr}\n`;
   const rel=v('related');
-  if(rel)msg+=(isHe?'נכסים נלווים':'Related Assets')+`: ${rel}\n`;
+  if(rel)msg+=('נכסים אופציונליים')+`: ${rel}\n`;
   if(c)msg+='\n'+(isHe?'ניתוח':'Analysis')+`:\n${c}\n`;
-  return msg+'━━━━━━━━━━━━━━━\n'+DISC[lang];
+  return colorize(msg+'━━━━━━━━━━━━━━━\n'+DISC[lang]);
 }
 function buildTradeMsg(){
   const isHe=lang==='he',ticker=v('t-ticker'),tf=v('t-tf'),ep=v('ep'),rl=v('rl'),ob=v('ob'),rr=v('t-rr'),rs=v('reason');
@@ -387,9 +396,9 @@ function buildTradeMsg(){
   if(ep)msg+=('Entry')+`: ${ep}\n`;
   if(rl)msg+=('Stop Loss')+`: ${rl}\n`;
   if(ob)msg+=('TP')+`: ${ob}\n`;
-  if(rr)msg+=(isHe?'יחס סיכון/תשואה':'Risk/Reward Ratio')+`: ${rr}\n`;
+  if(rr)msg+=('סיכון/סיכוי')+`: ${rr}\n`;
   if(rs)msg+='\n'+(isHe?'הערות':'Notes')+`:\n${rs}\n`;
-  return msg+'━━━━━━━━━━━━━━━\n'+DISC[lang];
+  return colorize(msg+'━━━━━━━━━━━━━━━\n'+DISC[lang]);
 }
 function buildUpdateMsg(){
   const isHe=lang==='he',utLabel=UTYPES[lang][utype],ticker=v('u-ticker'),nl=v('new-level'),nrr=v('new-rr'),note=v('note');
@@ -404,7 +413,7 @@ function buildUpdateMsg(){
   const pct=v('pos-pct');
   if(pct)msg+='% מהפוזיציה: '+pct+'\n';
   if(note)msg+='\n'+(isHe?'הערה':'Note')+`:\n${note}\n`;
-  return msg+'━━━━━━━━━━━━━━━\n'+DISC[lang];
+  return colorize(msg+'━━━━━━━━━━━━━━━\n'+DISC[lang]);
 }
 function buildCloseMsg(){
   const isHe=lang==='he',ticker=v('c-ticker'),tf=v('c-tf'),entry=v('c-entry'),exit=v('c-exit'),sl=v('c-sl'),rr=v('c-rr'),review=v('c-review');
@@ -417,16 +426,35 @@ function buildCloseMsg(){
   if(sl)msg+=('Stop Loss')+`: ${sl}\n`;
   if(rr)msg+=(isHe?'🎯 R:R שהושג':'🎯 R:R Achieved')+`: ${rr}\n`;
   if(review)msg+='\n'+(isHe?'סיכום ולקחים':'Review & Lessons')+`:\n${review}\n`;
-  return msg+'━━━━━━━━━━━━━━━\n'+DISC[lang];
+  return colorize(msg+'━━━━━━━━━━━━━━━\n'+DISC[lang]);
 }
 
 function v(id){const el=document.getElementById(id);return el?el.value:'';}
 function setVal(id,val){const el=document.getElementById(id);if(el)el.value=val;}
 
-function updateIdeaPreview(){setVal('rr',calcRR(v('zone').split('-')[0],v('inv'),v('obj')));document.getElementById('idea-preview').textContent=buildIdeaMsg();}
-function updateTradePreview(){setVal('t-rr',calcRR(v('ep'),v('rl'),v('ob')));document.getElementById('trade-preview').textContent=buildTradeMsg();}
-function updateUpdatePreview(){document.getElementById('update-preview').textContent=buildUpdateMsg();}
-function updateClosePreview(){setVal('c-rr',calcRR(v('c-entry'),v('c-sl'),v('c-exit')));document.getElementById('close-preview').textContent=buildCloseMsg();}
+function syncFromIdea(){
+  // Auto-copy shared fields from idea to all other tabs
+  const ticker=v('ticker'),tf=v('tf'),sl=v('inv'),tp=v('obj');
+  // Trade tab
+  if(ticker){setVal('t-ticker',ticker);}
+  if(tf){setVal('t-tf',tf);}
+  if(sl){setVal('rl',sl);}
+  if(tp){setVal('ob',tp);}
+  // Update tab
+  if(ticker){setVal('u-ticker',ticker);}
+  if(sl){setVal('new-level',sl);}
+  if(tp){setVal('new-tp',tp);}
+  // Close tab
+  if(ticker){setVal('c-ticker',ticker);}
+  if(tf){setVal('c-tf',tf);}
+  if(sl){setVal('c-sl',sl);}
+  // Recalc other previews
+  updateTradePreview();updateUpdatePreview();updateClosePreview();
+}
+function updateIdeaPreview(){setVal('rr',calcRR(v('zone').split('-')[0],v('inv'),v('obj')));syncFromIdea();document.getElementById('idea-preview').innerHTML=buildIdeaMsg();}
+function updateTradePreview(){setVal('t-rr',calcRR(v('ep'),v('rl'),v('ob')));document.getElementById('trade-preview').innerHTML=buildTradeMsg();}
+function updateUpdatePreview(){document.getElementById('update-preview').innerHTML=buildUpdateMsg();}
+function updateClosePreview(){setVal('c-rr',calcRR(v('c-entry'),v('c-sl'),v('c-exit')));document.getElementById('close-preview').innerHTML=buildCloseMsg();}
 
 function setBias(b){bias=b;document.getElementById('bull-btn').classList.toggle('active',b==='bull');document.getElementById('bear-btn').classList.toggle('active',b==='bear');updateIdeaPreview();}
 function setTradeBias(b){tradeBias=b;document.getElementById('bull-btn-t').classList.toggle('active',b==='bull');document.getElementById('bear-btn-t').classList.toggle('active',b==='bear');updateTradePreview();}
