@@ -581,7 +581,7 @@ function buildIdea(){
   if(tp)lines.push('TP: '+bold(tp));
   if(rr)lines.push((isHe?'סיכון/סיכוי':'Risk/Reward')+': '+bold(rr));
   if(rel)lines.push((isHe?'נכסים אופציונאליים בהתאמה':'Optional Assets')+': '+esc(rel));
-  if(c)lines.push('','('+(isHe?'ניתוח':'Analysis')+')',esc(c));
+  if(c)lines.push('',esc('('+(isHe?'ניתוח':'Analysis')+')'),''+esc(c));
   lines.push(SEP);lines.push(esc(DISC[lang]));
   return lines.join('\n');
 }
@@ -597,7 +597,7 @@ function buildTrade(){
   if(rl)lines.push('Stop Loss: '+bold(rl));
   if(ob)lines.push('TP: '+bold(ob));
   if(rr)lines.push((isHe?'סיכון/סיכוי':'Risk/Reward')+': '+bold(rr));
-  if(rs)lines.push('',(isHe?'הערות':'Notes')+':',esc(rs));
+  if(rs)lines.push('',esc((isHe?'הערות':'Notes')+':'),esc(rs));
   lines.push(SEP);lines.push(esc(DISC[lang]));
   return lines.join('\n');
 }
@@ -613,7 +613,7 @@ function buildUpdate(){
   if(ntp)lines.push('Updated TP: '+bold(ntp));
   if(nrr)lines.push('R:R: '+bold(nrr));
   if(pct)lines.push('% Position: '+bold(pct));
-  if(note)lines.push('',(isHe?'הערה':'Note')+':',esc(note));
+  if(note)lines.push('',esc((isHe?'הערה':'Note')+':'),esc(note));
   lines.push(SEP);lines.push(esc(DISC[lang]));
   return lines.join('\n');
 }
@@ -630,7 +630,7 @@ function buildClose(){
   if(sl)lines.push('Stop Loss: '+bold(sl));
   if(rr)lines.push('🎯 R:R Achieved: '+bold(rr));
   if(reason)lines.push((isHe?'סיבת סגירה':'Close Reason')+': '+esc(reason));
-  if(review)lines.push('',(isHe?'סיכום ולקחים':'Review & Lessons')+':',esc(review));
+  if(review)lines.push('',esc((isHe?'סיכום ולקחים':'Review & Lessons')+':'),esc(review));
   lines.push(SEP);lines.push(esc(DISC[lang]));
   return lines.join('\n');
 }
@@ -785,7 +785,7 @@ function buildStats(period,entries){
   lines.push((isHe?'רעיונות':'Ideas')+': '+esc(String(ideas)));
   lines.push((isHe?'עדכונים':'Updates')+': '+esc(String(updates)));
   var note=document.getElementById('weekly-note').value;
-  if(note)lines.push('',(isHe?'הערות':'Notes')+':',esc(note));
+  if(note)lines.push('',esc((isHe?'הערות':'Notes')+':'),esc(note));
   lines.push(SEP);lines.push(esc(DISC[lang]));
   return lines.join('\n');
 }
