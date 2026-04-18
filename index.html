@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -360,7 +361,11 @@ function saveTgConfig(){
   const chatId=document.getElementById('tg-chatid').value;
   localStorage.setItem('tg_token',token);
   localStorage.setItem('tg_chatid',chatId);
-  fetch('/api/webhook?type=settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token,chatId})});
+  const btn=document.querySelector('[onclick="saveTgConfig()"]');
+  fetch('/api/webhook?type=settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token,chatId})})
+    .then(r=>r.json()).then(d=>{
+      if(d.ok&&btn){btn.textContent='✅';setTimeout(()=>{btn.textContent='☁️';},2000);}
+    }).catch(()=>{});
 }
 function loadTgConfig(){
   const t=localStorage.getItem('tg_token'),c=localStorage.getItem('tg_chatid');
