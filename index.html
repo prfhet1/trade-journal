@@ -152,7 +152,7 @@
           </div>
           <div class="form-group"><label id="lbl-ticker">נכס</label><input type="text" id="ticker" placeholder="לדוג׳ SPX" oninput="updateIdeaPreview()" /></div>
           <div class="form-group"><label id="lbl-tf">גרף</label><input type="text" id="tf" placeholder="לדוג׳ 5" oninput="updateIdeaPreview()" /></div>
-          <div class="form-group full"><label>נכסים אופציונליים</label><input type="text" id="related" placeholder="e.g. NQ, VIX, DXY" oninput="updateIdeaPreview()" /></div>
+          <div class="form-group full"><label>נכסים אופציונאליים</label><input type="text" id="related" placeholder="e.g. NQ, VIX, DXY" oninput="updateIdeaPreview()" /></div>
           <div class="form-group"><label id="lbl-zone">Entry Zone</label><input type="text" id="zone" placeholder="e.g. 5780-5800" oninput="updateIdeaPreview()" /></div>
           <div class="form-group"><label id="lbl-inv">Stop Loss</label><input type="text" id="inv" placeholder="e.g. 5750" oninput="updateIdeaPreview()" /></div>
           <div class="form-group"><label id="lbl-obj">TP</label><input type="text" id="obj" placeholder="e.g. 5850" oninput="updateIdeaPreview()" /></div>
@@ -256,6 +256,15 @@
           <div class="form-group"><label id="lbl-c-exit">Exit</label><input type="text" id="c-exit" placeholder="e.g. 5835" oninput="updateClosePreview()" /></div>
           <div class="form-group"><label id="lbl-c-sl">Stop Loss</label><input type="text" id="c-sl" placeholder="e.g. 5778" oninput="updateClosePreview()" /></div>
           <div class="form-group"><label id="lbl-c-rr">🎯 R:R שהושג</label><input type="text" id="c-rr" class="rr-field" style="font-size:15px;" readonly /></div>
+          <div class="form-group full"><label id="lbl-c-reason">סיבת סגירה</label>
+            <select id="c-reason" onchange="updateClosePreview()">
+              <option value="">-- בחר סיבת סגירה --</option>
+              <option value="TP">TP</option>
+              <option value="SL">SL</option>
+              <option value="Trailing">Trailing</option>
+              <option value="Manual Close">Manual Close</option>
+            </select>
+          </div>
           <div class="form-group full"><label id="lbl-c-review">סיכום ולקחים</label><textarea id="c-review" placeholder="שתף את הלקחים מהעסקה לצורכי לימוד..." oninput="updateClosePreview()"></textarea></div>
           <div class="form-group full"><label id="lbl-img4">צירוף תמונה</label>
             <div class="img-section"><div class="img-tabs">
@@ -277,10 +286,28 @@
 
     <!-- JOURNAL -->
     <div class="panel" id="panel-journal">
-      <div class="stats-grid">
-        <div class="stat"><div class="stat-label" id="sl1">סה״כ היום</div><div class="stat-val" id="stat1">0</div></div>
-        <div class="stat"><div class="stat-label" id="sl2">פוזיציות</div><div class="stat-val" id="stat2">0</div></div>
-        <div class="stat"><div class="stat-label" id="sl3">עדכונים</div><div class="stat-val" id="stat3">0</div></div>
+      <div class="stats-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:8px;">
+        <div class="stat"><div class="stat-label" id="sl1">סה״כ עסקאות שבועי</div><div class="stat-val" id="stat1">0</div></div>
+        <div class="stat"><div class="stat-label">Win Rate</div><div class="stat-val" id="stat-wr" style="color:var(--green);">-</div></div>
+      </div>
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:12px;">
+        <div class="stat"><div class="stat-label" id="sl2" style="color:#27500A;">מנצחות ✅</div><div class="stat-val" id="stat2" style="color:#27500A;">0</div></div>
+        <div class="stat"><div class="stat-label" id="sl3" style="color:#A32D2D;">מפסידות ❌</div><div class="stat-val" id="stat3" style="color:#A32D2D;">0</div></div>
+        <div class="stat"><div class="stat-label">עדכונים</div><div class="stat-val" id="stat4">0</div></div>
+      </div>
+      <div class="card" style="margin-bottom:10px;">
+        <div style="font-size:12px;font-weight:500;color:var(--muted);margin-bottom:8px;" id="weekly-note">סיכום שבועי</div>
+        <textarea id="weekly-note-text" placeholder="הוסף הערות שבועיות..." style="width:100%;min-height:60px;padding:8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;resize:vertical;" oninput="saveWeeklyNote()"></textarea>
+        <div style="margin-top:8px;">
+          <div class="img-section"><div class="img-tabs">
+            <button class="img-tab active" onclick="switchImgTab('weekly','upload',this)">📁 <span class="it-upload">העלאה</span></button>
+            <button class="img-tab" onclick="switchImgTab('weekly','paste',this)">📋 <span class="it-paste">הדבקה</span></button>
+          </div><div class="img-body">
+            <div id="img-upload-weekly" class="img-upload-area"><input type="file" accept="image/*" onchange="handleImg(event,'weekly')" /><span class="img-upload-label" id="img-upload-label-weekly">צרף תמונה שבועית</span></div>
+            <div id="img-paste-weekly" class="img-paste-area" style="display:none;" tabindex="0" onclick="this.focus()" onpaste="handlePasteEvent(event,'weekly')"><span id="img-paste-label-weekly">לחץ כאן ואז Ctrl+V</span></div>
+            <div id="img-preview-weekly"></div>
+          </div></div>
+        </div>
       </div>
       <div class="card"><div id="journal-list"><div class="empty-state">עדיין אין רשומות ביומן</div></div></div>
     </div>
@@ -290,7 +317,7 @@
 <script>
 const WEBHOOK_URL = 'https://trade-journal-inky-tau.vercel.app/api/webhook';
 let lang='he', bias=null, tradeBias=null, utype='sl', journal=[], pendingTVData=null, lastTVTs=null;
-let images={idea:null,trade:null,update:null,close:null};
+let images={idea:null,trade:null,update:null,close:null,weekly:null};
 
 const DISC={
   he:'⚠️ תוכן זה הינו חלק מיומן מסחר אישי לצורכי לימוד בלבד. אין לראות בכך ייעוץ השקעות. כל החלטה היא באחריות הקורא בלבד.',
@@ -378,12 +405,13 @@ function buildIdeaMsg(){
   msg+='━━━━━━━━━━━━━━━\n';
   if(ticker||tf)msg+=`📊 ${ticker}${tf?' | ⏱ '+tf:''}\n`;
   if(bias)msg+=(bias==='bull'?(isHe?'כיוון מצופה: 📈 עולה':'Expected Bias: 📈 Bullish'):(isHe?'כיוון מצופה: 📉 יורד':'Expected Bias: 📉 Bearish'))+'\n';
-  if(z)msg+=(isHe?'Entry Zone':'Entry Zone')+`: ${z}\n`;
+  if(z)msg+=('Entry')+`: ${z}\n`;
   if(i)msg+=('Stop Loss')+`: ${i}\n`;
   if(o)msg+=('TP')+`: ${o}\n`;
   if(rr)msg+=('סיכון/סיכוי')+`: ${rr}\n`;
   const rel=v('related');
-  if(rel)msg+=('נכסים אופציונליים')+`: ${rel}\n`;
+  if(rel)msg+='נכסים אופציונאליים בהתאמה: '+rel+'
+';
   if(c)msg+='\n'+(isHe?'ניתוח':'Analysis')+`:\n${c}\n`;
   return colorize(msg+'━━━━━━━━━━━━━━━\n'+DISC[lang]);
 }
@@ -425,6 +453,8 @@ function buildCloseMsg(){
   if(exit)msg+=('Exit')+`: ${exit}\n`;
   if(sl)msg+=('Stop Loss')+`: ${sl}\n`;
   if(rr)msg+=(isHe?'🎯 R:R שהושג':'🎯 R:R Achieved')+`: ${rr}\n`;
+  const reason=v('c-reason');
+  if(reason)msg+=(isHe?'סיבת סגירה':'Close Reason')+`: ${reason}\n`;
   if(review)msg+='\n'+(isHe?'סיכום ולקחים':'Review & Lessons')+`:\n${review}\n`;
   return colorize(msg+'━━━━━━━━━━━━━━━\n'+DISC[lang]);
 }
@@ -477,9 +507,15 @@ function addToJournal(type,text,img){
 }
 function renderJournal(){
   const list=document.getElementById('journal-list');
-  document.getElementById('stat1').textContent=journal.length;
-  document.getElementById('stat2').textContent=journal.filter(j=>j.type==='trade').length;
-  document.getElementById('stat3').textContent=journal.filter(j=>j.type==='update').length;
+  const closes=journal.filter(j=>j.type==='close');
+  const wins=closes.filter(j=>j.text&&j.text.includes('✅')).length;
+  const losses=closes.filter(j=>j.text&&j.text.includes('❌')).length;
+  const wr=closes.length>0?Math.round((wins/closes.length)*100)+'%':'-';
+  document.getElementById('stat1').textContent=closes.length;
+  document.getElementById('stat2').textContent=wins;
+  document.getElementById('stat3').textContent=losses;
+  document.getElementById('stat4').textContent=journal.filter(j=>j.type==='update').length;
+  document.getElementById('stat-wr').textContent=wr;
   if(!journal.length){list.innerHTML=`<div class="empty-state">${lang==='he'?'עדיין אין רשומות ביומן':'No journal entries yet'}</div>`;return;}
   const badges={idea:`<span class="badge badge-idea">${lang==='he'?'תרחיש':'Scenario'}</span>`,trade:`<span class="badge badge-open">${lang==='he'?'כניסה':'Entry'}</span>`,update:`<span class="badge badge-update">${lang==='he'?'עדכון':'Update'}</span>`,close:`<span class="badge badge-closed">${lang==='he'?'סגירה':'Close'}</span>`};
   list.innerHTML=journal.map(j=>`<div class="journal-item"><div class="ji-header">${badges[j.type]||''}<span class="ji-time">${j.time}</span></div><div class="ji-text">${j.text.split('\n').slice(0,3).join(' | ')}</div>${j.img?`<img class="ji-img" src="${j.img}"/>`:''}	</div>`).join('');
@@ -553,7 +589,9 @@ function setLang(l){
   updateIdeaPreview();updateTradePreview();updateUpdatePreview();updateClosePreview();renderJournal();
 }
 
-loadTgConfig();updateIdeaPreview();updateTradePreview();updateUpdatePreview();updateClosePreview();
+function saveWeeklyNote(){localStorage.setItem('weekly_note',document.getElementById('weekly-note-text').value);}
+function loadWeeklyNote(){const n=localStorage.getItem('weekly_note');if(n&&document.getElementById('weekly-note-text'))document.getElementById('weekly-note-text').value=n;}
+loadWeeklyNote();loadTgConfig();updateIdeaPreview();updateTradePreview();updateUpdatePreview();updateClosePreview();
 setInterval(pollTVData,4000);pollTVData();
 </script>
 </body>
