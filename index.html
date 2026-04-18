@@ -437,8 +437,7 @@ async function pollTVData(){
     var tvd=json.data;
     if(typeof tvd==='string'){try{tvd=JSON.parse(tvd);}catch(e){tvd=null;}}
     if(tvd&&tvd.timestamp&&tvd.timestamp!==lastTVTs){
-      pendingTVData=tvd;
-      showTVBanner(tvd);
+     if(!lastTVTs||tvd.timestamp!==lastTVTs){pendingTVData=tvd;showTVBanner(tvd);}
     }
   }catch(e){}
 }
@@ -455,6 +454,7 @@ function applyTVData(){
   if(!pendingTVData)return;
   var d=pendingTVData;
   var type=d.action||'idea';
+  lastTVTs=d.timestamp;
   pendingTVData=null;
   dismissBanner();
   showTab(type);
