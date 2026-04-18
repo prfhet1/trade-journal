@@ -437,7 +437,6 @@ async function pollTVData(){
     var tvd=json.data;
     if(typeof tvd==='string'){try{tvd=JSON.parse(tvd);}catch(e){tvd=null;}}
     if(tvd&&tvd.timestamp&&tvd.timestamp!==lastTVTs){
-      lastTVTs=tvd.timestamp;
       pendingTVData=tvd;
       showTVBanner(tvd);
     }
@@ -521,7 +520,7 @@ function setLang(l){
 }
 
 loadTgConfig();updateIdeaPreview();updateTradePreview();updateUpdatePreview();updateClosePreview();
-setInterval(pollTVData,4000);pollTVData();
+setInterval(pollTVData,4000);setTimeout(pollTVData,1000);
 </script>
 </body>
 </html>
