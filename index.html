@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -410,7 +411,8 @@ function buildIdeaMsg(){
   if(o)msg+=('TP')+`: ${o}\n`;
   if(rr)msg+=('סיכון/סיכוי')+`: ${rr}\n`;
   const rel=v('related');
-  if(rel)msg+='נכסים אופציונאליים בהתאמה: '+rel+'\n';
+  if(rel)msg+='נכסים אופציונאליים בהתאמה: '+rel+'
+';
   if(c)msg+='\n'+(isHe?'ניתוח':'Analysis')+`:\n${c}\n`;
   return colorize(msg+'━━━━━━━━━━━━━━━\n'+DISC[lang]);
 }
