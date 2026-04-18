@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -106,7 +105,16 @@
 </style>
 </head>
 <body>
-<div class="app">
+<div id="lock-screen" style="position:fixed;inset:0;background:#f8f9fa;display:flex;align-items:center;justify-content:center;z-index:9999;">
+  <div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:2rem;width:300px;text-align:center;">
+    <div style="font-size:20px;font-weight:700;margin-bottom:6px;">יומן<span style="color:#1D9E75;">מסחר</span></div>
+    <div style="font-size:12px;color:#718096;margin-bottom:1.5rem;">DJR Trading Journal</div>
+    <input type="password" id="pwd-input" placeholder="הזן סיסמה" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;margin-bottom:10px;text-align:center;" onkeydown="if(event.key==='Enter')checkPwd()" />
+    <button onclick="checkPwd()" style="width:100%;padding:10px;background:#1D9E75;color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">כניסה</button>
+    <div id="pwd-error" style="color:#A32D2D;font-size:12px;margin-top:8px;display:none;">סיסמה שגויה</div>
+  </div>
+</div>
+<div class="app" id="main-app" style="display:none;">
   <div class="topbar">
     <div class="logo">יומן<span>מסחר</span></div>
     <div class="lang-toggle">
@@ -310,10 +318,18 @@
           </div></div>
         </div>
       </div>
+      <div class="card" style="margin-bottom:10px;">
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <button onclick="sendWeeklyStats()" style="flex:1;padding:8px;background:#1D9E75;color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">📊 שלח סטטיסטיקה שבועית</button>
+          <button onclick="sendMonthlyStats()" style="flex:1;padding:8px;background:#185FA5;color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">📈 שלח סטטיסטיקה חודשית</button>
+        </div>
+        <button onclick="clearJournal()" style="width:100%;padding:6px;background:transparent;color:#A32D2D;border:1px solid #A32D2D;border-radius:8px;font-size:11px;cursor:pointer;">🗑 נקה יומן</button>
+      </div>
       <div class="card"><div id="journal-list"><div class="empty-state">עדיין אין רשומות ביומן</div></div></div>
     </div>
 
   </div>
+</div>
 </div>
 <script>
 const WEBHOOK_URL = 'https://trade-journal-inky-tau.vercel.app/api/webhook';
@@ -409,10 +425,9 @@ function buildIdeaMsg(){
   if(z)msg+=('Entry')+`: ${z}\n`;
   if(i)msg+=('Stop Loss')+`: ${i}\n`;
   if(o)msg+=('TP')+`: ${o}\n`;
-  if(rr)msg+=('סיכון/סיכוי')+`: ${rr}\n`;
+  if(rr)msg+=(isHe?'סיכון/סיכוי':'Risk/Reward')+`: ${rr}\n`;
   const rel=v('related');
-  if(rel)msg+='נכסים אופציונאליים בהתאמה: '+rel+'
-';
+  if(rel)msg+=(isHe?'נכסים אופציונאליים בהתאמה':'Optional Assets')+': '+rel+'\n';
   if(c)msg+='\n'+(isHe?'ניתוח':'Analysis')+`:\n${c}\n`;
   return colorize(msg+'━━━━━━━━━━━━━━━\n'+DISC[lang]);
 }
@@ -425,7 +440,7 @@ function buildTradeMsg(){
   if(ep)msg+=('Entry')+`: ${ep}\n`;
   if(rl)msg+=('Stop Loss')+`: ${rl}\n`;
   if(ob)msg+=('TP')+`: ${ob}\n`;
-  if(rr)msg+=('סיכון/סיכוי')+`: ${rr}\n`;
+  if(rr)msg+=(isHe?'סיכון/סיכוי':'Risk/Reward')+`: ${rr}\n`;
   if(rs)msg+='\n'+(isHe?'הערות':'Notes')+`:\n${rs}\n`;
   return colorize(msg+'━━━━━━━━━━━━━━━\n'+DISC[lang]);
 }
@@ -437,7 +452,7 @@ function buildUpdateMsg(){
   if(nl)msg+=('Updated Stop Loss')+`: ${nl}\n`;
   const ntp=v('new-tp');
   if(ntp)msg+=('Updated TP')+`: ${ntp}\n`;
-  if(nrr)msg+=(isHe?'R:R נוכחי':'Current R:R')+`: ${nrr}\n`;
+  if(nrr)msg+='R:R: '+nrr+'\n';
   
   const pct=v('pos-pct');
   if(pct)msg+='% מהפוזיציה: '+pct+'\n';
@@ -453,9 +468,9 @@ function buildCloseMsg(){
   if(entry)msg+=('Entry')+`: ${entry}\n`;
   if(exit)msg+=('Exit')+`: ${exit}\n`;
   if(sl)msg+=('Stop Loss')+`: ${sl}\n`;
-  if(rr)msg+=(isHe?'🎯 R:R שהושג':'🎯 R:R Achieved')+`: ${rr}\n`;
+  if(rr)msg+='🎯 R:R Achieved: '+rr+'\n';
   const reason=v('c-reason');
-  if(reason)msg+=(isHe?'סיבת סגירה':'Close Reason')+`: ${reason}\n`;
+  if(reason)msg+=(isHe?'סיבת סגירה':'Close Reason')+': '+reason+'\n';
   if(review)msg+='\n'+(isHe?'סיכום ולקחים':'Review & Lessons')+`:\n${review}\n`;
   return colorize(msg+'━━━━━━━━━━━━━━━\n'+DISC[lang]);
 }
@@ -503,12 +518,31 @@ function showTab(name){
 }
 
 function addToJournal(type,text,img){
-  journal.unshift({type,text,img,time:new Date().toLocaleTimeString(lang==='he'?'he-IL':'en-GB',{hour:'2-digit',minute:'2-digit'})});
+  const entry={type,text,img,time:new Date().toLocaleTimeString(lang==='he'?'he-IL':'en-GB',{hour:'2-digit',minute:'2-digit'}),date:new Date().toISOString()};
+  journal.unshift(entry);
+  saveJournal();
   renderJournal();
 }
+function saveJournal(){
+  const toSave=journal.map(j=>({type:j.type,text:j.text,time:j.time,date:j.date}));
+  try{localStorage.setItem('djr_journal',JSON.stringify(toSave));}catch(e){}
+}
+function loadJournal(){
+  try{
+    const saved=localStorage.getItem('djr_journal');
+    if(saved)journal=JSON.parse(saved);
+  }catch(e){}
+}
+function getWeekStart(d){const dt=new Date(d);dt.setHours(0,0,0,0);dt.setDate(dt.getDate()-dt.getDay());return dt;}
+function getMonthKey(d){const dt=new Date(d);return dt.getFullYear()+'-'+(dt.getMonth()+1);}
 function renderJournal(){
   const list=document.getElementById('journal-list');
-  const closes=journal.filter(j=>j.type==='close');
+  const now=new Date();
+  const weekStart=getWeekStart(now);
+  const monthKey=getMonthKey(now);
+  const weekJournal=journal.filter(j=>j.date&&new Date(j.date)>=weekStart);
+  const monthJournal=journal.filter(j=>j.date&&getMonthKey(j.date)===monthKey);
+  const closes=weekJournal.filter(j=>j.type==='close');
   const wins=closes.filter(j=>j.text&&j.text.includes('✅')).length;
   const losses=closes.filter(j=>j.text&&j.text.includes('❌')).length;
   const wr=closes.length>0?Math.round((wins/closes.length)*100)+'%':'-';
@@ -590,9 +624,85 @@ function setLang(l){
   updateIdeaPreview();updateTradePreview();updateUpdatePreview();updateClosePreview();renderJournal();
 }
 
+
+const DASHBOARD_PWD = 'DJR2024';
+function checkPwd(){
+  const input=document.getElementById('pwd-input').value;
+  if(input===DASHBOARD_PWD){
+    localStorage.setItem('djr_auth','1');
+    document.getElementById('lock-screen').style.display='none';
+    document.getElementById('main-app').style.display='flex';
+  } else {
+    document.getElementById('pwd-error').style.display='block';
+    document.getElementById('pwd-input').value='';
+  }
+}
+function initAuth(){
+  if(localStorage.getItem('djr_auth')==='1'){
+    document.getElementById('lock-screen').style.display='none';
+    document.getElementById('main-app').style.display='flex';
+  }
+}
+initAuth();
+
+
+function buildStatsMsg(period, entries){
+  const isHe=lang==='he';
+  const closes=entries.filter(j=>j.type==='close');
+  const wins=closes.filter(j=>j.text&&j.text.includes('✅')).length;
+  const losses=closes.filter(j=>j.text&&j.text.includes('❌')).length;
+  const wr=closes.length>0?Math.round((wins/closes.length)*100)+'%':'N/A';
+  const ideas=entries.filter(j=>j.type==='idea').length;
+  const updates=entries.filter(j=>j.type==='update').length;
+  const label=period==='weekly'?(isHe?'📊 סיכום שבועי':'📊 Weekly Summary'):(isHe?'📈 סיכום חודשי':'📈 Monthly Summary');
+  let msg=label+' | יומן מסחר DJR\n';
+  msg+='━━━━━━━━━━━━━━━\n';
+  msg+=(isHe?'עסקאות':'Trades')+': '+closes.length+'\n';
+  msg+=(isHe?'מנצחות ✅':'Winners ✅')+': '+wins+'\n';
+  msg+=(isHe?'מפסידות ❌':'Losers ❌')+': '+losses+'\n';
+  msg+='Win Rate: '+wr+'\n';
+  msg+=(isHe?'רעיונות':'Ideas')+': '+ideas+'\n';
+  msg+=(isHe?'עדכונים':'Updates')+': '+updates+'\n';
+  const weeklyNote=document.getElementById('weekly-note-text')?.value;
+  if(weeklyNote)msg+='\n'+(isHe?'הערות':'Notes')+':\n'+weeklyNote+'\n';
+  msg+='━━━━━━━━━━━━━━━\n';
+  msg+=DISC[lang];
+  return msg;
+}
+async function sendWeeklyStats(){
+  const now=new Date();
+  const weekStart=getWeekStart(now);
+  const entries=journal.filter(j=>j.date&&new Date(j.date)>=weekStart);
+  const msg=buildStatsMsg('weekly',entries);
+  const{token,chatId}=getTg();
+  if(!token||!chatId){alert(lang==='he'?'הגדר Token ו-Chat ID תחילה':'Set Token and Chat ID first');return;}
+  const img=images['weekly'];
+  if(img){
+    const fd=new FormData();fd.append('chat_id',chatId);fd.append('caption',msg);
+    const blob=await fetch(img).then(r=>r.blob());fd.append('photo',blob,'weekly.jpg');
+    await fetch('https://api.telegram.org/bot'+token+'/sendPhoto',{method:'POST',body:fd});
+  } else {
+    await fetch('https://api.telegram.org/bot'+token+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:chatId,text:msg})});
+  }
+}
+async function sendMonthlyStats(){
+  const now=new Date();
+  const monthKey=getMonthKey(now);
+  const entries=journal.filter(j=>j.date&&getMonthKey(j.date)===monthKey);
+  const msg=buildStatsMsg('monthly',entries);
+  const{token,chatId}=getTg();
+  if(!token||!chatId){alert(lang==='he'?'הגדר Token ו-Chat ID תחילה':'Set Token and Chat ID first');return;}
+  await fetch('https://api.telegram.org/bot'+token+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:chatId,text:msg})});
+}
+function clearJournal(){
+  if(confirm(lang==='he'?'האם אתה בטוח שברצונך למחוק את כל היומן?':'Are you sure you want to clear the journal?')){
+    journal=[];saveJournal();renderJournal();
+  }
+}
+
 function saveWeeklyNote(){localStorage.setItem('weekly_note',document.getElementById('weekly-note-text').value);}
 function loadWeeklyNote(){const n=localStorage.getItem('weekly_note');if(n&&document.getElementById('weekly-note-text'))document.getElementById('weekly-note-text').value=n;}
-loadWeeklyNote();loadTgConfig();updateIdeaPreview();updateTradePreview();updateUpdatePreview();updateClosePreview();
+loadJournal();loadWeeklyNote();loadTgConfig();updateIdeaPreview();updateTradePreview();updateUpdatePreview();updateClosePreview();
 setInterval(pollTVData,4000);pollTVData();
 </script>
 </body>
