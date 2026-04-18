@@ -2,145 +2,153 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>יומן מסחר | DJR</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #f8f9fa; --card: #ffffff; --border: #e2e8f0;
-    --text: #1a202c; --muted: #718096; --green: #1D9E75;
-    --green-dark: #0F6E56; --green-light: #E1F5EE;
-    --blue-light: #E6F1FB; --blue: #185FA5; --blue-border: #85B7EB;
-    --red-light: #FCEBEB; --red: #A32D2D;
-    --amber-light: #FAEEDA; --amber: #854F0B;
-    --radius: 10px; --radius-sm: 7px;
-  }
-  body { font-family: -apple-system,'Segoe UI',Arial,sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-  .app { display: flex; flex-direction: column; height: 100vh; max-width: 700px; margin: 0 auto; }
-  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--card); border-bottom: 1px solid var(--border); flex-shrink: 0; }
-  .logo { font-size: 18px; font-weight: 700; } .logo span { color: var(--green); }
-  .lang-toggle { display: flex; gap: 3px; background: var(--bg); border-radius: var(--radius-sm); padding: 3px; border: 1px solid var(--border); }
-  .lang-btn { border: none; background: transparent; padding: 4px 10px; border-radius: 5px; font-size: 12px; cursor: pointer; color: var(--muted); }
-  .lang-btn.active { background: var(--card); color: var(--text); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-  .tv-banner { display: none !important; align-items: center; justify-content: space-between; padding: 10px 16px; background: #0f1923; color: #00d4aa; font-size: 13px; font-weight: 500; flex-shrink: 0; border-bottom: 1px solid #00d4aa33; }
-  .tv-banner.show { display: flex; }
-  .tv-dot { width: 8px; height: 8px; background: #00d4aa; border-radius: 50%; animation: blink 1s infinite; flex-shrink: 0; }
-  .tv-banner-text { display: flex; align-items: center; gap: 8px; }
-  .tv-open-btn { padding: 5px 14px; background: #00d4aa; color: #0f1923; border: none; border-radius: 5px; font-size: 12px; font-weight: 700; cursor: pointer; }
-  .tv-dismiss { background: transparent; border: none; color: #00d4aa66; font-size: 18px; cursor: pointer; margin-right: 4px; }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  .tg-setup { padding: 10px 16px; background: var(--blue-light); border-bottom: 1px solid var(--blue-border); flex-shrink: 0; }
-  .tg-setup-title { font-size: 12px; font-weight: 600; color: var(--blue); margin-bottom: 8px; }
-  .tg-fields { display: flex; gap: 8px; align-items: flex-end; }
-  .tg-field { display: flex; flex-direction: column; gap: 3px; flex: 1; }
-  .tg-field label { font-size: 11px; color: var(--blue); }
-  .tg-field input { padding: 6px 10px; border: 1px solid var(--blue-border); border-radius: var(--radius-sm); font-size: 12px; background: white; color: var(--text); }
-  .test-btn { padding: 7px 14px; background: var(--blue); color: white; border: none; border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
-  .tg-status { font-size: 11px; margin-top: 6px; padding: 5px 10px; border-radius: var(--radius-sm); display: none; }
-  .tg-status.ok { background: #EAF3DE; color: #27500A; display: block; }
-  .tg-status.err { background: var(--red-light); color: var(--red); display: block; }
-  .tabs { display: flex; padding: 0 16px; background: var(--card); border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; }
-  .tab { padding: 12px 14px; font-size: 13px; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; white-space: nowrap; }
-  .tab.active { color: var(--green); border-bottom-color: var(--green); font-weight: 600; }
-  .panels { flex: 1; overflow-y: auto; padding: 16px; }
-  .panel { display: none; } .panel.active { display: block; }
-  .tv-prefill-badge { display: none; align-items: center; gap: 6px; background: #0f1923; color: #00d4aa; font-size: 11px; padding: 6px 10px; border-radius: var(--radius-sm); margin-bottom: 12px; }
-  .tv-prefill-badge.show { display: flex; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .form-group { display: flex; flex-direction: column; gap: 4px; }
-  .form-group.full { grid-column: 1 / -1; }
-  .form-group label { font-size: 12px; color: var(--muted); font-weight: 500; }
-  .form-group input, .form-group select, .form-group textarea { padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; background: white; color: var(--text); font-family: inherit; width: 100%; }
-  .form-group textarea { resize: vertical; min-height: 68px; }
-  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--green); }
-  .bias-btns { display: flex; gap: 8px; }
-  .bias-btn { flex: 1; padding: 9px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; cursor: pointer; background: white; color: var(--text); text-align: center; }
-  .bias-btn.bull.active { background: #EAF3DE; border-color: #3B6D11; color: #27500A; font-weight: 600; }
-  .bias-btn.bear.active { background: var(--red-light); border-color: var(--red); color: var(--red); font-weight: 600; }
-  .rr-field { background: #f0faf5 !important; font-weight: 700 !important; color: var(--green-dark) !important; }
-  .img-section { border: 1.5px dashed var(--border); border-radius: var(--radius-sm); background: var(--bg); overflow: hidden; }
-  .img-tabs { display: flex; border-bottom: 1px solid var(--border); }
-  .img-tab { flex: 1; padding: 7px; font-size: 12px; text-align: center; cursor: pointer; color: var(--muted); background: white; border: none; }
-  .img-tab.active { color: var(--green); font-weight: 600; background: var(--green-light); }
-  .img-body { padding: 10px; }
-  .img-upload-area { position: relative; text-align: center; cursor: pointer; padding: 8px 0; }
-  .img-upload-area input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-  .img-upload-label { font-size: 12px; color: var(--muted); pointer-events: none; display: block; }
-  .img-paste-area { min-height: 64px; border: 1px dashed var(--border); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--muted); cursor: pointer; outline: none; background: white; text-align: center; padding: 8px; }
-  .img-paste-area.ready { border-color: var(--green); color: var(--green); }
-  .img-paste-area:focus { border-color: var(--blue); }
-  .img-preview-wrap { margin-top: 8px; position: relative; display: inline-block; }
-  .img-preview-wrap img { max-height: 110px; max-width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border); display: block; }
-  .img-remove { position: absolute; top: 4px; right: 4px; background: #E24B4A; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 11px; cursor: pointer; }
-  .preview-label { font-size: 11px; color: var(--muted); margin: 10px 0 4px; }
-  .preview-box { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; font-size: 12px; line-height: 1.7; color: var(--text); line-height: 1.8; max-height: 150px; overflow-y: auto; }
-  .disclaimer { font-size: 11px; color: var(--muted); background: var(--green-light); padding: 7px 10px; border-radius: var(--radius-sm); border-right: 3px solid var(--green); margin-top: 10px; }
-  .send-btn { width: 100%; margin-top: 12px; padding: 12px; background: var(--green); color: white; border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 600; cursor: pointer; }
-  .send-btn:hover { background: var(--green-dark); }
-  .send-btn:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
-  .update-types { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
-  .utype { padding: 5px 12px; border: 1px solid var(--border); border-radius: 20px; font-size: 12px; cursor: pointer; background: white; color: var(--muted); }
-  .utype.active { background: var(--green-light); border-color: var(--green-dark); color: var(--green-dark); font-weight: 600; }
-  .stats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 12px; }
-  .stat { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; text-align: center; }
-  .stat-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
-  .stat-val { font-size: 22px; font-weight: 700; }
-  .journal-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
-  .journal-item:last-child { border-bottom: none; }
-  .ji-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
-  .ji-time { font-size: 11px; color: var(--muted); }
-  .badge { font-size: 11px; padding: 2px 9px; border-radius: 20px; font-weight: 500; }
-  .badge-idea { background: var(--blue-light); color: var(--blue); }
-  .badge-open { background: var(--green-light); color: var(--green-dark); }
-  .badge-update { background: var(--amber-light); color: var(--amber); }
-  .badge-closed { background: #f0f0f0; color: #555; }
-  .ji-text { font-size: 12px; color: var(--muted); line-height: 1.5; }
-  .ji-img { width: 52px; height: 38px; object-fit: cover; border-radius: 5px; border: 1px solid var(--border); margin-top: 5px; }
-  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid white; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; vertical-align: middle; margin-right: 6px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .empty-state { text-align: center; padding: 2rem; color: var(--muted); font-size: 13px; }
-  @media (max-width: 480px) { .tg-fields { flex-direction: column; } .form-grid { grid-template-columns: 1fr; } }
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f8f9fa;--card:#fff;--border:#e2e8f0;--text:#1a202c;--muted:#718096;
+  --green:#1D9E75;--gd:#0F6E56;--gl:#E1F5EE;
+  --bl:#E6F1FB;--blue:#185FA5;--bb:#85B7EB;
+  --rl:#FCEBEB;--red:#A32D2D;--al:#FAEEDA;--amber:#854F0B;
+  --r:10px;--rs:7px;
+}
+body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.app{display:flex;flex-direction:column;height:100vh;max-width:700px;margin:0 auto;}
+/* LOCK */
+#lock{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;}
+#lock .box{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:2rem;width:300px;text-align:center;}
+#lock .logo{font-size:22px;font-weight:700;margin-bottom:6px;}
+#lock .logo span{color:var(--green);}
+#lock input{width:100%;padding:10px;border:1px solid var(--border);border-radius:var(--rs);font-size:14px;margin-bottom:10px;text-align:center;}
+#lock button{width:100%;padding:10px;background:var(--green);color:#fff;border:none;border-radius:var(--rs);font-size:14px;font-weight:600;cursor:pointer;}
+#lock .err{color:var(--red);font-size:12px;margin-top:8px;display:none;}
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0;}
+.logo{font-size:18px;font-weight:700;}.logo span{color:var(--green);}
+.lang-toggle{display:flex;gap:3px;background:var(--bg);border-radius:var(--rs);padding:3px;border:1px solid var(--border);}
+.lang-btn{border:none;background:transparent;padding:4px 10px;border-radius:5px;font-size:12px;cursor:pointer;color:var(--muted);}
+.lang-btn.active{background:var(--card);color:var(--text);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.1);}
+/* TG */
+.tg-setup{padding:10px 16px;background:var(--bl);border-bottom:1px solid var(--bb);flex-shrink:0;}
+.tg-title{font-size:12px;font-weight:600;color:var(--blue);margin-bottom:8px;}
+.tg-fields{display:flex;gap:8px;align-items:flex-end;}
+.tg-field{display:flex;flex-direction:column;gap:3px;flex:1;}
+.tg-field label{font-size:11px;color:var(--blue);}
+.tg-field input{padding:6px 10px;border:1px solid var(--bb);border-radius:var(--rs);font-size:12px;background:#fff;color:var(--text);}
+.test-btn{padding:7px 14px;background:var(--blue);color:#fff;border:none;border-radius:var(--rs);font-size:12px;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.save-btn{padding:7px 10px;background:var(--green);color:#fff;border:none;border-radius:var(--rs);font-size:13px;cursor:pointer;flex-shrink:0;}
+.tg-status{font-size:11px;margin-top:6px;padding:5px 10px;border-radius:var(--rs);display:none;}
+.tg-status.ok{background:#EAF3DE;color:#27500A;display:block;}
+.tg-status.err{background:var(--rl);color:var(--red);display:block;}
+/* TABS */
+.tabs{display:flex;padding:0 16px;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;}
+.tab{padding:12px 14px;font-size:13px;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;}
+.tab.active{color:var(--green);border-bottom-color:var(--green);font-weight:600;}
+.panels{flex:1;overflow-y:auto;padding:16px;}
+.panel{display:none;}.panel.active{display:block;}
+/* CARD / FORM */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.fg{display:flex;flex-direction:column;gap:4px;}
+.fg.full{grid-column:1/-1;}
+.fg label{font-size:12px;color:var(--muted);font-weight:500;}
+.fg input,.fg select,.fg textarea{padding:8px 10px;border:1px solid var(--border);border-radius:var(--rs);font-size:13px;background:#fff;color:var(--text);font-family:inherit;width:100%;}
+.fg textarea{resize:vertical;min-height:68px;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--green);}
+.bias-btns{display:flex;gap:8px;}
+.bb-btn{flex:1;padding:9px;border:1px solid var(--border);border-radius:var(--rs);font-size:13px;cursor:pointer;background:#fff;color:var(--text);text-align:center;}
+.bb-btn.bull.active{background:#EAF3DE;border-color:#3B6D11;color:#27500A;font-weight:600;}
+.bb-btn.bear.active{background:var(--rl);border-color:var(--red);color:var(--red);font-weight:600;}
+.rrf{background:#f0faf5!important;font-weight:700!important;color:var(--gd)!important;}
+/* IMG */
+.img-sec{border:1.5px dashed var(--border);border-radius:var(--rs);background:var(--bg);overflow:hidden;}
+.img-tabs{display:flex;border-bottom:1px solid var(--border);}
+.img-tab{flex:1;padding:7px;font-size:12px;text-align:center;cursor:pointer;color:var(--muted);background:#fff;border:none;}
+.img-tab.active{color:var(--green);font-weight:600;background:var(--gl);}
+.img-body{padding:10px;}
+.img-up{position:relative;text-align:center;cursor:pointer;padding:8px 0;}
+.img-up input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.img-up-lbl{font-size:12px;color:var(--muted);pointer-events:none;display:block;}
+.img-paste{min-height:64px;border:1px dashed var(--border);border-radius:var(--rs);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);cursor:pointer;outline:none;background:#fff;text-align:center;padding:8px;}
+.img-paste.ready{border-color:var(--green);color:var(--green);}
+.img-paste:focus{border-color:var(--blue);}
+.img-prev{margin-top:8px;position:relative;display:inline-block;}
+.img-prev img{max-height:110px;max-width:100%;border-radius:var(--rs);border:1px solid var(--border);display:block;}
+.img-rm{position:absolute;top:4px;right:4px;background:#E24B4A;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;}
+/* PREVIEW */
+.prev-lbl{font-size:11px;color:var(--muted);margin:10px 0 4px;}
+.prev-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:10px;font-size:12px;line-height:1.8;color:var(--text);max-height:160px;overflow-y:auto;}
+.disc{font-size:11px;color:var(--muted);background:var(--gl);padding:7px 10px;border-radius:var(--rs);border-right:3px solid var(--green);margin-top:10px;}
+.send-btn{width:100%;margin-top:12px;padding:12px;background:var(--green);color:#fff;border:none;border-radius:var(--rs);font-size:15px;font-weight:600;cursor:pointer;}
+.send-btn:hover{background:var(--gd);}
+.send-btn:disabled{background:var(--border);color:var(--muted);cursor:not-allowed;}
+/* UPDATE TYPES */
+.utypes{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.utype{padding:5px 12px;border:1px solid var(--border);border-radius:20px;font-size:12px;cursor:pointer;background:#fff;color:var(--muted);}
+.utype.active{background:var(--gl);border-color:var(--gd);color:var(--gd);font-weight:600;}
+/* JOURNAL */
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:8px;}
+.stats-grid2{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px;text-align:center;}
+.stat-lbl{font-size:11px;color:var(--muted);margin-bottom:4px;}
+.stat-val{font-size:20px;font-weight:700;}
+.ji{padding:10px 0;border-bottom:1px solid var(--border);}
+.ji:last-child{border-bottom:none;}
+.ji-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.ji-time{font-size:11px;color:var(--muted);}
+.badge{font-size:11px;padding:2px 9px;border-radius:20px;font-weight:500;}
+.b-idea{background:var(--bl);color:var(--blue);}
+.b-trade{background:var(--gl);color:var(--gd);}
+.b-update{background:var(--al);color:var(--amber);}
+.b-close{background:#f0f0f0;color:#555;}
+.ji-txt{font-size:12px;color:var(--muted);line-height:1.5;}
+.ji-img{width:52px;height:38px;object-fit:cover;border-radius:5px;border:1px solid var(--border);margin-top:5px;}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.empty{text-align:center;padding:2rem;color:var(--muted);font-size:13px;}
+.jnl-btns{display:flex;gap:8px;margin-bottom:10px;}
+.jnl-btns button{flex:1;padding:8px;border:none;border-radius:var(--rs);font-size:12px;font-weight:600;cursor:pointer;color:#fff;}
+.btn-week{background:var(--green);}
+.btn-month{background:var(--blue);}
+.btn-clear{flex:none!important;padding:6px 12px!important;background:transparent!important;color:var(--red)!important;border:1px solid var(--red)!important;border-radius:var(--rs);font-size:11px;cursor:pointer;}
+@media(max-width:480px){.tg-fields{flex-direction:column;}.form-grid{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
-<div id="lock-screen" style="position:fixed;inset:0;background:#f8f9fa;display:flex;align-items:center;justify-content:center;z-index:9999;">
-  <div style="background:white;border:1px solid #e2e8f0;border-radius:12px;padding:2rem;width:300px;text-align:center;">
-    <div style="font-size:20px;font-weight:700;margin-bottom:6px;">יומן<span style="color:#1D9E75;">מסחר</span></div>
-    <div style="font-size:12px;color:#718096;margin-bottom:1.5rem;">DJR Trading Journal</div>
-    <input type="password" id="pwd-input" placeholder="הזן סיסמה" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;margin-bottom:10px;text-align:center;" onkeydown="if(event.key==='Enter')checkPwd()" />
-    <button onclick="checkPwd()" style="width:100%;padding:10px;background:#1D9E75;color:white;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">כניסה</button>
-    <div id="pwd-error" style="color:#A32D2D;font-size:12px;margin-top:8px;display:none;">סיסמה שגויה</div>
+
+<!-- LOCK SCREEN -->
+<div id="lock">
+  <div class="box">
+    <div class="logo">יומן<span>מסחר</span></div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:1.5rem;">DJR Trading Journal</div>
+    <input type="password" id="pwd" placeholder="סיסמה / Password" onkeydown="if(event.key==='Enter')checkPwd()"/>
+    <button onclick="checkPwd()">כניסה</button>
+    <div class="err" id="pwd-err">סיסמה שגויה</div>
   </div>
 </div>
-<div class="app" id="main-app" style="display:none;">
+
+<!-- MAIN APP -->
+<div class="app" id="app" style="display:none;">
+
   <div class="topbar">
     <div class="logo">יומן<span>מסחר</span></div>
-    <div id="sync-indicator" style="font-size:11px;color:#718096;display:none;">☁️ מסנכרן...</div>
     <div class="lang-toggle">
       <button class="lang-btn active" onclick="setLang('he')">עברית</button>
       <button class="lang-btn" onclick="setLang('en')">English</button>
     </div>
   </div>
 
-  <div class="tv-banner" id="tv-banner">
-    <div class="tv-banner-text"><div class="tv-dot"></div><span id="tv-banner-msg">נתוני TradingView התקבלו</span></div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <button class="tv-open-btn" onclick="applyTVData()" id="tv-open-btn">פתח טופס</button>
-      <button class="tv-dismiss" onclick="dismissBanner()">✕</button>
-    </div>
-  </div>
-
   <div class="tg-setup">
-    <div class="tg-setup-title" id="tg-title">⚙️ הגדרות טלגרם</div>
+    <div class="tg-title" id="tg-title">⚙️ הגדרות טלגרם</div>
     <div class="tg-fields">
-      <div class="tg-field"><label>Bot Token</label><input type="password" id="tg-token" placeholder="123456:ABC-DEF..." oninput="saveTgConfig()" onblur="saveTgConfig()" /></div>
-      <div class="tg-field"><label>Chat ID</label><input type="text" id="tg-chatid" placeholder="-5195169509" oninput="saveTgConfig()" onblur="saveTgConfig()" /></div>
-      <button class="test-btn" onclick="testTelegram()">🔗 <span id="test-btn-text">בדוק</span></button>
-      <button class="test-btn" onclick="saveTgConfig()" style="background:#1D9E75;">☁️</button>
+      <div class="tg-field"><label>Bot Token</label><input type="password" id="tg-token" placeholder="123456:ABC..." oninput="saveTg()"/></div>
+      <div class="tg-field"><label>Chat ID</label><input type="text" id="tg-chatid" placeholder="-5195169509" oninput="saveTg()"/></div>
+      <button class="test-btn" onclick="testTg()">🔗 <span id="tst-txt">בדוק</span></button>
+      <button class="save-btn" onclick="saveTgCloud()" id="cloud-btn">☁️</button>
     </div>
-    <div class="tg-status" id="tg-status"></div>
+    <div class="tg-status" id="tg-st"></div>
   </div>
 
   <div class="tabs">
@@ -155,120 +163,120 @@
 
     <!-- IDEA -->
     <div class="panel active" id="panel-idea">
-      <div class="tv-prefill-badge" id="tv-badge-idea"><div class="tv-dot"></div><span id="tv-badge-idea-text">מולא אוטומטית מ-TradingView</span></div>
       <div class="card">
         <div class="form-grid">
-          <div class="form-group full"><label id="lbl-bias">כיוון מצופה</label>
-            <div class="bias-btns"><div class="bias-btn bull" id="bull-btn" onclick="setBias('bull')">📈 מגמה עולה</div><div class="bias-btn bear" id="bear-btn" onclick="setBias('bear')">📉 מגמה יורדת</div></div>
+          <div class="fg full"><label id="l-bias">כיוון מצופה</label>
+            <div class="bias-btns">
+              <div class="bb-btn bull" id="bull-btn" onclick="setBias('bull')">📈 מגמה עולה</div>
+              <div class="bb-btn bear" id="bear-btn" onclick="setBias('bear')">📉 מגמה יורדת</div>
+            </div>
           </div>
-          <div class="form-group"><label id="lbl-ticker">נכס</label><input type="text" id="ticker" placeholder="לדוג׳ SPX" oninput="updateIdeaPreview()" /></div>
-          <div class="form-group"><label id="lbl-tf">גרף</label><input type="text" id="tf" placeholder="לדוג׳ 5" oninput="updateIdeaPreview()" /></div>
-          <div class="form-group full"><label>נכסים אופציונאליים</label><input type="text" id="related" placeholder="e.g. NQ, VIX, DXY" oninput="updateIdeaPreview()" /></div>
-          <div class="form-group"><label id="lbl-zone">Entry Zone</label><input type="text" id="zone" placeholder="e.g. 5780-5800" oninput="updateIdeaPreview()" /></div>
-          <div class="form-group"><label id="lbl-inv">Stop Loss</label><input type="text" id="inv" placeholder="e.g. 5750" oninput="updateIdeaPreview()" /></div>
-          <div class="form-group"><label id="lbl-obj">TP</label><input type="text" id="obj" placeholder="e.g. 5850" oninput="updateIdeaPreview()" /></div>
-          <div class="form-group"><label id="lbl-rr">יחס R:R</label><input type="text" id="rr" class="rr-field" readonly /></div>
-          <div class="form-group full"><label id="lbl-conf">ניתוח ונקודות עיקריות</label><textarea id="conf" placeholder="שתף את הניתוח שלך לצורכי לימוד..." oninput="updateIdeaPreview()"></textarea></div>
-          <div class="form-group full"><label id="lbl-img1">צירוף תמונה</label>
-            <div class="img-section"><div class="img-tabs">
-              <button class="img-tab active" onclick="switchImgTab('idea','upload',this)">📁 <span class="it-upload">העלאה</span></button>
-              <button class="img-tab" onclick="switchImgTab('idea','paste',this)">📋 <span class="it-paste">הדבקה</span></button>
+          <div class="fg"><label id="l-ticker">נכס</label><input type="text" id="ticker" value="US500" oninput="syncAndUpdate('idea')"/></div>
+          <div class="fg"><label id="l-tf">גרף</label><input type="text" id="tf" value="5min" oninput="syncAndUpdate('idea')"/></div>
+          <div class="fg"><label>Entry</label><input type="text" id="zone" placeholder="e.g. 5780" oninput="syncAndUpdate('idea')"/></div>
+          <div class="fg"><label>Stop Loss</label><input type="text" id="inv" placeholder="e.g. 5750" oninput="syncAndUpdate('idea')"/></div>
+          <div class="fg"><label>TP</label><input type="text" id="obj" placeholder="e.g. 5850" oninput="syncAndUpdate('idea')"/></div>
+          <div class="fg"><label id="l-rr">סיכון/סיכוי</label><input type="text" id="rr" class="rrf" readonly/></div>
+          <div class="fg full"><label id="l-related">נכסים אופציונאליים בהתאמה</label><input type="text" id="related" value="ES1!" oninput="syncAndUpdate('idea')"/></div>
+          <div class="fg full"><label id="l-conf">ניתוח ונקודות עיקריות</label><textarea id="conf" placeholder="שתף את הניתוח שלך לצורכי לימוד..." oninput="updatePrev('idea')"></textarea></div>
+          <div class="fg full"><label id="l-img1">צירוף תמונה</label>
+            <div class="img-sec"><div class="img-tabs">
+              <button class="img-tab active" onclick="switchImg('idea','up',this)">📁 <span class="it-up">העלאה</span></button>
+              <button class="img-tab" onclick="switchImg('idea','pa',this)">📋 <span class="it-pa">הדבקה</span></button>
             </div><div class="img-body">
-              <div id="img-upload-idea" class="img-upload-area"><input type="file" accept="image/*" onchange="handleImg(event,'idea')" /><span class="img-upload-label" id="img-upload-label-idea">לחץ לבחירת קובץ</span></div>
-              <div id="img-paste-idea" class="img-paste-area" style="display:none;" tabindex="0" onclick="this.focus()" onpaste="handlePasteEvent(event,'idea')"><span id="img-paste-label-idea">לחץ כאן ואז Ctrl+V להדבקת צילום מסך</span></div>
-              <div id="img-preview-idea"></div>
+              <div id="iu-idea" class="img-up"><input type="file" accept="image/*" onchange="handleImg(event,'idea')"/><span class="img-up-lbl" id="ul-idea">לחץ לבחירת קובץ</span></div>
+              <div id="ip-idea" class="img-paste" style="display:none;" tabindex="0" onclick="this.focus()" onpaste="handlePaste(event,'idea')"><span id="pl-idea">לחץ כאן ואז Ctrl+V</span></div>
+              <div id="iv-idea"></div>
             </div></div>
           </div>
         </div>
-        <div class="preview-label" id="prev-label1">תצוגה מקדימה</div>
-        <div class="preview-box" id="idea-preview">מלא את הפרטים לצפייה בתצוגה מקדימה...</div>
-        <div class="disclaimer" id="disc1">⚠️ כל הפרסומים הינם חלק מיומן מסחר אישי לצורכי לימוד בלבד. אין לראות בכך ייעוץ השקעות. כל החלטה היא באחריות הקורא בלבד.</div>
-        <button class="send-btn" id="send-idea-btn" onclick="sendToTelegram('idea')">📤 שלח לטלגרם</button>
+        <div class="prev-lbl" id="pl1">תצוגה מקדימה</div>
+        <div class="prev-box" id="prev-idea"></div>
+        <div class="disc" id="disc1"></div>
+        <button class="send-btn" id="send-idea" onclick="sendTg('idea')">📤 שלח לטלגרם</button>
       </div>
     </div>
 
     <!-- TRADE -->
     <div class="panel" id="panel-trade">
-      <div class="tv-prefill-badge" id="tv-badge-trade"><div class="tv-dot"></div><span id="tv-badge-trade-text">מולא אוטומטית מ-TradingView</span></div>
       <div class="card">
         <div class="form-grid">
-          <div class="form-group full"><label id="lbl-t-dir">כיוון</label>
-            <div class="bias-btns"><div class="bias-btn bull" id="bull-btn-t" onclick="setTradeBias('bull')">📈 עולה</div><div class="bias-btn bear" id="bear-btn-t" onclick="setTradeBias('bear')">📉 יורד</div></div>
+          <div class="fg full"><label id="l-tdir">כיוון</label>
+            <div class="bias-btns">
+              <div class="bb-btn bull" id="bull-t" onclick="setTradeBias('bull')">📈 עולה</div>
+              <div class="bb-btn bear" id="bear-t" onclick="setTradeBias('bear')">📉 יורד</div>
+            </div>
           </div>
-          <div class="form-group"><label id="lbl-t-ticker">נכס</label><input type="text" id="t-ticker" placeholder="לדוג׳ SPX" oninput="updateTradePreview()" /></div>
-          <div class="form-group"><label id="lbl-t-tf">גרף</label><input type="text" id="t-tf" placeholder="לדוג׳ 5m" oninput="updateTradePreview()" /></div>
-          <div class="form-group"><label id="lbl-ep">Entry</label><input type="text" id="ep" placeholder="e.g. 5792.5" oninput="updateTradePreview()" /></div>
-
-          <div class="form-group"><label id="lbl-rl">Stop Loss</label><input type="text" id="rl" placeholder="e.g. 5778" oninput="updateTradePreview()" /></div>
-          <div class="form-group"><label id="lbl-ob">TP</label><input type="text" id="ob" placeholder="e.g. 5820" oninput="updateTradePreview()" /></div>
-          <div class="form-group"><label id="lbl-t-rr">יחס R:R</label><input type="text" id="t-rr" class="rr-field" readonly /></div>
-          <div class="form-group full"><label id="lbl-reason">הערות</label><textarea id="reason" placeholder="הוסף הערות לצורכי לימוד..." oninput="updateTradePreview()"></textarea></div>
-          <div class="form-group full"><label id="lbl-img2">צירוף תמונה</label>
-            <div class="img-section"><div class="img-tabs">
-              <button class="img-tab active" onclick="switchImgTab('trade','upload',this)">📁 <span class="it-upload">העלאה</span></button>
-              <button class="img-tab" onclick="switchImgTab('trade','paste',this)">📋 <span class="it-paste">הדבקה</span></button>
+          <div class="fg"><label id="l-tticker">נכס</label><input type="text" id="t-ticker" oninput="updatePrev('trade')"/></div>
+          <div class="fg"><label id="l-ttf">גרף</label><input type="text" id="t-tf" oninput="updatePrev('trade')"/></div>
+          <div class="fg"><label>Entry</label><input type="text" id="ep" placeholder="e.g. 5792.5" oninput="updatePrev('trade')"/></div>
+          <div class="fg"><label>Stop Loss</label><input type="text" id="rl" placeholder="e.g. 5778" oninput="updatePrev('trade')"/></div>
+          <div class="fg"><label>TP</label><input type="text" id="ob" placeholder="e.g. 5820" oninput="updatePrev('trade')"/></div>
+          <div class="fg"><label id="l-trr">סיכון/סיכוי</label><input type="text" id="t-rr" class="rrf" readonly/></div>
+          <div class="fg full"><label id="l-notes">הערות</label><textarea id="reason" placeholder="הוסף הערות לצורכי לימוד..." oninput="updatePrev('trade')"></textarea></div>
+          <div class="fg full"><label id="l-img2">צירוף תמונה</label>
+            <div class="img-sec"><div class="img-tabs">
+              <button class="img-tab active" onclick="switchImg('trade','up',this)">📁 <span class="it-up">העלאה</span></button>
+              <button class="img-tab" onclick="switchImg('trade','pa',this)">📋 <span class="it-pa">הדבקה</span></button>
             </div><div class="img-body">
-              <div id="img-upload-trade" class="img-upload-area"><input type="file" accept="image/*" onchange="handleImg(event,'trade')" /><span class="img-upload-label" id="img-upload-label-trade">לחץ לבחירת קובץ</span></div>
-              <div id="img-paste-trade" class="img-paste-area" style="display:none;" tabindex="0" onclick="this.focus()" onpaste="handlePasteEvent(event,'trade')"><span id="img-paste-label-trade">לחץ כאן ואז Ctrl+V להדבקת צילום מסך</span></div>
-              <div id="img-preview-trade"></div>
+              <div id="iu-trade" class="img-up"><input type="file" accept="image/*" onchange="handleImg(event,'trade')"/><span class="img-up-lbl" id="ul-trade">לחץ לבחירת קובץ</span></div>
+              <div id="ip-trade" class="img-paste" style="display:none;" tabindex="0" onclick="this.focus()" onpaste="handlePaste(event,'trade')"><span id="pl-trade">לחץ כאן ואז Ctrl+V</span></div>
+              <div id="iv-trade"></div>
             </div></div>
           </div>
         </div>
-        <div class="preview-label">תצוגה מקדימה</div>
-        <div class="preview-box" id="trade-preview">מלא את הפרטים לצפייה בתצוגה מקדימה...</div>
-        <div class="disclaimer" id="disc2">⚠️ כל הפרסומים הינם חלק מיומן מסחר אישי לצורכי לימוד בלבד. אין לראות בכך ייעוץ השקעות.</div>
-        <button class="send-btn" id="send-trade-btn" onclick="sendToTelegram('trade')">📤 שלח לטלגרם</button>
+        <div class="prev-lbl" id="pl2">תצוגה מקדימה</div>
+        <div class="prev-box" id="prev-trade"></div>
+        <div class="disc" id="disc2"></div>
+        <button class="send-btn" id="send-trade" onclick="sendTg('trade')">📤 שלח לטלגרם</button>
       </div>
     </div>
 
     <!-- UPDATE -->
     <div class="panel" id="panel-update">
-      <div class="tv-prefill-badge" id="tv-badge-update"><div class="tv-dot"></div><span id="tv-badge-update-text">מולא אוטומטית מ-TradingView</span></div>
       <div class="card">
-        <div class="update-types">
+        <div class="utypes" id="utypes">
           <div class="utype active" onclick="setUtype(this,'sl')" id="ut-sl">Move Stop Loss</div>
           <div class="utype" onclick="setUtype(this,'partial')" id="ut-partial">Partial Close</div>
           <div class="utype" onclick="setUtype(this,'add')" id="ut-add">Add to Position</div>
         </div>
         <div class="form-grid">
-          <div class="form-group"><label id="lbl-u-ticker">נכס</label><input type="text" id="u-ticker" placeholder="לדוג׳ SPX" oninput="updateUpdatePreview()" /></div>
-          <div class="form-group"><label id="lbl-newlevel">Updated Stop Loss</label><input type="text" id="new-level" placeholder="e.g. 5795" oninput="updateUpdatePreview()" /></div>
-          <div class="form-group"><label id="lbl-new-tp">Updated TP</label><input type="text" id="new-tp" placeholder="e.g. 5850" oninput="updateUpdatePreview()" /></div>
-          <div class="form-group"><label id="lbl-new-rr">R:R נוכחי</label><input type="text" id="new-rr" placeholder="לדוג׳ 1:1.8" oninput="updateUpdatePreview()" /></div>
-
-          <div class="form-group" id="pct-group" style="display:none;"><label>% מהפוזיציה</label><input type="text" id="pos-pct" placeholder="e.g. 50%" oninput="updateUpdatePreview()" /></div>
-          <div class="form-group full"><label id="lbl-note">הערה</label><textarea id="note" placeholder="תאר את שינוי הניהול לצורכי לימוד..." oninput="updateUpdatePreview()"></textarea></div>
-          <div class="form-group full"><label id="lbl-img3">צירוף תמונה</label>
-            <div class="img-section"><div class="img-tabs">
-              <button class="img-tab active" onclick="switchImgTab('update','upload',this)">📁 <span class="it-upload">העלאה</span></button>
-              <button class="img-tab" onclick="switchImgTab('update','paste',this)">📋 <span class="it-paste">הדבקה</span></button>
+          <div class="fg"><label id="l-uticker">נכס</label><input type="text" id="u-ticker" oninput="updatePrev('update')"/></div>
+          <div class="fg"><label>Updated Stop Loss</label><input type="text" id="new-sl" placeholder="e.g. 5790" oninput="updatePrev('update')"/></div>
+          <div class="fg"><label>Updated TP</label><input type="text" id="new-tp" placeholder="e.g. 5860" oninput="updatePrev('update')"/></div>
+          <div class="fg"><label>R:R</label><input type="text" id="new-rr" placeholder="auto or manual" oninput="updatePrev('update')"/></div>
+          <div class="fg" id="pct-grp" style="display:none;"><label>% מהפוזיציה</label><input type="text" id="pos-pct" placeholder="e.g. 50%" oninput="updatePrev('update')"/></div>
+          <div class="fg full"><label id="l-note">הערה</label><textarea id="note" placeholder="תאר את שינוי הניהול לצורכי לימוד..." oninput="updatePrev('update')"></textarea></div>
+          <div class="fg full"><label id="l-img3">צירוף תמונה</label>
+            <div class="img-sec"><div class="img-tabs">
+              <button class="img-tab active" onclick="switchImg('update','up',this)">📁 <span class="it-up">העלאה</span></button>
+              <button class="img-tab" onclick="switchImg('update','pa',this)">📋 <span class="it-pa">הדבקה</span></button>
             </div><div class="img-body">
-              <div id="img-upload-update" class="img-upload-area"><input type="file" accept="image/*" onchange="handleImg(event,'update')" /><span class="img-upload-label" id="img-upload-label-update">לחץ לבחירת קובץ</span></div>
-              <div id="img-paste-update" class="img-paste-area" style="display:none;" tabindex="0" onclick="this.focus()" onpaste="handlePasteEvent(event,'update')"><span id="img-paste-label-update">לחץ כאן ואז Ctrl+V להדבקת צילום מסך</span></div>
-              <div id="img-preview-update"></div>
+              <div id="iu-update" class="img-up"><input type="file" accept="image/*" onchange="handleImg(event,'update')"/><span class="img-up-lbl" id="ul-update">לחץ לבחירת קובץ</span></div>
+              <div id="ip-update" class="img-paste" style="display:none;" tabindex="0" onclick="this.focus()" onpaste="handlePaste(event,'update')"><span id="pl-update">לחץ כאן ואז Ctrl+V</span></div>
+              <div id="iv-update"></div>
             </div></div>
           </div>
         </div>
-        <div class="preview-label">תצוגה מקדימה</div>
-        <div class="preview-box" id="update-preview">מלא את הפרטים לצפייה בתצוגה מקדימה...</div>
-        <div class="disclaimer" id="disc3">⚠️ כל הפרסומים הינם חלק מיומן מסחר אישי לצורכי לימוד בלבד. אין לראות בכך ייעוץ השקעות.</div>
-        <button class="send-btn" id="send-update-btn" onclick="sendToTelegram('update')">📤 שלח לטלגרם</button>
+        <div class="prev-lbl" id="pl3">תצוגה מקדימה</div>
+        <div class="prev-box" id="prev-update"></div>
+        <div class="disc" id="disc3"></div>
+        <button class="send-btn" id="send-update" onclick="sendTg('update')">📤 שלח לטלגרם</button>
       </div>
     </div>
 
     <!-- CLOSE -->
     <div class="panel" id="panel-close">
-      <div class="tv-prefill-badge" id="tv-badge-close"><div class="tv-dot"></div><span id="tv-badge-close-text">מולא אוטומטית מ-TradingView</span></div>
       <div class="card">
         <div class="form-grid">
-          <div class="form-group"><label id="lbl-c-ticker">נכס</label><input type="text" id="c-ticker" placeholder="לדוג׳ SPX" oninput="updateClosePreview()" /></div>
-          <div class="form-group"><label id="lbl-c-tf">גרף</label><input type="text" id="c-tf" placeholder="לדוג׳ 5m" oninput="updateClosePreview()" /></div>
-          <div class="form-group"><label id="lbl-c-entry">Entry</label><input type="text" id="c-entry" placeholder="e.g. 5792.5" oninput="updateClosePreview()" /></div>
-          <div class="form-group"><label id="lbl-c-exit">Exit</label><input type="text" id="c-exit" placeholder="e.g. 5835" oninput="updateClosePreview()" /></div>
-          <div class="form-group"><label id="lbl-c-sl">Stop Loss</label><input type="text" id="c-sl" placeholder="e.g. 5778" oninput="updateClosePreview()" /></div>
-          <div class="form-group"><label id="lbl-c-rr">🎯 R:R שהושג</label><input type="text" id="c-rr" class="rr-field" style="font-size:15px;" readonly /></div>
-          <div class="form-group full"><label id="lbl-c-reason">סיבת סגירה</label>
-            <select id="c-reason" onchange="updateClosePreview()">
+          <div class="fg"><label id="l-cticker">נכס</label><input type="text" id="c-ticker" oninput="updatePrev('close')"/></div>
+          <div class="fg"><label id="l-ctf">גרף</label><input type="text" id="c-tf" oninput="updatePrev('close')"/></div>
+          <div class="fg"><label>Entry</label><input type="text" id="c-entry" placeholder="e.g. 5792.5" oninput="updatePrev('close')"/></div>
+          <div class="fg"><label>Exit</label><input type="text" id="c-exit" placeholder="e.g. 5835" oninput="updatePrev('close')"/></div>
+          <div class="fg"><label>Stop Loss</label><input type="text" id="c-sl" placeholder="e.g. 5778" oninput="updatePrev('close')"/></div>
+          <div class="fg"><label>🎯 R:R Achieved</label><input type="text" id="c-rr" class="rrf" style="font-size:15px;" readonly/></div>
+          <div class="fg full"><label id="l-creason">סיבת סגירה</label>
+            <select id="c-reason" onchange="updatePrev('close')">
               <option value="">-- בחר סיבת סגירה --</option>
               <option value="TP">TP</option>
               <option value="SL">SL</option>
@@ -276,502 +284,434 @@
               <option value="Manual Close">Manual Close</option>
             </select>
           </div>
-          <div class="form-group full"><label id="lbl-c-review">סיכום ולקחים</label><textarea id="c-review" placeholder="שתף את הלקחים מהעסקה לצורכי לימוד..." oninput="updateClosePreview()"></textarea></div>
-          <div class="form-group full"><label id="lbl-img4">צירוף תמונה</label>
-            <div class="img-section"><div class="img-tabs">
-              <button class="img-tab active" onclick="switchImgTab('close','upload',this)">📁 <span class="it-upload">העלאה</span></button>
-              <button class="img-tab" onclick="switchImgTab('close','paste',this)">📋 <span class="it-paste">הדבקה</span></button>
+          <div class="fg full"><label id="l-creview">סיכום ולקחים</label><textarea id="c-review" placeholder="שתף את הלקחים מהעסקה לצורכי לימוד..." oninput="updatePrev('close')"></textarea></div>
+          <div class="fg full"><label id="l-img4">צירוף תמונה</label>
+            <div class="img-sec"><div class="img-tabs">
+              <button class="img-tab active" onclick="switchImg('close','up',this)">📁 <span class="it-up">העלאה</span></button>
+              <button class="img-tab" onclick="switchImg('close','pa',this)">📋 <span class="it-pa">הדבקה</span></button>
             </div><div class="img-body">
-              <div id="img-upload-close" class="img-upload-area"><input type="file" accept="image/*" onchange="handleImg(event,'close')" /><span class="img-upload-label" id="img-upload-label-close">לחץ לבחירת קובץ</span></div>
-              <div id="img-paste-close" class="img-paste-area" style="display:none;" tabindex="0" onclick="this.focus()" onpaste="handlePasteEvent(event,'close')"><span id="img-paste-label-close">לחץ כאן ואז Ctrl+V להדבקת צילום מסך</span></div>
-              <div id="img-preview-close"></div>
+              <div id="iu-close" class="img-up"><input type="file" accept="image/*" onchange="handleImg(event,'close')"/><span class="img-up-lbl" id="ul-close">לחץ לבחירת קובץ</span></div>
+              <div id="ip-close" class="img-paste" style="display:none;" tabindex="0" onclick="this.focus()" onpaste="handlePaste(event,'close')"><span id="pl-close">לחץ כאן ואז Ctrl+V</span></div>
+              <div id="iv-close"></div>
             </div></div>
           </div>
         </div>
-        <div class="preview-label">תצוגה מקדימה</div>
-        <div class="preview-box" id="close-preview">מלא את הפרטים לצפייה בתצוגה מקדימה...</div>
-        <div class="disclaimer" id="disc4">⚠️ כל הפרסומים הינם חלק מיומן מסחר אישי לצורכי לימוד בלבד. אין לראות בכך ייעוץ השקעות.</div>
-        <button class="send-btn" id="send-close-btn" onclick="sendToTelegram('close')">📤 שלח לטלגרם</button>
+        <div class="prev-lbl" id="pl4">תצוגה מקדימה</div>
+        <div class="prev-box" id="prev-close"></div>
+        <div class="disc" id="disc4"></div>
+        <button class="send-btn" id="send-close" onclick="sendTg('close')">📤 שלח לטלגרם</button>
       </div>
     </div>
 
     <!-- JOURNAL -->
     <div class="panel" id="panel-journal">
-      <div class="stats-grid" style="grid-template-columns:repeat(2,1fr);margin-bottom:8px;">
-        <div class="stat"><div class="stat-label" id="sl1">עסקאות שבועיות</div><div class="stat-val" id="stat1">0</div></div>
-        <div class="stat"><div class="stat-label">Win Rate</div><div class="stat-val" id="stat-wr" style="color:var(--green);">-</div></div>
+      <div class="stats-grid">
+        <div class="stat"><div class="stat-lbl" id="sl1">עסקאות שבועיות</div><div class="stat-val" id="st1">0</div></div>
+        <div class="stat"><div class="stat-lbl">Win Rate</div><div class="stat-val" id="st-wr" style="color:var(--green);">-</div></div>
       </div>
-      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:12px;">
-        <div class="stat"><div class="stat-label" style="color:#27500A;">מנצחות ✅</div><div class="stat-val" id="stat2" style="color:#27500A;">0</div></div>
-        <div class="stat"><div class="stat-label" style="color:#A32D2D;">מפסידות ❌</div><div class="stat-val" id="stat3" style="color:#A32D2D;">0</div></div>
-        <div class="stat"><div class="stat-label">Avg R:R</div><div class="stat-val" id="stat-rr" style="color:var(--green);">-</div></div>
-        <div class="stat"><div class="stat-label">עדכונים</div><div class="stat-val" id="stat4">0</div></div>
+      <div class="stats-grid2">
+        <div class="stat"><div class="stat-lbl" style="color:#27500A;">מנצחות ✅</div><div class="stat-val" id="st2" style="color:#27500A;">0</div></div>
+        <div class="stat"><div class="stat-lbl" style="color:#A32D2D;">מפסידות ❌</div><div class="stat-val" id="st3" style="color:#A32D2D;">0</div></div>
+        <div class="stat"><div class="stat-lbl">Avg R:R</div><div class="stat-val" id="st-rr" style="color:var(--green);">-</div></div>
+        <div class="stat"><div class="stat-lbl" id="sl4">עדכונים</div><div class="stat-val" id="st4">0</div></div>
       </div>
       <div class="card" style="margin-bottom:10px;">
-        <div style="font-size:12px;font-weight:500;color:var(--muted);margin-bottom:8px;" id="weekly-note">סיכום שבועי</div>
-        <textarea id="weekly-note-text" placeholder="הוסף הערות שבועיות..." style="width:100%;min-height:60px;padding:8px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13px;font-family:inherit;resize:vertical;" oninput="saveWeeklyNote()"></textarea>
+        <div style="font-size:12px;font-weight:500;color:var(--muted);margin-bottom:6px;" id="wn-lbl">הערות שבועיות</div>
+        <textarea id="weekly-note" placeholder="הוסף הערות שבועיות..." style="width:100%;min-height:60px;padding:8px;border:1px solid var(--border);border-radius:var(--rs);font-size:13px;font-family:inherit;resize:vertical;" oninput="saveWeeklyNote()"></textarea>
         <div style="margin-top:8px;">
-          <div class="img-section"><div class="img-tabs">
-            <button class="img-tab active" onclick="switchImgTab('weekly','upload',this)">📁 <span class="it-upload">העלאה</span></button>
-            <button class="img-tab" onclick="switchImgTab('weekly','paste',this)">📋 <span class="it-paste">הדבקה</span></button>
+          <div class="img-sec"><div class="img-tabs">
+            <button class="img-tab active" onclick="switchImg('weekly','up',this)">📁 <span class="it-up">העלאה</span></button>
+            <button class="img-tab" onclick="switchImg('weekly','pa',this)">📋 <span class="it-pa">הדבקה</span></button>
           </div><div class="img-body">
-            <div id="img-upload-weekly" class="img-upload-area"><input type="file" accept="image/*" onchange="handleImg(event,'weekly')" /><span class="img-upload-label" id="img-upload-label-weekly">צרף תמונה שבועית</span></div>
-            <div id="img-paste-weekly" class="img-paste-area" style="display:none;" tabindex="0" onclick="this.focus()" onpaste="handlePasteEvent(event,'weekly')"><span id="img-paste-label-weekly">לחץ כאן ואז Ctrl+V</span></div>
-            <div id="img-preview-weekly"></div>
+            <div id="iu-weekly" class="img-up"><input type="file" accept="image/*" onchange="handleImg(event,'weekly')"/><span class="img-up-lbl" id="ul-weekly">צרף תמונה שבועית</span></div>
+            <div id="ip-weekly" class="img-paste" style="display:none;" tabindex="0" onclick="this.focus()" onpaste="handlePaste(event,'weekly')"><span id="pl-weekly">לחץ כאן ואז Ctrl+V</span></div>
+            <div id="iv-weekly"></div>
           </div></div>
         </div>
       </div>
-      <div class="card" style="margin-bottom:10px;">
-        <div style="display:flex;gap:8px;margin-bottom:10px;">
-          <button onclick="sendWeeklyStats()" style="flex:1;padding:8px;background:#1D9E75;color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">📊 שלח סטטיסטיקה שבועית</button>
-          <button onclick="sendMonthlyStats()" style="flex:1;padding:8px;background:#185FA5;color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">📈 שלח סטטיסטיקה חודשית</button>
-        </div>
-        <button onclick="clearJournal()" style="width:100%;padding:6px;background:transparent;color:#A32D2D;border:1px solid #A32D2D;border-radius:8px;font-size:11px;cursor:pointer;">🗑 נקה יומן</button>
+      <div class="jnl-btns">
+        <button class="btn-week" onclick="sendStats('weekly')" id="btn-week">📊 שלח סטטיסטיקה שבועית</button>
+        <button class="btn-month" onclick="sendStats('monthly')" id="btn-month">📈 שלח סטטיסטיקה חודשית</button>
+        <button class="btn-clear" onclick="clearJournal()" id="btn-clear">🗑</button>
       </div>
-      <div class="card"><div id="journal-list"><div class="empty-state">עדיין אין רשומות ביומן</div></div></div>
+      <div class="card"><div id="jlist"><div class="empty" id="empty-j">עדיין אין רשומות ביומן</div></div></div>
     </div>
 
   </div>
 </div>
-</div>
+
 <script>
-const WEBHOOK_URL = 'https://trade-journal-inky-tau.vercel.app/api/webhook';
-let lang='he', bias=null, tradeBias=null, utype='sl', journal=[], pendingTVData=null, lastTVTs=null;
-let images={idea:null,trade:null,update:null,close:null,weekly:null};
-let rawMessages={idea:'',trade:'',update:'',close:''};
+var WURL='/api/webhook';
+var PWD='DJR2024';
+var lang='he', bias=null, tradeBias=null, utype='sl', journal=[];
+var imgs={idea:null,trade:null,update:null,close:null,weekly:null};
+var rawMsg={idea:'',trade:'',update:'',close:''};
 
-function escMD(s){return String(s).replace(/([_*\[\]()~`>#+\-=|{}.!\\])/g,'\\$1');}
-function bold(s){return '*'+escMD(s)+'*';}
-const DISC={
+var DISC={
   he:'⚠️ תוכן זה הינו חלק מיומן מסחר אישי לצורכי לימוד בלבד. אין לראות בכך ייעוץ השקעות. כל החלטה היא באחריות הקורא בלבד.',
-  en:"⚠️ This content is part of a personal trading journal for educational purposes only. This is not financial advice. All decisions are the sole responsibility of the reader."
+  en:'⚠️ This content is part of a personal trading journal for educational purposes only. This is not financial advice. All decisions are the sole responsibility of the reader.'
 };
-function colorize(text){ return text; }
-function colorizeHTML(text){
-  var t=text;
-  t=t.replace(/\*(.*?)\*/g,'<strong>$1</strong>');
-  t=t.replace(/\\([_\[\]().!|#+\-={}~`>])/g,'$1');
-  t=t.replace(/(Stop Loss|Updated Stop Loss):([^<\n]+)/g,'$1:<span style="color:#E24B4A;font-weight:700;">$2</span>');
-  t=t.replace(/TP:([^<\n]+)/g,'TP:<span style="color:#1D9E75;font-weight:700;">$1</span>');
-  t=t.replace(/\u{1F4CA} <strong>([^<]+)<\/strong>/gu,'📊 <span style="color:#EF9F27;font-weight:700;">$1</span>');
-  t=t.replace(/\n/g,'<br>');
-  return t;
-}
-const UTYPES={
+var UTYPES={
   he:{sl:'Move Stop Loss',partial:'Partial Close',add:'Add to Position'},
-  en:{sl:'Move risk level',partial:'Partial close',add:'Add to position'}
+  en:{sl:'Move Stop Loss',partial:'Partial Close',add:'Add to Position'}
 };
 
-function saveTgConfig(){
-  const token=document.getElementById('tg-token').value;
-  const chatId=document.getElementById('tg-chatid').value;
-  localStorage.setItem('tg_token',token);
-  localStorage.setItem('tg_chatid',chatId);
-  const btn=document.querySelector('[onclick="saveTgConfig()"]');
-  fetch('/api/webhook?type=settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token,chatId})})
-    .then(r=>r.json()).then(d=>{
-      if(d.ok&&btn){btn.textContent='✅';setTimeout(()=>{btn.textContent='☁️';},2000);}
-    }).catch(()=>{});
+// ── AUTH ──────────────────────────────────────────────────────
+function checkPwd(){
+  var input=document.getElementById('pwd').value;
+  if(input===PWD){
+    localStorage.setItem('djr_auth','1');
+    document.getElementById('lock').style.display='none';
+    document.getElementById('app').style.display='flex';
+    onLogin();
+  } else {
+    document.getElementById('pwd-err').style.display='block';
+    document.getElementById('pwd').value='';
+  }
 }
-function loadTgConfig(){
-  const t=localStorage.getItem('tg_token'),c=localStorage.getItem('tg_chatid');
+function initAuth(){
+  if(localStorage.getItem('djr_auth')==='1'){
+    document.getElementById('lock').style.display='none';
+    document.getElementById('app').style.display='flex';
+    onLogin();
+  }
+}
+function onLogin(){
+  loadLocal();
+  updateAllPreviews();
+  setTimeout(function(){
+    syncSettings();
+    syncJournal();
+    syncWeekly();
+  },500);
+  setInterval(pollTV,10000);
+  pollTV();
+}
+
+// ── TELEGRAM CONFIG ───────────────────────────────────────────
+function saveTg(){
+  localStorage.setItem('tg_token',document.getElementById('tg-token').value);
+  localStorage.setItem('tg_chatid',document.getElementById('tg-chatid').value);
+}
+function loadLocal(){
+  var t=localStorage.getItem('tg_token'),c=localStorage.getItem('tg_chatid');
   if(t)document.getElementById('tg-token').value=t;
   if(c)document.getElementById('tg-chatid').value=c;
+  var j=localStorage.getItem('djr_journal');
+  if(j){try{journal=JSON.parse(j);}catch(e){}}
+  var w=localStorage.getItem('weekly_note');
+  if(w&&document.getElementById('weekly-note'))document.getElementById('weekly-note').value=w;
 }
-async function syncSettingsFromCloud(){
+function getTg(){return{token:document.getElementById('tg-token').value.trim(),chatId:document.getElementById('tg-chatid').value.trim()};}
+
+function saveTgCloud(){
+  var cfg=getTg();
+  var btn=document.getElementById('cloud-btn');
+  fetch(WURL+'?type=settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(cfg)})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.ok){btn.textContent='✅';setTimeout(function(){btn.textContent='☁️';},2000);}
+    }).catch(function(){});
+}
+async function syncSettings(){
   try{
-    const r=await fetch('/api/webhook?type=settings');
-    const j=await r.json();
+    var r=await fetch(WURL+'?type=settings');
+    var j=await r.json();
     if(j.data){
-      const d=typeof j.data==='string'?JSON.parse(j.data):j.data;
+      var d=typeof j.data==='string'?JSON.parse(j.data):j.data;
       if(d.token){document.getElementById('tg-token').value=d.token;localStorage.setItem('tg_token',d.token);}
       if(d.chatId){document.getElementById('tg-chatid').value=d.chatId;localStorage.setItem('tg_chatid',d.chatId);}
     }
   }catch(e){}
 }
-function getTg(){return{token:document.getElementById('tg-token').value.trim(),chatId:document.getElementById('tg-chatid').value.trim()};}
-
-async function testTelegram(){
-  const{token,chatId}=getTg();const st=document.getElementById('tg-status');
-  if(!token||!chatId){st.className='tg-status err';st.textContent=lang==='he'?'נא למלא Token ו-Chat ID':'Please fill Token and Chat ID';return;}
-  document.getElementById('test-btn-text').textContent='...';
+async function syncJournal(){
   try{
-    const r=await fetch(`https://api.telegram.org/bot${token}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:chatId,text:lang==='he'?'✅ יומן המסחר מחובר בהצלחה!':'✅ Trading journal connected!'})});
-    const d=await r.json();
-    st.className=d.ok?'tg-status ok':'tg-status err';
-    st.textContent=d.ok?(lang==='he'?'✅ חיבור תקין! הודעת בדיקה נשלחה':'✅ Connected! Test message sent'):('Error: '+(d.description||'Unknown'));
-  }catch(e){st.className='tg-status err';st.textContent=lang==='he'?'שגיאת רשת':'Network error';}
-  document.getElementById('test-btn-text').textContent=lang==='he'?'בדוק':'Test';
+    var r=await fetch(WURL+'?type=journal');
+    var j=await r.json();
+    if(j.data){
+      var d=typeof j.data==='string'?JSON.parse(j.data):j.data;
+      if(Array.isArray(d)&&d.length>0){journal=d;localStorage.setItem('djr_journal',JSON.stringify(d));renderJournal();}
+    }
+  }catch(e){}
+}
+async function syncWeekly(){
+  try{
+    var r=await fetch(WURL+'?type=weekly');
+    var j=await r.json();
+    if(j.data){
+      var d=typeof j.data==='string'?JSON.parse(j.data):j.data;
+      if(d&&d.note){localStorage.setItem('weekly_note',d.note);var el=document.getElementById('weekly-note');if(el)el.value=d.note;}
+    }
+  }catch(e){}
 }
 
-async function sendToTelegram(type){
-  const{token,chatId}=getTg();const btn=document.getElementById(`send-${type}-btn`);const st=document.getElementById('tg-status');
-  if(!token||!chatId){st.className='tg-status err';st.textContent=lang==='he'?'⚠️ הגדר Token ו-Chat ID תחילה':'⚠️ Set Token and Chat ID first';return;}
-  const prev=btn.textContent;btn.disabled=true;btn.innerHTML=`<span class="spinner"></span>${lang==='he'?'שולח...':'Sending...'}`;
-  const text=rawMessages[type]||'';const img=images[type];
+async function testTg(){
+  var cfg=getTg();var st=document.getElementById('tg-st');
+  if(!cfg.token||!cfg.chatId){st.className='tg-status err';st.textContent=lang==='he'?'נא למלא Token ו-Chat ID':'Please fill Token and Chat ID';return;}
+  document.getElementById('tst-txt').textContent='...';
   try{
-    let res,data;
-    if(img){const fd=new FormData();fd.append('chat_id',chatId);fd.append('caption',text);fd.append('parse_mode','MarkdownV2');const blob=await fetch(img).then(r=>r.blob());fd.append('photo',blob,'chart.jpg');res=await fetch(`https://api.telegram.org/bot${token}/sendPhoto`,{method:'POST',body:fd});}
-    else{res=await fetch(`https://api.telegram.org/bot${token}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:chatId,text})});}
-    data=await res.json();if(!data.ok)throw new Error(data.description);
-    addToJournal(type,text,img);
+    var r=await fetch('https://api.telegram.org/bot'+cfg.token+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:cfg.chatId,text:lang==='he'?'✅ יומן המסחר מחובר!':'✅ Trading journal connected!'})});
+    var d=await r.json();
+    st.className=d.ok?'tg-status ok':'tg-status err';
+    st.textContent=d.ok?(lang==='he'?'✅ חיבור תקין!':'✅ Connected!'):('Error: '+(d.description||'Unknown'));
+  }catch(e){st.className='tg-status err';st.textContent='Network error';}
+  document.getElementById('tst-txt').textContent=lang==='he'?'בדוק':'Test';
+}
+
+// ── SEND TO TELEGRAM ──────────────────────────────────────────
+async function sendTg(type){
+  var cfg=getTg();var btn=document.getElementById('send-'+type);var st=document.getElementById('tg-st');
+  if(!cfg.token||!cfg.chatId){st.className='tg-status err';st.textContent=lang==='he'?'⚠️ הגדר Token ו-Chat ID':'⚠️ Set Token and Chat ID';return;}
+  var prev=btn.textContent;btn.disabled=true;btn.innerHTML='<span class="spinner"></span>'+(lang==='he'?'שולח...':'Sending...');
+  var text=rawMsg[type]||'';var img=imgs[type];
+  try{
+    var res,data;
+    if(img){
+      var fd=new FormData();fd.append('chat_id',cfg.chatId);fd.append('caption',text);fd.append('parse_mode','MarkdownV2');
+      var blob=await fetch(img).then(function(r){return r.blob();});fd.append('photo',blob,'chart.jpg');
+      res=await fetch('https://api.telegram.org/bot'+cfg.token+'/sendPhoto',{method:'POST',body:fd});
+    } else {
+      res=await fetch('https://api.telegram.org/bot'+cfg.token+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:cfg.chatId,text:text,parse_mode:'MarkdownV2'})});
+    }
+    data=await res.json();
+    if(!data.ok)throw new Error(data.description);
+    addJournal(type,text,img);
     btn.innerHTML=lang==='he'?'✅ נשלח!':'✅ Sent!';btn.style.background='#27500A';
-    st.className='tg-status ok';st.textContent=lang==='he'?'✅ נשלח בהצלחה!':'✅ Sent successfully!';
-    setTimeout(()=>{btn.textContent=prev;btn.style.background='';btn.disabled=false;},2500);
+    st.className='tg-status ok';st.textContent=lang==='he'?'✅ נשלח בהצלחה!':'✅ Sent!';
+    setTimeout(function(){btn.textContent=prev;btn.style.background='';btn.disabled=false;},2500);
   }catch(e){btn.textContent=prev;btn.disabled=false;st.className='tg-status err';st.textContent=(lang==='he'?'שגיאה: ':'Error: ')+e.message;}
 }
 
-function switchImgTab(type,mode,btn){
-  const up=document.getElementById(`img-upload-${type}`),pa=document.getElementById(`img-paste-${type}`);
-  btn.closest('.img-tabs').querySelectorAll('.img-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
-  if(mode==='upload'){up.style.display='block';pa.style.display='none';}else{up.style.display='none';pa.style.display='flex';pa.focus();}
+// ── IMAGES ────────────────────────────────────────────────────
+function switchImg(type,mode,btn){
+  var up=document.getElementById('iu-'+type),pa=document.getElementById('ip-'+type);
+  btn.closest('.img-tabs').querySelectorAll('.img-tab').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  if(mode==='up'){up.style.display='block';pa.style.display='none';}
+  else{up.style.display='none';pa.style.display='flex';pa.focus();}
 }
-function handleImg(e,type){const f=e.target.files[0];if(f)readImgFile(f,type);}
-function handlePasteEvent(e,type){const items=e.clipboardData?.items;if(!items)return;for(const item of items){if(item.type.startsWith('image/')){e.preventDefault();readImgFile(item.getAsFile(),type);return;}}}
-function readImgFile(file,type){
-  const r=new FileReader();
-  r.onload=ev=>{
-    images[type]=ev.target.result;
-    const ul=document.getElementById(`img-upload-label-${type}`);if(ul)ul.textContent='✅ '+(file.name||'תמונה');
-    const pl=document.getElementById(`img-paste-label-${type}`);if(pl)pl.textContent=lang==='he'?'✅ תמונה מוכנה':'✅ Image ready';
-    const pa=document.getElementById(`img-paste-${type}`);if(pa)pa.classList.add('ready');
-    const pv=document.getElementById(`img-preview-${type}`);if(pv)pv.innerHTML=`<div class="img-preview-wrap"><img src="${ev.target.result}"/><button class="img-remove" onclick="removeImg('${type}')">✕</button></div>`;
+function handleImg(e,type){var f=e.target.files[0];if(f)readImg(f,type);}
+function handlePaste(e,type){
+  var items=e.clipboardData?e.clipboardData.items:[];
+  for(var i=0;i<items.length;i++){if(items[i].type.startsWith('image/')){e.preventDefault();readImg(items[i].getAsFile(),type);return;}}
+}
+function readImg(file,type){
+  var r=new FileReader();
+  r.onload=function(ev){
+    imgs[type]=ev.target.result;
+    var ul=document.getElementById('ul-'+type);if(ul)ul.textContent='✅ '+(file.name||'image');
+    var pl=document.getElementById('pl-'+type);if(pl)pl.textContent='✅ '+(lang==='he'?'תמונה מוכנה':'Image ready');
+    var pa=document.getElementById('ip-'+type);if(pa)pa.classList.add('ready');
+    var iv=document.getElementById('iv-'+type);
+    if(iv)iv.innerHTML='<div class="img-prev"><img src="'+ev.target.result+'"/><button class="img-rm" onclick="removeImg(\''+type+'\')">✕</button></div>';
   };r.readAsDataURL(file);
 }
 function removeImg(type){
-  images[type]=null;
-  const ul=document.getElementById(`img-upload-label-${type}`);if(ul)ul.textContent=lang==='he'?'לחץ לבחירת קובץ':'Click to select file';
-  const pl=document.getElementById(`img-paste-label-${type}`);if(pl)pl.textContent=lang==='he'?'לחץ כאן ואז Ctrl+V':'Click here then Ctrl+V';
-  const pa=document.getElementById(`img-paste-${type}`);if(pa)pa.classList.remove('ready');
-  const pv=document.getElementById(`img-preview-${type}`);if(pv)pv.innerHTML='';
+  imgs[type]=null;
+  var ul=document.getElementById('ul-'+type);if(ul)ul.textContent=lang==='he'?'לחץ לבחירת קובץ':'Click to select file';
+  var pl=document.getElementById('pl-'+type);if(pl)pl.textContent=lang==='he'?'לחץ כאן ואז Ctrl+V':'Click here then Ctrl+V';
+  var pa=document.getElementById('ip-'+type);if(pa)pa.classList.remove('ready');
+  var iv=document.getElementById('iv-'+type);if(iv)iv.innerHTML='';
 }
 
-function calcRR(entry,sl,tp){const e=parseFloat(entry),s=parseFloat(sl),t=parseFloat(tp);if(isNaN(e)||isNaN(s)||isNaN(t)||e===s)return'';return'1:'+(Math.abs(t-e)/Math.abs(e-s)).toFixed(2);}
+// ── MARKDOWN HELPERS ──────────────────────────────────────────
+function esc(s){
+  var c=String(s);
+  var sp=['_','*','[',']','(',')','.','+','-','=','{','}','!','|','~','`','#','>'];
+  sp.forEach(function(ch){c=c.split(ch).join('\\'+ch);});
+  return c;
+}
+function bold(s){return '*'+esc(s)+'*';}
+var SEP='━━━━━━━━━━━━━━━';
 
-function buildIdeaMsg(){
-  const isHe=lang==='he',ticker=v('ticker'),tf=v('tf'),z=v('zone'),i=v('inv'),o=v('obj'),rr=v('rr'),c=v('conf');
-  let msg=isHe?'📋 רעיון מקדים | יומן מסחר DJR\n':'📋 Pre-Trade Idea | DJR Trading Journal\n';
-  msg+='━━━━━━━━━━━━━━━\n';
-  if(ticker||tf)msg+=`📊 ${ticker}${tf?' | ⏱ '+tf:''}\n`;
-  if(bias)msg+=(bias==='bull'?(isHe?'כיוון מצופה: 📈 עולה':'Expected Bias: 📈 Bullish'):(isHe?'כיוון מצופה: 📉 יורד':'Expected Bias: 📉 Bearish'))+'\n';
-  if(z)msg+=('Entry')+`: ${z}\n`;
-  if(i)msg+=('Stop Loss')+`: ${i}\n`;
-  if(o)msg+=('TP')+`: ${o}\n`;
-  if(rr)msg+=(isHe?'סיכון/סיכוי':'Risk/Reward')+`: ${rr}\n`;
-  const rel=v('related');
-  if(rel)msg+=(isHe?'נכסים אופציונאליים בהתאמה':'Optional Assets')+': '+rel+'\n';
-  if(c)msg+='\n'+(isHe?'ניתוח':'Analysis')+`:\n${c}\n`;
-  return colorize(msg+'━━━━━━━━━━━━━━━\n'+DISC[lang]);
+// ── MESSAGE BUILDERS ──────────────────────────────────────────
+function buildIdea(){
+  var isHe=lang==='he';
+  var ticker=gv('ticker'),tf=gv('tf'),z=gv('zone'),sl=gv('inv'),tp=gv('obj'),rr=gv('rr'),c=gv('conf'),rel=gv('related');
+  var lines=[];
+  lines.push(bold((isHe?'📋 רעיון מקדים':'📋 Pre-Trade Idea')+' | יומן מסחר DJR'));
+  lines.push(SEP);
+  if(ticker||tf)lines.push('📊 '+bold(ticker)+(tf?' | ⏱ '+esc(tf):''));
+  if(bias)lines.push(bias==='bull'?(isHe?'כיוון מצופה: 📈 עולה':'Expected Bias: 📈 Bullish'):(isHe?'כיוון מצופה: 📉 יורד':'Expected Bias: 📉 Bearish'));
+  if(z)lines.push('Entry: '+bold(z));
+  if(sl)lines.push('Stop Loss: '+bold(sl));
+  if(tp)lines.push('TP: '+bold(tp));
+  if(rr)lines.push((isHe?'סיכון/סיכוי':'Risk/Reward')+': '+bold(rr));
+  if(rel)lines.push((isHe?'נכסים אופציונאליים בהתאמה':'Optional Assets')+': '+esc(rel));
+  if(c)lines.push('','('+(isHe?'ניתוח':'Analysis')+')',esc(c));
+  lines.push(SEP);lines.push(esc(DISC[lang]));
+  return lines.join('\n');
 }
-function buildTradeMsg(){
-  const isHe=lang==='he',ticker=v('t-ticker'),tf=v('t-tf'),ep=v('ep'),rl=v('rl'),ob=v('ob'),rr=v('t-rr'),rs=v('reason');
-  let msg=isHe?'📌 תיעוד עסקה | יומן מסחר DJR\n':'📌 Documented Trade | DJR Trading Journal\n';
-  msg+='━━━━━━━━━━━━━━━\n';
-  if(ticker||tf)msg+=`📊 ${ticker}${tf?' | ⏱ '+tf:''}\n`;
-  if(tradeBias)msg+=(tradeBias==='bull'?(isHe?'כיוון: 📈 עולה':'Direction: 📈 Long'):(isHe?'כיוון: 📉 יורד':'Direction: 📉 Short'))+'\n';
-  if(ep)msg+=('Entry')+`: ${ep}\n`;
-  if(rl)msg+=('Stop Loss')+`: ${rl}\n`;
-  if(ob)msg+=('TP')+`: ${ob}\n`;
-  if(rr)msg+=(isHe?'סיכון/סיכוי':'Risk/Reward')+`: ${rr}\n`;
-  if(rs)msg+='\n'+(isHe?'הערות':'Notes')+`:\n${rs}\n`;
-  return colorize(msg+'━━━━━━━━━━━━━━━\n'+DISC[lang]);
+function buildTrade(){
+  var isHe=lang==='he';
+  var ticker=gv('t-ticker'),tf=gv('t-tf'),ep=gv('ep'),rl=gv('rl'),ob=gv('ob'),rr=gv('t-rr'),rs=gv('reason');
+  var lines=[];
+  lines.push(bold((isHe?'📌 תיעוד עסקה':'📌 Documented Trade')+' | יומן מסחר DJR'));
+  lines.push(SEP);
+  if(ticker||tf)lines.push('📊 '+bold(ticker)+(tf?' | ⏱ '+esc(tf):''));
+  if(tradeBias)lines.push(tradeBias==='bull'?(isHe?'כיוון: 📈 עולה':'Direction: 📈 Long'):(isHe?'כיוון: 📉 יורד':'Direction: 📉 Short'));
+  if(ep)lines.push('Entry: '+bold(ep));
+  if(rl)lines.push('Stop Loss: '+bold(rl));
+  if(ob)lines.push('TP: '+bold(ob));
+  if(rr)lines.push((isHe?'סיכון/סיכוי':'Risk/Reward')+': '+bold(rr));
+  if(rs)lines.push('',(isHe?'הערות':'Notes')+':',esc(rs));
+  lines.push(SEP);lines.push(esc(DISC[lang]));
+  return lines.join('\n');
 }
-function buildUpdateMsg(){
-  const isHe=lang==='he',utLabel=UTYPES[lang][utype],ticker=v('u-ticker'),nl=v('new-level'),nrr=v('new-rr'),note=v('note');
-  let msg=isHe?'🔄 ניהול עסקה | יומן מסחר DJR\n':'🔄 Management Update | DJR Trading Journal\n';
-  msg+=`${utLabel}\n━━━━━━━━━━━━━━━\n`;
-  if(ticker)msg+=`📊 ${ticker}\n`;
-  if(nl)msg+=('Updated Stop Loss')+`: ${nl}\n`;
-  const ntp=v('new-tp');
-  if(ntp)msg+=('Updated TP')+`: ${ntp}\n`;
-  if(nrr)msg+='R:R: '+nrr+'\n';
-  
-  const pct=v('pos-pct');
-  if(pct)msg+='% מהפוזיציה: '+pct+'\n';
-  if(note)msg+='\n'+(isHe?'הערה':'Note')+`:\n${note}\n`;
-  return colorize(msg+'━━━━━━━━━━━━━━━\n'+DISC[lang]);
+function buildUpdate(){
+  var isHe=lang==='he';
+  var utLabel=UTYPES[lang][utype]||utype;
+  var ticker=gv('u-ticker'),nl=gv('new-sl'),ntp=gv('new-tp'),nrr=gv('new-rr'),note=gv('note'),pct=gv('pos-pct');
+  var lines=[];
+  lines.push(bold((isHe?'🔄 ניהול עסקה':'🔄 Trade Management')+' | יומן מסחר DJR'));
+  lines.push(esc(utLabel));lines.push(SEP);
+  if(ticker)lines.push('📊 '+bold(ticker));
+  if(nl)lines.push('Updated Stop Loss: '+bold(nl));
+  if(ntp)lines.push('Updated TP: '+bold(ntp));
+  if(nrr)lines.push('R:R: '+bold(nrr));
+  if(pct)lines.push('% Position: '+bold(pct));
+  if(note)lines.push('',(isHe?'הערה':'Note')+':',esc(note));
+  lines.push(SEP);lines.push(esc(DISC[lang]));
+  return lines.join('\n');
 }
-function buildCloseMsg(){
-  const isHe=lang==='he',ticker=v('c-ticker'),tf=v('c-tf'),entry=v('c-entry'),exit=v('c-exit'),sl=v('c-sl'),rr=v('c-rr'),review=v('c-review');
-  const isProfit=parseFloat(exit)>parseFloat(entry);
-  let msg=isHe?`${isProfit?'✅':'❌'} סגירת עסקה | יומן מסחר DJR\n`:`${isProfit?'✅':'❌'} Trade Closed | DJR Trading Journal\n`;
-  msg+='━━━━━━━━━━━━━━━\n';
-  if(ticker||tf)msg+=`📊 ${ticker}${tf?' | ⏱ '+tf:''}\n`;
-  if(entry)msg+=('Entry')+`: ${entry}\n`;
-  if(exit)msg+=('Exit')+`: ${exit}\n`;
-  if(sl)msg+=('Stop Loss')+`: ${sl}\n`;
-  if(rr)msg+='🎯 R:R Achieved: '+rr+'\n';
-  const reason=v('c-reason');
-  if(reason)msg+=(isHe?'סיבת סגירה':'Close Reason')+': '+reason+'\n';
-  if(review)msg+='\n'+(isHe?'סיכום ולקחים':'Review & Lessons')+`:\n${review}\n`;
-  return colorize(msg+'━━━━━━━━━━━━━━━\n'+DISC[lang]);
-}
-
-function v(id){const el=document.getElementById(id);return el?el.value:'';}
-function setVal(id,val){const el=document.getElementById(id);if(el)el.value=val;}
-
-function syncFromIdea(){
-  const ticker=v('ticker'),tf=v('tf'),sl=v('inv'),tp=v('obj'),entry=v('zone').split('-')[0];
-  // Trade tab
-  if(ticker)setVal('t-ticker',ticker);
-  if(tf)setVal('t-tf',tf);
-  if(entry)setVal('ep',entry);
-  if(sl)setVal('rl',sl);
-  if(tp)setVal('ob',tp);
-  // Update tab
-  if(ticker)setVal('u-ticker',ticker);
-  if(sl)setVal('new-level',sl);
-  if(tp)setVal('new-tp',tp);
-  // Close tab
-  if(ticker)setVal('c-ticker',ticker);
-  if(tf)setVal('c-tf',tf);
-  if(entry)setVal('c-entry',entry);
-  if(sl)setVal('c-sl',sl);
-  // Recalc
-  updateTradePreview();updateUpdatePreview();updateClosePreview();
-}
-function updateIdeaPreview(){
-  setVal('rr',calcRR(v('zone').split('-')[0],v('inv'),v('obj')));
-  syncFromIdea();
-  const raw=buildIdeaMsg();
-  rawMessages.idea=raw;
-  document.getElementById('idea-preview').innerHTML=colorizeHTML(raw);
-}
-function updateTradePreview(){
-  setVal('t-rr',calcRR(v('ep'),v('rl'),v('ob')));
-  const raw=buildTradeMsg();
-  rawMessages.trade=raw;
-  document.getElementById('trade-preview').innerHTML=colorizeHTML(raw);
-}
-function updateUpdatePreview(){
-  const raw=buildUpdateMsg();
-  rawMessages.update=raw;
-  document.getElementById('update-preview').innerHTML=colorizeHTML(raw);
-}
-function updateClosePreview(){
-  setVal('c-rr',calcRR(v('c-entry'),v('c-sl'),v('c-exit')));
-  const raw=buildCloseMsg();
-  rawMessages.close=raw;
-  document.getElementById('close-preview').innerHTML=colorizeHTML(raw);
+function buildClose(){
+  var isHe=lang==='he';
+  var ticker=gv('c-ticker'),tf=gv('c-tf'),entry=gv('c-entry'),exit=gv('c-exit'),sl=gv('c-sl'),rr=gv('c-rr'),review=gv('c-review'),reason=gv('c-reason');
+  var isProfit=parseFloat(exit)>parseFloat(entry);
+  var lines=[];
+  lines.push(bold((isProfit?'✅ ':'❌ ')+(isHe?'סגירת עסקה':'Trade Closed')+' | יומן מסחר DJR'));
+  lines.push(SEP);
+  if(ticker||tf)lines.push('📊 '+bold(ticker)+(tf?' | ⏱ '+esc(tf):''));
+  if(entry)lines.push('Entry: '+bold(entry));
+  if(exit)lines.push('Exit: '+bold(exit));
+  if(sl)lines.push('Stop Loss: '+bold(sl));
+  if(rr)lines.push('🎯 R:R Achieved: '+bold(rr));
+  if(reason)lines.push((isHe?'סיבת סגירה':'Close Reason')+': '+esc(reason));
+  if(review)lines.push('',(isHe?'סיכום ולקחים':'Review & Lessons')+':',esc(review));
+  lines.push(SEP);lines.push(esc(DISC[lang]));
+  return lines.join('\n');
 }
 
-function setBias(b){bias=b;document.getElementById('bull-btn').classList.toggle('active',b==='bull');document.getElementById('bear-btn').classList.toggle('active',b==='bear');updateIdeaPreview();}
-function setTradeBias(b){tradeBias=b;document.getElementById('bull-btn-t').classList.toggle('active',b==='bull');document.getElementById('bear-btn-t').classList.toggle('active',b==='bear');updateTradePreview();}
-function setUtype(el,t){utype=t;document.querySelectorAll('.utype').forEach(u=>u.classList.remove('active'));el.classList.add('active');
-  var pctGroup=document.getElementById('pct-group');
-  if(pctGroup)pctGroup.style.display=(t==='partial'||t==='add')?'flex':'none';
-  updateUpdatePreview();}
+// ── PREVIEW ───────────────────────────────────────────────────
+function renderPreview(type,msg){
+  var box=document.getElementById('prev-'+type);
+  if(!box)return;
+  var html=msg
+    .replace(/\*(.*?)\*/g,'<strong>$1</strong>')
+    .replace(/\\([_\[\]()+\-={}!|.~`#>])/g,'$1')
+    .replace(/(Stop Loss):([^\n<]+)/g,'$1:<span style="color:#E24B4A;font-weight:700;">$2</span>')
+    .replace(/\bTP:([^\n<]+)/g,'TP:<span style="color:#1D9E75;font-weight:700;">$1</span>')
+    .replace(/\n/g,'<br>');
+  box.innerHTML=html;
+}
 
+// ── UPDATE PREVIEWS ───────────────────────────────────────────
+function calcRR(e,s,t){
+  var ev=parseFloat(e),sv=parseFloat(s),tv=parseFloat(t);
+  if(isNaN(ev)||isNaN(sv)||isNaN(tv)||ev===sv)return'';
+  return'1:'+(Math.abs(tv-ev)/Math.abs(ev-sv)).toFixed(2);
+}
+function syncAndUpdate(from){
+  if(from==='idea'){
+    var ticker=gv('ticker'),tf=gv('tf'),sl=gv('inv'),tp=gv('obj'),entry=gv('zone').split('-')[0];
+    sv('t-ticker',ticker);sv('t-tf',tf);sv('ep',entry);sv('rl',sl);sv('ob',tp);
+    sv('u-ticker',ticker);sv('new-sl',sl);sv('new-tp',tp);
+    sv('c-ticker',ticker);sv('c-tf',tf);sv('c-entry',entry);sv('c-sl',sl);
+    updatePrev('trade');updatePrev('update');updatePrev('close');
+  }
+  updatePrev('idea');
+}
+function updatePrev(type){
+  var msg='';
+  if(type==='idea'){sv('rr',calcRR(gv('zone').split('-')[0],gv('inv'),gv('obj')));msg=buildIdea();}
+  else if(type==='trade'){sv('t-rr',calcRR(gv('ep'),gv('rl'),gv('ob')));msg=buildTrade();}
+  else if(type==='update'){msg=buildUpdate();}
+  else if(type==='close'){sv('c-rr',calcRR(gv('c-entry'),gv('c-sl'),gv('c-exit')));msg=buildClose();}
+  rawMsg[type]=msg;
+  renderPreview(type,msg);
+}
+function updateAllPreviews(){
+  ['idea','trade','update','close'].forEach(function(t){updatePrev(t);});
+  setDiscs();
+}
+
+// ── BIAS / UTYPE ──────────────────────────────────────────────
+function setBias(b){
+  bias=b;
+  document.getElementById('bull-btn').classList.toggle('active',b==='bull');
+  document.getElementById('bear-btn').classList.toggle('active',b==='bear');
+  updatePrev('idea');
+}
+function setTradeBias(b){
+  tradeBias=b;
+  document.getElementById('bull-t').classList.toggle('active',b==='bull');
+  document.getElementById('bear-t').classList.toggle('active',b==='bear');
+  updatePrev('trade');
+}
+function setUtype(el,t){
+  utype=t;
+  document.querySelectorAll('.utype').forEach(function(u){u.classList.remove('active');});
+  el.classList.add('active');
+  var pg=document.getElementById('pct-grp');
+  if(pg)pg.style.display=(t==='partial'||t==='add')?'flex':'none';
+  updatePrev('update');
+}
+
+// ── TABS ──────────────────────────────────────────────────────
 function showTab(name){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
   document.getElementById('tab-'+name).classList.add('active');
   document.getElementById('panel-'+name).classList.add('active');
 }
 
-function addToJournal(type,text,img){
-  const entry={type,text,img,time:new Date().toLocaleTimeString(lang==='he'?'he-IL':'en-GB',{hour:'2-digit',minute:'2-digit'}),date:new Date().toISOString()};
-  journal.unshift(entry);
-  saveJournal();
-  renderJournal();
+// ── JOURNAL ───────────────────────────────────────────────────
+function addJournal(type,text,img){
+  journal.unshift({type:type,text:text,img:img,time:new Date().toLocaleTimeString(lang==='he'?'he-IL':'en-GB',{hour:'2-digit',minute:'2-digit'}),date:new Date().toISOString()});
+  saveJournal();renderJournal();
 }
 function saveJournal(){
-  const toSave=journal.map(j=>({type:j.type,text:j.text,time:j.time,date:j.date}));
-  try{localStorage.setItem('djr_journal',JSON.stringify(toSave));}catch(e){}
-  fetch('/api/webhook?type=journal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(toSave)});
+  var s=journal.map(function(j){return{type:j.type,text:j.text,time:j.time,date:j.date};});
+  try{localStorage.setItem('djr_journal',JSON.stringify(s));}catch(e){}
+  fetch(WURL+'?type=journal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(s)});
 }
-function loadJournal(){
-  try{
-    const saved=localStorage.getItem('djr_journal');
-    if(saved)journal=JSON.parse(saved);
-  }catch(e){}
+function saveWeeklyNote(){
+  var note=document.getElementById('weekly-note').value;
+  localStorage.setItem('weekly_note',note);
+  fetch(WURL+'?type=weekly',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({note:note})});
 }
-async function syncJournalFromCloud(){
-  try{
-    const r=await fetch('/api/webhook?type=journal');
-    const j=await r.json();
-    if(j.data){
-      const d=typeof j.data==='string'?JSON.parse(j.data):j.data;
-      if(Array.isArray(d)&&d.length>0){
-        journal=d;
-        localStorage.setItem('djr_journal',JSON.stringify(d));
-        renderJournal();
-      }
-    }
-  }catch(e){}
-}
-function getWeekStart(d){const dt=new Date(d);dt.setHours(0,0,0,0);dt.setDate(dt.getDate()-dt.getDay());return dt;}
-function getMonthKey(d){const dt=new Date(d);return dt.getFullYear()+'-'+(dt.getMonth()+1);}
 function extractRR(text){
-  const m=text&&text.match(/R:R Achieved[:\s]+1:([0-9.]+)/);
-  if(m)return parseFloat(m[1]);
-  const m2=text&&text.match(/R:R שהושג[:\s]+1:([0-9.]+)/);
-  if(m2)return parseFloat(m2[1]);
-  return null;
+  var m=text&&text.match(/R:R Achieved[: ]+1:([0-9.]+)/);
+  return m?parseFloat(m[1]):null;
 }
+function getWeekStart(){var d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay());return d;}
+function getMonthKey(d){var dt=new Date(d);return dt.getFullYear()+'-'+(dt.getMonth()+1);}
+
 function renderJournal(){
-  const list=document.getElementById('journal-list');
-  const now=new Date();
-  const weekStart=getWeekStart(now);
-  const monthKey=getMonthKey(now);
-  const weekJournal=journal.filter(j=>j.date&&new Date(j.date)>=weekStart);
-  const closes=weekJournal.filter(j=>j.type==='close');
-  const wins=closes.filter(j=>j.text&&j.text.includes('✅')).length;
-  const losses=closes.filter(j=>j.text&&j.text.includes('❌')).length;
-  const wr=closes.length>0?Math.round((wins/closes.length)*100)+'%':'-';
-  const rrVals=closes.map(j=>extractRR(j.text)).filter(v=>v!==null);
-  const avgRR=rrVals.length>0?'1:'+(rrVals.reduce((a,b)=>a+b,0)/rrVals.length).toFixed(2):'-';
-  document.getElementById('stat1').textContent=closes.length;
-  document.getElementById('stat2').textContent=wins;
-  document.getElementById('stat3').textContent=losses;
-  document.getElementById('stat4').textContent=journal.filter(j=>j.type==='update').length;
-  document.getElementById('stat-wr').textContent=wr;
-  document.getElementById('stat-rr').textContent=avgRR;
-  if(!journal.length){list.innerHTML=`<div class="empty-state">${lang==='he'?'עדיין אין רשומות ביומן':'No journal entries yet'}</div>`;return;}
-  const badges={idea:`<span class="badge badge-idea">${lang==='he'?'תרחיש':'Scenario'}</span>`,trade:`<span class="badge badge-open">${lang==='he'?'כניסה':'Entry'}</span>`,update:`<span class="badge badge-update">${lang==='he'?'עדכון':'Update'}</span>`,close:`<span class="badge badge-closed">${lang==='he'?'סגירה':'Close'}</span>`};
-  list.innerHTML=journal.map(j=>`<div class="journal-item"><div class="ji-header">${badges[j.type]||''}<span class="ji-time">${j.time}</span></div><div class="ji-text">${j.text.split('\n').slice(0,3).join(' | ')}</div>${j.img?`<img class="ji-img" src="${j.img}"/>`:''}	</div>`).join('');
-}
-
-async function pollTVData(){
-  try{
-    const r=await fetch(WEBHOOK_URL+'?type=tv',{cache:'no-store'});const json=await r.json();
-    let tvd=json.data;
-    if(typeof tvd==='string'){try{tvd=JSON.parse(tvd);}catch(e){tvd=null;}}
-    if(tvd&&tvd.timestamp&&tvd.timestamp!==lastTVTs){
-      lastTVTs=tvd.timestamp;pendingTVData=tvd;showTVBanner(tvd);
-    }
-  }catch(e){}
-}
-function showTVBanner(d){
-  const typeLabel={idea:lang==='he'?'תרחיש מקדים':'Pre-Trade Idea',trade:lang==='he'?'פוזיציה':'Position Entry',update:lang==='he'?'עדכון':'Update',close:lang==='he'?'סגירה':'Close'};
-  document.getElementById('tv-banner-msg').textContent=`📡 ${d.ticker||'TradingView'} → ${typeLabel[d.action||'idea']||d.action}`;
-  document.getElementById('tv-open-btn').textContent=lang==='he'?'פתח טופס':'Open Form';
-  document.getElementById('tv-banner').classList.add('show');
-}
-function dismissBanner(){document.getElementById('tv-banner').classList.remove('show');}
-function applyTVData(){
-  if(!pendingTVData)return;const d=pendingTVData;const type=d.action||'idea';
-  pendingTVData=null;
-  dismissBanner();showTab(type);
-  const badge=document.getElementById('tv-badge-'+type);if(badge)badge.classList.add('show');
-  setTimeout(function(){
-    if(type==='idea'){
-      if(d.ticker)setVal('ticker',d.ticker);if(d.timeframe)setVal('tf',d.timeframe);
-      if(d.direction)setBias(d.direction);if(d.entry)setVal('zone',d.entry);
-      if(d.sl)setVal('inv',d.sl);if(d.tp)setVal('obj',d.tp);updateIdeaPreview();
-    }else if(type==='trade'){
-      if(d.ticker)setVal('t-ticker',d.ticker);if(d.timeframe)setVal('t-tf',d.timeframe);
-      if(d.direction)setTradeBias(d.direction);if(d.entry)setVal('ep',d.entry);
-      if(d.sl)setVal('rl',d.sl);if(d.tp)setVal('ob',d.tp);updateTradePreview();
-    }else if(type==='update'){
-      if(d.ticker)setVal('u-ticker',d.ticker);if(d.sl)setVal('new-level',d.sl);
-      if(d.rr)setVal('new-rr',d.rr);updateUpdatePreview();
-    }else if(type==='close'){
-      if(d.ticker)setVal('c-ticker',d.ticker);if(d.timeframe)setVal('c-tf',d.timeframe);
-      if(d.entry)setVal('c-entry',d.entry);if(d.exit)setVal('c-exit',d.exit);
-      if(d.sl)setVal('c-sl',d.sl);updateClosePreview();
-    }
-  },150);
-}
-
-function setLang(l){
-  lang=l;document.documentElement.dir=l==='he'?'rtl':'ltr';document.documentElement.lang=l;
-  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelector(`.lang-btn[onclick="setLang('${l}')"]`).classList.add('active');
-  const he=l==='he';
-  document.getElementById('tg-title').textContent=he?'⚙️ הגדרות טלגרם':'⚙️ Telegram Settings';
-  document.getElementById('test-btn-text').textContent=he?'בדוק':'Test';
-  document.getElementById('tab-idea').textContent=he?'רעיון מקדים':'Pre-Trade Idea';
-  document.getElementById('tab-trade').textContent=he?'תיעוד עסקה':'Document Trade';
-  document.getElementById('tab-update').textContent=he?'ניהול עסקה':'Trade Management';
-  document.getElementById('tab-close').textContent=he?'סגירת עסקה':'Close Trade';
-  document.getElementById('tab-journal').textContent=he?'יומן':'Journal';
-  document.getElementById('sl1').textContent=he?'סה״כ היום':'Total today';
-  document.getElementById('sl2').textContent=he?'פוזיציות':'Positions';
-  document.getElementById('sl3').textContent=he?'עדכונים':'Updates';
-  ['idea','trade','update','close'].forEach((t,i)=>{
-    const btn=document.getElementById(`send-${t}-btn`);if(btn)btn.textContent=he?'📤 שלח לטלגרם':'📤 Send to Telegram';
-    const disc=document.getElementById(`disc${i+1}`);if(disc)disc.textContent=DISC[l];
-    const badge=document.getElementById(`tv-badge-${t}-text`);if(badge)badge.textContent=he?'מולא אוטומטית מ-TradingView':'Auto-filled from TradingView';
-  });
-  document.querySelectorAll('.it-upload').forEach(el=>el.textContent=he?'העלאה':'Upload');
-  document.querySelectorAll('.it-paste').forEach(el=>el.textContent=he?'הדבקה':'Paste');
-  document.querySelectorAll('.utype').forEach((el,i)=>el.textContent=UTYPES[l][['sl','partial','add'][i]]);
-  updateIdeaPreview();updateTradePreview();updateUpdatePreview();updateClosePreview();renderJournal();
-}
-
-
-const DASHBOARD_PWD = 'DJR2024';
-function checkPwd(){
-  const input=document.getElementById('pwd-input').value;
-  if(input===DASHBOARD_PWD){
-    localStorage.setItem('djr_auth','1');
-    document.getElementById('lock-screen').style.display='none';
-    document.getElementById('main-app').style.display='flex';
-  } else {
-    document.getElementById('pwd-error').style.display='block';
-    document.getElementById('pwd-input').value='';
-  }
-}
-function initAuth(){
-  if(localStorage.getItem('djr_auth')==='1'){
-    document.getElementById('lock-screen').style.display='none';
-    document.getElementById('main-app').style.display='flex';
-  }
-}
-initAuth();
-
-
-function buildStatsMsg(period, entries){
-  const isHe=lang==='he';
-  const closes=entries.filter(j=>j.type==='close');
-  const wins=closes.filter(j=>j.text&&j.text.includes('✅')).length;
-  const losses=closes.filter(j=>j.text&&j.text.includes('❌')).length;
-  const wr=closes.length>0?Math.round((wins/closes.length)*100)+'%':'N/A';
-  const rrVals=closes.map(j=>extractRR(j.text)).filter(v=>v!==null);
-  const avgRR=rrVals.length>0?'1:'+(rrVals.reduce((a,b)=>a+b,0)/rrVals.length).toFixed(2):'N/A';
-  const ideas=entries.filter(j=>j.type==='idea').length;
-  const updates=entries.filter(j=>j.type==='update').length;
-  const label=period==='weekly'?(isHe?'📊 סיכום שבועי':'📊 Weekly Summary'):(isHe?'📈 סיכום חודשי':'📈 Monthly Summary');
-  let msg=bold(label+' | יומן מסחר DJR')+'\n';
-  msg+='━━━━━━━━━━━━━━━\n';
-  msg+=(isHe?'עסקאות':'Trades')+': '+bold(String(closes.length))+'\n';
-  msg+=(isHe?'מנצחות ✅':'Winners ✅')+': '+bold(String(wins))+'\n';
-  msg+=(isHe?'מפסידות ❌':'Losers ❌')+': '+bold(String(losses))+'\n';
-  msg+='Win Rate: '+bold(wr)+'\n';
-  msg+='Avg R:R: '+bold(avgRR)+'\n';
-  msg+=(isHe?'רעיונות':'Ideas')+': '+escMD(String(ideas))+'\n';
-  msg+=(isHe?'עדכונים':'Updates')+': '+escMD(String(updates))+'\n';
-  const weeklyNote=document.getElementById('weekly-note-text')?.value;
-  if(weeklyNote)msg+='\n'+(isHe?'הערות':'Notes')+':\n'+escMD(weeklyNote)+'\n';
-  msg+='━━━━━━━━━━━━━━━\n';
-  msg+=escMD(DISC[lang]);
-  return msg;
-}
-async function sendWeeklyStats(){
-  const now=new Date();
-  const weekStart=getWeekStart(now);
-  const entries=journal.filter(j=>j.date&&new Date(j.date)>=weekStart);
-  const msg=buildStatsMsg('weekly',entries);
-  const{token,chatId}=getTg();
-  if(!token||!chatId){alert(lang==='he'?'הגדר Token ו-Chat ID תחילה':'Set Token and Chat ID first');return;}
-  const img=images['weekly'];
-  if(img){
-    const fd=new FormData();fd.append('chat_id',chatId);fd.append('caption',msg);
-    const blob=await fetch(img).then(r=>r.blob());fd.append('photo',blob,'weekly.jpg');
-    await fetch('https://api.telegram.org/bot'+token+'/sendPhoto',{method:'POST',body:fd});
-  } else {
-    await fetch('https://api.telegram.org/bot'+token+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:chatId,text:msg,parse_mode:'MarkdownV2'})});
-  }
-}
-async function sendMonthlyStats(){
-  const now=new Date();
-  const monthKey=getMonthKey(now);
-  const entries=journal.filter(j=>j.date&&getMonthKey(j.date)===monthKey);
-  const msg=buildStatsMsg('monthly',entries);
-  const{token,chatId}=getTg();
-  if(!token||!chatId){alert(lang==='he'?'הגדר Token ו-Chat ID תחילה':'Set Token and Chat ID first');return;}
-  await fetch('https://api.telegram.org/bot'+token+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:chatId,text:msg,parse_mode:'MarkdownV2'})});
+  var list=document.getElementById('jlist');
+  var weekStart=getWeekStart(),now=new Date(),monthKey=getMonthKey(now);
+  var weekJ=journal.filter(function(j){return j.date&&new Date(j.date)>=weekStart;});
+  var closes=weekJ.filter(function(j){return j.type==='close';});
+  var wins=closes.filter(function(j){return j.text&&j.text.includes('✅');}).length;
+  var losses=closes.filter(function(j){return j.text&&j.text.includes('❌');}).length;
+  var wr=closes.length>0?Math.round((wins/closes.length)*100)+'%':'-';
+  var rrVals=closes.map(function(j){return extractRR(j.text);}).filter(function(v){return v!==null;});
+  var avgRR=rrVals.length>0?'1:'+(rrVals.reduce(function(a,b){return a+b;},0)/rrVals.length).toFixed(2):'-';
+  document.getElementById('st1').textContent=closes.length;
+  document.getElementById('st2').textContent=wins;
+  document.getElementById('st3').textContent=losses;
+  document.getElementById('st4').textContent=journal.filter(function(j){return j.type==='update';}).length;
+  document.getElementById('st-wr').textContent=wr;
+  document.getElementById('st-rr').textContent=avgRR;
+  if(!journal.length){list.innerHTML='<div class="empty">'+(lang==='he'?'עדיין אין רשומות ביומן':'No journal entries yet')+'</div>';return;}
+  var badges={idea:'b-idea',trade:'b-trade',update:'b-update',close:'b-close'};
+  var labels={idea:{he:'תרחיש',en:'Idea'},trade:{he:'כניסה',en:'Entry'},update:{he:'עדכון',en:'Update'},close:{he:'סגירה',en:'Close'}};
+  list.innerHTML=journal.map(function(j){
+    var lbl=labels[j.type]?labels[j.type][lang]:'?';
+    var bc=badges[j.type]||'b-idea';
+    var txt=j.text.replace(/\*(.*?)\*/g,'$1').split('\n').slice(0,3).join(' | ');
+    return '<div class="ji"><div class="ji-hdr"><span class="badge '+bc+'">'+lbl+'</span><span class="ji-time">'+j.time+'</span></div><div class="ji-txt">'+txt+'</div>'+(j.img?'<img class="ji-img" src="'+j.img+'"/>':'')+'</div>';
+  }).join('');
 }
 function clearJournal(){
   if(confirm(lang==='he'?'האם אתה בטוח שברצונך למחוק את כל היומן?':'Are you sure you want to clear the journal?')){
@@ -779,37 +719,117 @@ function clearJournal(){
   }
 }
 
-function saveWeeklyNote(){
-  const note=document.getElementById('weekly-note-text').value;
-  localStorage.setItem('weekly_note',note);
-  fetch('/api/webhook?type=weekly',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({note})});
+// ── STATS ─────────────────────────────────────────────────────
+function buildStats(period,entries){
+  var isHe=lang==='he';
+  var closes=entries.filter(function(j){return j.type==='close';});
+  var wins=closes.filter(function(j){return j.text&&j.text.includes('✅');}).length;
+  var losses=closes.filter(function(j){return j.type==='close'&&j.text&&j.text.includes('❌');}).length;
+  var wr=closes.length>0?Math.round((wins/closes.length)*100)+'%':'N/A';
+  var rrVals=closes.map(function(j){return extractRR(j.text);}).filter(function(v){return v!==null;});
+  var avgRR=rrVals.length>0?'1:'+(rrVals.reduce(function(a,b){return a+b;},0)/rrVals.length).toFixed(2):'N/A';
+  var ideas=entries.filter(function(j){return j.type==='idea';}).length;
+  var updates=entries.filter(function(j){return j.type==='update';}).length;
+  var label=period==='weekly'?(isHe?'📊 סיכום שבועי':'📊 Weekly Summary'):(isHe?'📈 סיכום חודשי':'📈 Monthly Summary');
+  var lines=[];
+  lines.push(bold(label+' | יומן מסחר DJR'));
+  lines.push(SEP);
+  lines.push((isHe?'עסקאות':'Trades')+': '+bold(String(closes.length)));
+  lines.push((isHe?'מנצחות ✅':'Winners ✅')+': '+bold(String(wins)));
+  lines.push((isHe?'מפסידות ❌':'Losers ❌')+': '+bold(String(losses)));
+  lines.push('Win Rate: '+bold(wr));
+  lines.push('Avg R:R: '+bold(avgRR));
+  lines.push((isHe?'רעיונות':'Ideas')+': '+esc(String(ideas)));
+  lines.push((isHe?'עדכונים':'Updates')+': '+esc(String(updates)));
+  var note=document.getElementById('weekly-note').value;
+  if(note)lines.push('',(isHe?'הערות':'Notes')+':',esc(note));
+  lines.push(SEP);lines.push(esc(DISC[lang]));
+  return lines.join('\n');
 }
-function loadWeeklyNote(){
-  const n=localStorage.getItem('weekly_note');
-  if(n&&document.getElementById('weekly-note-text'))document.getElementById('weekly-note-text').value=n;
+async function sendStats(period){
+  var cfg=getTg();
+  if(!cfg.token||!cfg.chatId){alert(lang==='he'?'הגדר Token ו-Chat ID תחילה':'Set Token and Chat ID first');return;}
+  var now=new Date();
+  var entries;
+  if(period==='weekly'){
+    var ws=getWeekStart();entries=journal.filter(function(j){return j.date&&new Date(j.date)>=ws;});
+  } else {
+    var mk=getMonthKey(now);entries=journal.filter(function(j){return j.date&&getMonthKey(j.date)===mk;});
+  }
+  var msg=buildStats(period,entries);
+  var img=imgs['weekly'];
+  if(img){
+    var fd=new FormData();fd.append('chat_id',cfg.chatId);fd.append('caption',msg);fd.append('parse_mode','MarkdownV2');
+    var blob=await fetch(img).then(function(r){return r.blob();});fd.append('photo',blob,'stats.jpg');
+    await fetch('https://api.telegram.org/bot'+cfg.token+'/sendPhoto',{method:'POST',body:fd});
+  } else {
+    await fetch('https://api.telegram.org/bot'+cfg.token+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:cfg.chatId,text:msg,parse_mode:'MarkdownV2'})});
+  }
 }
-async function syncWeeklyFromCloud(){
+
+// ── TV POLLING ────────────────────────────────────────────────
+var lastTVTs=null,pendingTV=null;
+async function pollTV(){
   try{
-    const r=await fetch('/api/webhook?type=weekly');
-    const j=await r.json();
-    if(j.data){
-      const d=typeof j.data==='string'?JSON.parse(j.data):j.data;
-      if(d&&d.note){
-        localStorage.setItem('weekly_note',d.note);
-        const el=document.getElementById('weekly-note-text');
-        if(el)el.value=d.note;
-      }
-    }
+    var r=await fetch(WURL+'?type=tv',{cache:'no-store'});
+    var j=await r.json();
+    var d=j.data;
+    if(typeof d==='string'){try{d=JSON.parse(d);}catch(e){d=null;}}
+    if(d&&d.timestamp&&d.timestamp!==lastTVTs){lastTVTs=d.timestamp;pendingTV=d;showTVBanner(d);}
   }catch(e){}
 }
-loadJournal();loadWeeklyNote();loadTgConfig();updateIdeaPreview();
-// Sync from cloud in background
-setTimeout(async function(){
-  await syncSettingsFromCloud();
-  await syncJournalFromCloud();
-  await syncWeeklyFromCloud();
-},500);updateTradePreview();updateUpdatePreview();updateClosePreview();
-setInterval(pollTVData,4000);pollTVData();
+function showTVBanner(d){}
+function dismissBanner(){}
+function applyTVData(){
+  if(!pendingTV)return;var d=pendingTV;var type=d.action||'idea';pendingTV=null;
+  showTab(type);
+  setTimeout(function(){
+    if(type==='idea'){if(d.ticker)sv('ticker',d.ticker);if(d.timeframe)sv('tf',d.timeframe);if(d.direction)setBias(d.direction);if(d.entry)sv('zone',d.entry);if(d.sl)sv('inv',d.sl);if(d.tp)sv('obj',d.tp);syncAndUpdate('idea');}
+    else if(type==='trade'){if(d.ticker)sv('t-ticker',d.ticker);if(d.timeframe)sv('t-tf',d.timeframe);if(d.direction)setTradeBias(d.direction);if(d.entry)sv('ep',d.entry);if(d.sl)sv('rl',d.sl);if(d.tp)sv('ob',d.tp);updatePrev('trade');}
+    else if(type==='update'){if(d.ticker)sv('u-ticker',d.ticker);if(d.sl)sv('new-sl',d.sl);updatePrev('update');}
+    else if(type==='close'){if(d.ticker)sv('c-ticker',d.ticker);if(d.entry)sv('c-entry',d.entry);if(d.exit)sv('c-exit',d.exit);if(d.sl)sv('c-sl',d.sl);updatePrev('close');}
+  },150);
+}
+
+// ── LANGUAGE ──────────────────────────────────────────────────
+function setDiscs(){
+  ['disc1','disc2','disc3','disc4'].forEach(function(id){var el=document.getElementById(id);if(el)el.textContent=DISC[lang];});
+}
+function setLang(l){
+  lang=l;
+  document.documentElement.dir=l==='he'?'rtl':'ltr';
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.remove('active');});
+  document.querySelector('.lang-btn[onclick="setLang(\''+l+'\')"]').classList.add('active');
+  var he=l==='he';
+  document.getElementById('tg-title').textContent=he?'⚙️ הגדרות טלגרם':'⚙️ Telegram Settings';
+  document.getElementById('tst-txt').textContent=he?'בדוק':'Test';
+  document.getElementById('tab-idea').textContent=he?'רעיון מקדים':'Pre-Trade Idea';
+  document.getElementById('tab-trade').textContent=he?'תיעוד עסקה':'Document Trade';
+  document.getElementById('tab-update').textContent=he?'ניהול עסקה':'Trade Management';
+  document.getElementById('tab-close').textContent=he?'סגירת עסקה':'Close Trade';
+  document.getElementById('tab-journal').textContent=he?'יומן':'Journal';
+  document.getElementById('sl1').textContent=he?'עסקאות שבועיות':'Weekly Trades';
+  document.getElementById('sl4').textContent=he?'עדכונים':'Updates';
+  document.getElementById('btn-week').textContent=he?'📊 שלח סטטיסטיקה שבועית':'📊 Send Weekly Stats';
+  document.getElementById('btn-month').textContent=he?'📈 שלח סטטיסטיקה חודשית':'📈 Send Monthly Stats';
+  document.getElementById('wn-lbl').textContent=he?'הערות שבועיות':'Weekly Notes';
+  document.querySelectorAll('.it-up').forEach(function(el){el.textContent=he?'העלאה':'Upload';});
+  document.querySelectorAll('.it-pa').forEach(function(el){el.textContent=he?'הדבקה':'Paste';});
+  ['idea','trade','update','close'].forEach(function(t){
+    var btn=document.getElementById('send-'+t);if(btn)btn.textContent=he?'📤 שלח לטלגרם':'📤 Send to Telegram';
+  });
+  setDiscs();
+  renderJournal();
+  updateAllPreviews();
+}
+
+// ── HELPERS ───────────────────────────────────────────────────
+function gv(id){var el=document.getElementById(id);return el?el.value:'';}
+function sv(id,val){var el=document.getElementById(id);if(el)el.value=val;}
+
+// ── INIT ──────────────────────────────────────────────────────
+setDiscs();
+initAuth();
 </script>
 </body>
 </html>
