@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
@@ -361,7 +360,7 @@ function saveTgConfig(){
   const chatId=document.getElementById('tg-chatid').value;
   localStorage.setItem('tg_token',token);
   localStorage.setItem('tg_chatid',chatId);
-  fetch('/api/webhook/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token,chatId})});
+  fetch('/api/webhook?type=settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token,chatId})});
 }
 function loadTgConfig(){
   const t=localStorage.getItem('tg_token'),c=localStorage.getItem('tg_chatid');
@@ -370,7 +369,7 @@ function loadTgConfig(){
 }
 async function syncSettingsFromCloud(){
   try{
-    const r=await fetch('/api/webhook/settings');
+    const r=await fetch('/api/webhook?type=settings');
     const j=await r.json();
     if(j.data){
       const d=typeof j.data==='string'?JSON.parse(j.data):j.data;
@@ -549,7 +548,7 @@ function addToJournal(type,text,img){
 function saveJournal(){
   const toSave=journal.map(j=>({type:j.type,text:j.text,time:j.time,date:j.date}));
   try{localStorage.setItem('djr_journal',JSON.stringify(toSave));}catch(e){}
-  fetch('/api/webhook/journal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(toSave)});
+  fetch('/api/webhook?type=journal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(toSave)});
 }
 function loadJournal(){
   try{
@@ -559,7 +558,7 @@ function loadJournal(){
 }
 async function syncJournalFromCloud(){
   try{
-    const r=await fetch('/api/webhook/journal');
+    const r=await fetch('/api/webhook?type=journal');
     const j=await r.json();
     if(j.data){
       const d=typeof j.data==='string'?JSON.parse(j.data):j.data;
@@ -596,7 +595,7 @@ function renderJournal(){
 
 async function pollTVData(){
   try{
-    const r=await fetch(WEBHOOK_URL,{cache:'no-store'});const json=await r.json();
+    const r=await fetch(WEBHOOK_URL+'?type=tv',{cache:'no-store'});const json=await r.json();
     let tvd=json.data;
     if(typeof tvd==='string'){try{tvd=JSON.parse(tvd);}catch(e){tvd=null;}}
     if(tvd&&tvd.timestamp&&tvd.timestamp!==lastTVTs){
@@ -741,7 +740,7 @@ function clearJournal(){
 function saveWeeklyNote(){
   const note=document.getElementById('weekly-note-text').value;
   localStorage.setItem('weekly_note',note);
-  fetch('/api/webhook/weekly',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({note})});
+  fetch('/api/webhook?type=weekly',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({note})});
 }
 function loadWeeklyNote(){
   const n=localStorage.getItem('weekly_note');
@@ -749,7 +748,7 @@ function loadWeeklyNote(){
 }
 async function syncWeeklyFromCloud(){
   try{
-    const r=await fetch('/api/webhook/weekly');
+    const r=await fetch('/api/webhook?type=weekly');
     const j=await r.json();
     if(j.data){
       const d=typeof j.data==='string'?JSON.parse(j.data):j.data;
