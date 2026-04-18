@@ -455,6 +455,7 @@ function applyTVData(){
   var d=pendingTVData;
   var type=d.action||'idea';
   lastTVTs=d.timestamp;
+  localStorage.setItem('lastTVTs',d.timestamp);
   pendingTVData=null;
   dismissBanner();
   showTab(type);
@@ -520,6 +521,7 @@ function setLang(l){
 }
 
 loadTgConfig();updateIdeaPreview();updateTradePreview();updateUpdatePreview();updateClosePreview();
+lastTVTs=parseInt(localStorage.getItem('lastTVTs'))||null;
 setInterval(pollTVData,2000);
 </script>
 </body>
