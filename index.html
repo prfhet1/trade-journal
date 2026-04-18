@@ -133,140 +133,147 @@
   </div>
 
   <div class="tabs">
-    <div class="tab active" onclick="showTab('idea')" id="tab-idea">רעיון מוקדם</div>
-    <div class="tab" onclick="showTab('trade')" id="tab-trade">תיעוד פוזיציה</div>
-    <div class="tab" onclick="showTab('update')" id="tab-update">עדכון ניהול</div>
-    <div class="tab" onclick="showTab('close')" id="tab-close">סגירה</div>
+    <div class="tab active" onclick="showTab('idea')" id="tab-idea">רעיון מקדים</div>
+    <div class="tab" onclick="showTab('trade')" id="tab-trade">עדכון פוזיציה</div>
+    <div class="tab" onclick="showTab('update')" id="tab-update">ניהול פוזיציה</div>
+    <div class="tab" onclick="showTab('close')" id="tab-close">סגירת פוזיציה</div>
     <div class="tab" onclick="showTab('journal')" id="tab-journal">יומן</div>
   </div>
 
   <div class="panels">
+
+    <!-- IDEA -->
     <div class="panel active" id="panel-idea">
       <div class="tv-prefill-badge" id="tv-badge-idea"><div class="tv-dot"></div><span id="tv-badge-idea-text">מולא אוטומטית מ-TradingView</span></div>
       <div class="card">
         <div class="form-grid">
-          <div class="form-group full"><label id="lbl-bias">כיוון ציפייה</label>
+          <div class="form-group full"><label id="lbl-bias">כיוון מצופה</label>
             <div class="bias-btns"><div class="bias-btn bull" id="bull-btn" onclick="setBias('bull')">📈 מגמה עולה</div><div class="bias-btn bear" id="bear-btn" onclick="setBias('bear')">📉 מגמה יורדת</div></div>
           </div>
-          <div class="form-group"><label>נכס</label><input type="text" id="ticker" placeholder="לדוג׳ SPX" oninput="updateIdeaPreview()" /></div>
-          <div class="form-group"><label>מסגרת זמן</label><input type="text" id="tf" placeholder="לדוג׳ 5m" oninput="updateIdeaPreview()" /></div>
-          <div class="form-group"><label>אזור כניסה</label><input type="text" id="zone" placeholder="לדוג׳ 5780-5800" oninput="updateIdeaPreview()" /></div>
-          <div class="form-group"><label>רמת ביטול</label><input type="text" id="inv" placeholder="לדוג׳ 5750" oninput="updateIdeaPreview()" /></div>
-          <div class="form-group"><label>מטרה</label><input type="text" id="obj" placeholder="לדוג׳ 5850" oninput="updateIdeaPreview()" /></div>
-          <div class="form-group"><label>יחס R:R</label><input type="text" id="rr" class="rr-field" readonly /></div>
-          <div class="form-group full"><label>ניתוח ונקודות עיקריות</label><textarea id="conf" placeholder="שתף את הניתוח שלך לצורכי לימוד..." oninput="updateIdeaPreview()"></textarea></div>
-          <div class="form-group full"><label>צירוף תמונה</label>
+          <div class="form-group"><label id="lbl-ticker">נכס</label><input type="text" id="ticker" placeholder="לדוג׳ SPX" oninput="updateIdeaPreview()" /></div>
+          <div class="form-group"><label id="lbl-tf">גרף</label><input type="text" id="tf" placeholder="לדוג׳ 5" oninput="updateIdeaPreview()" /></div>
+          <div class="form-group"><label id="lbl-zone">Entry Zone</label><input type="text" id="zone" placeholder="e.g. 5780-5800" oninput="updateIdeaPreview()" /></div>
+          <div class="form-group"><label id="lbl-inv">Stop Loss</label><input type="text" id="inv" placeholder="e.g. 5750" oninput="updateIdeaPreview()" /></div>
+          <div class="form-group"><label id="lbl-obj">TP</label><input type="text" id="obj" placeholder="e.g. 5850" oninput="updateIdeaPreview()" /></div>
+          <div class="form-group"><label id="lbl-rr">יחס R:R</label><input type="text" id="rr" class="rr-field" readonly /></div>
+          <div class="form-group full"><label id="lbl-conf">ניתוח ונקודות עיקריות</label><textarea id="conf" placeholder="שתף את הניתוח שלך לצורכי לימוד..." oninput="updateIdeaPreview()"></textarea></div>
+          <div class="form-group full"><label id="lbl-img1">צירוף תמונה</label>
             <div class="img-section"><div class="img-tabs">
               <button class="img-tab active" onclick="switchImgTab('idea','upload',this)">📁 <span class="it-upload">העלאה</span></button>
               <button class="img-tab" onclick="switchImgTab('idea','paste',this)">📋 <span class="it-paste">הדבקה</span></button>
             </div><div class="img-body">
               <div id="img-upload-idea" class="img-upload-area"><input type="file" accept="image/*" onchange="handleImg(event,'idea')" /><span class="img-upload-label" id="img-upload-label-idea">לחץ לבחירת קובץ</span></div>
-              <div id="img-paste-idea" class="img-paste-area" style="display:none;" tabindex="0" onclick="this.focus()" onpaste="handlePasteEvent(event,'idea')"><span id="img-paste-label-idea">לחץ כאן ואז Ctrl+V</span></div>
+              <div id="img-paste-idea" class="img-paste-area" style="display:none;" tabindex="0" onclick="this.focus()" onpaste="handlePasteEvent(event,'idea')"><span id="img-paste-label-idea">לחץ כאן ואז Ctrl+V להדבקת צילום מסך</span></div>
               <div id="img-preview-idea"></div>
             </div></div>
           </div>
         </div>
-        <div class="preview-label">תצוגה מקדימה</div>
-        <div class="preview-box" id="idea-preview">מלא את הפרטים...</div>
-        <div class="disclaimer" id="disc1">⚠️ כל הפרסומים הינם חלק מיומן מסחר אישי לצורכי לימוד בלבד. אין לראות בכך ייעוץ השקעות.</div>
+        <div class="preview-label" id="prev-label1">תצוגה מקדימה</div>
+        <div class="preview-box" id="idea-preview">מלא את הפרטים לצפייה בתצוגה מקדימה...</div>
+        <div class="disclaimer" id="disc1">⚠️ כל הפרסומים הינם חלק מיומן מסחר אישי לצורכי לימוד בלבד. אין לראות בכך ייעוץ השקעות. כל החלטה היא באחריות הקורא בלבד.</div>
         <button class="send-btn" id="send-idea-btn" onclick="sendToTelegram('idea')">📤 שלח לטלגרם</button>
       </div>
     </div>
 
+    <!-- TRADE -->
     <div class="panel" id="panel-trade">
       <div class="tv-prefill-badge" id="tv-badge-trade"><div class="tv-dot"></div><span id="tv-badge-trade-text">מולא אוטומטית מ-TradingView</span></div>
       <div class="card">
         <div class="form-grid">
-          <div class="form-group full"><label>כיוון</label>
+          <div class="form-group full"><label id="lbl-t-dir">כיוון</label>
             <div class="bias-btns"><div class="bias-btn bull" id="bull-btn-t" onclick="setTradeBias('bull')">📈 עולה</div><div class="bias-btn bear" id="bear-btn-t" onclick="setTradeBias('bear')">📉 יורד</div></div>
           </div>
-          <div class="form-group"><label>נכס</label><input type="text" id="t-ticker" placeholder="לדוג׳ SPX" oninput="updateTradePreview()" /></div>
-          <div class="form-group"><label>מסגרת זמן</label><input type="text" id="t-tf" placeholder="לדוג׳ 5m" oninput="updateTradePreview()" /></div>
-          <div class="form-group"><label>נקודת כניסה</label><input type="text" id="ep" placeholder="לדוג׳ 5792.5" oninput="updateTradePreview()" /></div>
-          <div class="form-group"><label>גודל פוזיציה</label><input type="text" id="size" placeholder="לדוג׳ 1 חוזה" oninput="updateTradePreview()" /></div>
-          <div class="form-group"><label>רמת סיכון</label><input type="text" id="rl" placeholder="לדוג׳ 5778" oninput="updateTradePreview()" /></div>
-          <div class="form-group"><label>יעד</label><input type="text" id="ob" placeholder="לדוג׳ 5820" oninput="updateTradePreview()" /></div>
-          <div class="form-group"><label>יחס R:R</label><input type="text" id="t-rr" class="rr-field" readonly /></div>
-          <div class="form-group full"><label>סיבת הכניסה</label><textarea id="reason" placeholder="תאר את הסיבה לכניסה לצורכי לימוד..." oninput="updateTradePreview()"></textarea></div>
-          <div class="form-group full"><label>צירוף תמונה</label>
+          <div class="form-group"><label id="lbl-t-ticker">נכס</label><input type="text" id="t-ticker" placeholder="לדוג׳ SPX" oninput="updateTradePreview()" /></div>
+          <div class="form-group"><label id="lbl-t-tf">גרף</label><input type="text" id="t-tf" placeholder="לדוג׳ 5m" oninput="updateTradePreview()" /></div>
+          <div class="form-group"><label id="lbl-ep">Entry</label><input type="text" id="ep" placeholder="e.g. 5792.5" oninput="updateTradePreview()" /></div>
+          <div class="form-group"><label id="lbl-size">גודל פוזיציה</label><input type="text" id="size" placeholder="לדוג׳ 1 חוזה" oninput="updateTradePreview()" /></div>
+          <div class="form-group"><label id="lbl-rl">Stop Loss</label><input type="text" id="rl" placeholder="e.g. 5778" oninput="updateTradePreview()" /></div>
+          <div class="form-group"><label id="lbl-ob">TP</label><input type="text" id="ob" placeholder="e.g. 5820" oninput="updateTradePreview()" /></div>
+          <div class="form-group"><label id="lbl-t-rr">יחס R:R</label><input type="text" id="t-rr" class="rr-field" readonly /></div>
+          <div class="form-group full"><label id="lbl-reason">הערות</label><textarea id="reason" placeholder="הוסף הערות לצורכי לימוד..." oninput="updateTradePreview()"></textarea></div>
+          <div class="form-group full"><label id="lbl-img2">צירוף תמונה</label>
             <div class="img-section"><div class="img-tabs">
               <button class="img-tab active" onclick="switchImgTab('trade','upload',this)">📁 <span class="it-upload">העלאה</span></button>
               <button class="img-tab" onclick="switchImgTab('trade','paste',this)">📋 <span class="it-paste">הדבקה</span></button>
             </div><div class="img-body">
               <div id="img-upload-trade" class="img-upload-area"><input type="file" accept="image/*" onchange="handleImg(event,'trade')" /><span class="img-upload-label" id="img-upload-label-trade">לחץ לבחירת קובץ</span></div>
-              <div id="img-paste-trade" class="img-paste-area" style="display:none;" tabindex="0" onclick="this.focus()" onpaste="handlePasteEvent(event,'trade')"><span id="img-paste-label-trade">לחץ כאן ואז Ctrl+V</span></div>
+              <div id="img-paste-trade" class="img-paste-area" style="display:none;" tabindex="0" onclick="this.focus()" onpaste="handlePasteEvent(event,'trade')"><span id="img-paste-label-trade">לחץ כאן ואז Ctrl+V להדבקת צילום מסך</span></div>
               <div id="img-preview-trade"></div>
             </div></div>
           </div>
         </div>
         <div class="preview-label">תצוגה מקדימה</div>
-        <div class="preview-box" id="trade-preview">מלא את הפרטים...</div>
+        <div class="preview-box" id="trade-preview">מלא את הפרטים לצפייה בתצוגה מקדימה...</div>
         <div class="disclaimer" id="disc2">⚠️ כל הפרסומים הינם חלק מיומן מסחר אישי לצורכי לימוד בלבד. אין לראות בכך ייעוץ השקעות.</div>
         <button class="send-btn" id="send-trade-btn" onclick="sendToTelegram('trade')">📤 שלח לטלגרם</button>
       </div>
     </div>
 
+    <!-- UPDATE -->
     <div class="panel" id="panel-update">
       <div class="tv-prefill-badge" id="tv-badge-update"><div class="tv-dot"></div><span id="tv-badge-update-text">מולא אוטומטית מ-TradingView</span></div>
       <div class="card">
         <div class="update-types">
-          <div class="utype active" onclick="setUtype(this,'sl')">הזזת רמת סיכון</div>
-          <div class="utype" onclick="setUtype(this,'partial')">סגירה חלקית</div>
-          <div class="utype" onclick="setUtype(this,'add')">הוספה לפוזיציה</div>
+          <div class="utype active" onclick="setUtype(this,'sl')" id="ut-sl">הזזת רמת סיכון</div>
+          <div class="utype" onclick="setUtype(this,'partial')" id="ut-partial">סגירה חלקית</div>
+          <div class="utype" onclick="setUtype(this,'add')" id="ut-add">הוספה לפוזיציה</div>
         </div>
         <div class="form-grid">
-          <div class="form-group"><label>נכס</label><input type="text" id="u-ticker" placeholder="לדוג׳ SPX" oninput="updateUpdatePreview()" /></div>
-          <div class="form-group"><label>רמה חדשה</label><input type="text" id="new-level" placeholder="לדוג׳ 5795" oninput="updateUpdatePreview()" /></div>
-          <div class="form-group"><label>R:R נוכחי</label><input type="text" id="new-rr" placeholder="לדוג׳ 1:1.8" oninput="updateUpdatePreview()" /></div>
-          <div class="form-group"><label>רווח/הפסד (נק׳)</label><input type="text" id="pnl" placeholder="לדוג׳ +12.5" oninput="updateUpdatePreview()" /></div>
-          <div class="form-group full"><label>הערה</label><textarea id="note" placeholder="תאר את שינוי הניהול לצורכי לימוד..." oninput="updateUpdatePreview()"></textarea></div>
-          <div class="form-group full"><label>צירוף תמונה</label>
+          <div class="form-group"><label id="lbl-u-ticker">נכס</label><input type="text" id="u-ticker" placeholder="לדוג׳ SPX" oninput="updateUpdatePreview()" /></div>
+          <div class="form-group"><label id="lbl-newlevel">Updated Stop Loss</label><input type="text" id="new-level" placeholder="e.g. 5795" oninput="updateUpdatePreview()" /></div>
+          <div class="form-group"><label id="lbl-new-tp">Updated TP</label><input type="text" id="new-tp" placeholder="e.g. 5850" oninput="updateUpdatePreview()" /></div>
+          <div class="form-group"><label id="lbl-new-rr">R:R נוכחי</label><input type="text" id="new-rr" placeholder="לדוג׳ 1:1.8" oninput="updateUpdatePreview()" /></div>
+
+          <div class="form-group full"><label id="lbl-note">הערה</label><textarea id="note" placeholder="תאר את שינוי הניהול לצורכי לימוד..." oninput="updateUpdatePreview()"></textarea></div>
+          <div class="form-group full"><label id="lbl-img3">צירוף תמונה</label>
             <div class="img-section"><div class="img-tabs">
               <button class="img-tab active" onclick="switchImgTab('update','upload',this)">📁 <span class="it-upload">העלאה</span></button>
               <button class="img-tab" onclick="switchImgTab('update','paste',this)">📋 <span class="it-paste">הדבקה</span></button>
             </div><div class="img-body">
               <div id="img-upload-update" class="img-upload-area"><input type="file" accept="image/*" onchange="handleImg(event,'update')" /><span class="img-upload-label" id="img-upload-label-update">לחץ לבחירת קובץ</span></div>
-              <div id="img-paste-update" class="img-paste-area" style="display:none;" tabindex="0" onclick="this.focus()" onpaste="handlePasteEvent(event,'update')"><span id="img-paste-label-update">לחץ כאן ואז Ctrl+V</span></div>
+              <div id="img-paste-update" class="img-paste-area" style="display:none;" tabindex="0" onclick="this.focus()" onpaste="handlePasteEvent(event,'update')"><span id="img-paste-label-update">לחץ כאן ואז Ctrl+V להדבקת צילום מסך</span></div>
               <div id="img-preview-update"></div>
             </div></div>
           </div>
         </div>
         <div class="preview-label">תצוגה מקדימה</div>
-        <div class="preview-box" id="update-preview">מלא את הפרטים...</div>
+        <div class="preview-box" id="update-preview">מלא את הפרטים לצפייה בתצוגה מקדימה...</div>
         <div class="disclaimer" id="disc3">⚠️ כל הפרסומים הינם חלק מיומן מסחר אישי לצורכי לימוד בלבד. אין לראות בכך ייעוץ השקעות.</div>
         <button class="send-btn" id="send-update-btn" onclick="sendToTelegram('update')">📤 שלח לטלגרם</button>
       </div>
     </div>
 
+    <!-- CLOSE -->
     <div class="panel" id="panel-close">
       <div class="tv-prefill-badge" id="tv-badge-close"><div class="tv-dot"></div><span id="tv-badge-close-text">מולא אוטומטית מ-TradingView</span></div>
       <div class="card">
         <div class="form-grid">
-          <div class="form-group"><label>נכס</label><input type="text" id="c-ticker" placeholder="לדוג׳ SPX" oninput="updateClosePreview()" /></div>
-          <div class="form-group"><label>מסגרת זמן</label><input type="text" id="c-tf" placeholder="לדוג׳ 5m" oninput="updateClosePreview()" /></div>
-          <div class="form-group"><label>כניסה</label><input type="text" id="c-entry" placeholder="לדוג׳ 5792.5" oninput="updateClosePreview()" /></div>
-          <div class="form-group"><label>יציאה</label><input type="text" id="c-exit" placeholder="לדוג׳ 5835" oninput="updateClosePreview()" /></div>
-          <div class="form-group"><label>רמת סיכון שהייתה</label><input type="text" id="c-sl" placeholder="לדוג׳ 5778" oninput="updateClosePreview()" /></div>
-          <div class="form-group"><label>R:R שהושג</label><input type="text" id="c-rr" class="rr-field" style="font-size:15px;" readonly /></div>
-          <div class="form-group full"><label>סיכום ולקחים</label><textarea id="c-review" placeholder="שתף את הלקחים מהעסקה לצורכי לימוד..." oninput="updateClosePreview()"></textarea></div>
-          <div class="form-group full"><label>צירוף תמונה</label>
+          <div class="form-group"><label id="lbl-c-ticker">נכס</label><input type="text" id="c-ticker" placeholder="לדוג׳ SPX" oninput="updateClosePreview()" /></div>
+          <div class="form-group"><label id="lbl-c-tf">גרף</label><input type="text" id="c-tf" placeholder="לדוג׳ 5m" oninput="updateClosePreview()" /></div>
+          <div class="form-group"><label id="lbl-c-entry">Entry</label><input type="text" id="c-entry" placeholder="e.g. 5792.5" oninput="updateClosePreview()" /></div>
+          <div class="form-group"><label id="lbl-c-exit">Exit</label><input type="text" id="c-exit" placeholder="e.g. 5835" oninput="updateClosePreview()" /></div>
+          <div class="form-group"><label id="lbl-c-sl">Stop Loss</label><input type="text" id="c-sl" placeholder="e.g. 5778" oninput="updateClosePreview()" /></div>
+          <div class="form-group"><label id="lbl-c-rr">🎯 R:R שהושג</label><input type="text" id="c-rr" class="rr-field" style="font-size:15px;" readonly /></div>
+          <div class="form-group full"><label id="lbl-c-review">סיכום ולקחים</label><textarea id="c-review" placeholder="שתף את הלקחים מהעסקה לצורכי לימוד..." oninput="updateClosePreview()"></textarea></div>
+          <div class="form-group full"><label id="lbl-img4">צירוף תמונה</label>
             <div class="img-section"><div class="img-tabs">
               <button class="img-tab active" onclick="switchImgTab('close','upload',this)">📁 <span class="it-upload">העלאה</span></button>
               <button class="img-tab" onclick="switchImgTab('close','paste',this)">📋 <span class="it-paste">הדבקה</span></button>
             </div><div class="img-body">
               <div id="img-upload-close" class="img-upload-area"><input type="file" accept="image/*" onchange="handleImg(event,'close')" /><span class="img-upload-label" id="img-upload-label-close">לחץ לבחירת קובץ</span></div>
-              <div id="img-paste-close" class="img-paste-area" style="display:none;" tabindex="0" onclick="this.focus()" onpaste="handlePasteEvent(event,'close')"><span id="img-paste-label-close">לחץ כאן ואז Ctrl+V</span></div>
+              <div id="img-paste-close" class="img-paste-area" style="display:none;" tabindex="0" onclick="this.focus()" onpaste="handlePasteEvent(event,'close')"><span id="img-paste-label-close">לחץ כאן ואז Ctrl+V להדבקת צילום מסך</span></div>
               <div id="img-preview-close"></div>
             </div></div>
           </div>
         </div>
         <div class="preview-label">תצוגה מקדימה</div>
-        <div class="preview-box" id="close-preview">מלא את הפרטים...</div>
+        <div class="preview-box" id="close-preview">מלא את הפרטים לצפייה בתצוגה מקדימה...</div>
         <div class="disclaimer" id="disc4">⚠️ כל הפרסומים הינם חלק מיומן מסחר אישי לצורכי לימוד בלבד. אין לראות בכך ייעוץ השקעות.</div>
         <button class="send-btn" id="send-close-btn" onclick="sendToTelegram('close')">📤 שלח לטלגרם</button>
       </div>
     </div>
 
+    <!-- JOURNAL -->
     <div class="panel" id="panel-journal">
       <div class="stats-grid">
         <div class="stat"><div class="stat-label" id="sl1">סה״כ היום</div><div class="stat-val" id="stat1">0</div></div>
@@ -275,26 +282,34 @@
       </div>
       <div class="card"><div id="journal-list"><div class="empty-state">עדיין אין רשומות ביומן</div></div></div>
     </div>
+
   </div>
 </div>
 <script>
-const WEBHOOK_URL='https://trade-journal-inky-tau.vercel.app/api/webhook';
-let lang='he',bias=null,tradeBias=null,utype='sl',journal=[],pendingTVData=null,lastTVTs=null;
+const WEBHOOK_URL = 'https://trade-journal-inky-tau.vercel.app/api/webhook';
+let lang='he', bias=null, tradeBias=null, utype='sl', journal=[], pendingTVData=null, lastTVTs=null;
 let images={idea:null,trade:null,update:null,close:null};
-const DISC={he:'⚠️ תוכן זה הינו חלק מיומן מסחר אישי לצורכי לימוד בלבד. אין לראות בכך ייעוץ השקעות. כל החלטה היא באחריות הקורא בלבד.',en:'⚠️ This content is part of a personal trading journal for educational purposes only. This is not financial advice. All decisions are the sole responsibility of the reader.'};
-const UTYPES={he:{sl:'הזזת רמת סיכון',partial:'סגירה חלקית',add:'הוספה לפוזיציה'},en:{sl:'Move risk level',partial:'Partial close',add:'Add to position'}};
+
+const DISC={
+  he:'⚠️ תוכן זה הינו חלק מיומן מסחר אישי לצורכי לימוד בלבד. אין לראות בכך ייעוץ השקעות. כל החלטה היא באחריות הקורא בלבד.',
+  en:"⚠️ This content is part of a personal trading journal for educational purposes only. This is not financial advice. All decisions are the sole responsibility of the reader."
+};
+const UTYPES={
+  he:{sl:'הזזת רמת סיכון',partial:'סגירה חלקית',add:'הוספה לפוזיציה'},
+  en:{sl:'Move risk level',partial:'Partial close',add:'Add to position'}
+};
 
 function saveTgConfig(){localStorage.setItem('tg_token',document.getElementById('tg-token').value);localStorage.setItem('tg_chatid',document.getElementById('tg-chatid').value);}
-function loadTgConfig(){var t=localStorage.getItem('tg_token'),c=localStorage.getItem('tg_chatid');if(t)document.getElementById('tg-token').value=t;if(c)document.getElementById('tg-chatid').value=c;}
+function loadTgConfig(){const t=localStorage.getItem('tg_token'),c=localStorage.getItem('tg_chatid');if(t)document.getElementById('tg-token').value=t;if(c)document.getElementById('tg-chatid').value=c;}
 function getTg(){return{token:document.getElementById('tg-token').value.trim(),chatId:document.getElementById('tg-chatid').value.trim()};}
 
 async function testTelegram(){
-  var cfg=getTg(),st=document.getElementById('tg-status');
-  if(!cfg.token||!cfg.chatId){st.className='tg-status err';st.textContent=lang==='he'?'נא למלא Token ו-Chat ID':'Please fill Token and Chat ID';return;}
+  const{token,chatId}=getTg();const st=document.getElementById('tg-status');
+  if(!token||!chatId){st.className='tg-status err';st.textContent=lang==='he'?'נא למלא Token ו-Chat ID':'Please fill Token and Chat ID';return;}
   document.getElementById('test-btn-text').textContent='...';
   try{
-    var r=await fetch('https://api.telegram.org/bot'+cfg.token+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:cfg.chatId,text:lang==='he'?'✅ יומן המסחר מחובר בהצלחה!':'✅ Trading journal connected!'})});
-    var d=await r.json();
+    const r=await fetch(`https://api.telegram.org/bot${token}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:chatId,text:lang==='he'?'✅ יומן המסחר מחובר בהצלחה!':'✅ Trading journal connected!'})});
+    const d=await r.json();
     st.className=d.ok?'tg-status ok':'tg-status err';
     st.textContent=d.ok?(lang==='he'?'✅ חיבור תקין! הודעת בדיקה נשלחה':'✅ Connected! Test message sent'):('Error: '+(d.description||'Unknown'));
   }catch(e){st.className='tg-status err';st.textContent=lang==='he'?'שגיאת רשת':'Network error';}
@@ -302,103 +317,106 @@ async function testTelegram(){
 }
 
 async function sendToTelegram(type){
-  var cfg=getTg(),btn=document.getElementById('send-'+type+'-btn'),st=document.getElementById('tg-status');
-  if(!cfg.token||!cfg.chatId){st.className='tg-status err';st.textContent=lang==='he'?'⚠️ הגדר Token ו-Chat ID תחילה':'⚠️ Set Token and Chat ID first';return;}
-  var prev=btn.textContent;btn.disabled=true;btn.innerHTML='<span class="spinner"></span>'+(lang==='he'?'שולח...':'Sending...');
-  var previewIds={idea:'idea-preview',trade:'trade-preview',update:'update-preview',close:'close-preview'};
-  var text=document.getElementById(previewIds[type]).textContent,img=images[type];
+  const{token,chatId}=getTg();const btn=document.getElementById(`send-${type}-btn`);const st=document.getElementById('tg-status');
+  if(!token||!chatId){st.className='tg-status err';st.textContent=lang==='he'?'⚠️ הגדר Token ו-Chat ID תחילה':'⚠️ Set Token and Chat ID first';return;}
+  const prev=btn.textContent;btn.disabled=true;btn.innerHTML=`<span class="spinner"></span>${lang==='he'?'שולח...':'Sending...'}`;
+  const pid={idea:'idea-preview',trade:'trade-preview',update:'update-preview',close:'close-preview'}[type];
+  const text=document.getElementById(pid).textContent;const img=images[type];
   try{
-    var res,data;
-    if(img){var fd=new FormData();fd.append('chat_id',cfg.chatId);fd.append('caption',text);var blob=await fetch(img).then(function(r){return r.blob();});fd.append('photo',blob,'chart.jpg');res=await fetch('https://api.telegram.org/bot'+cfg.token+'/sendPhoto',{method:'POST',body:fd});}
-    else{res=await fetch('https://api.telegram.org/bot'+cfg.token+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:cfg.chatId,text:text})});}
+    let res,data;
+    if(img){const fd=new FormData();fd.append('chat_id',chatId);fd.append('caption',text);const blob=await fetch(img).then(r=>r.blob());fd.append('photo',blob,'chart.jpg');res=await fetch(`https://api.telegram.org/bot${token}/sendPhoto`,{method:'POST',body:fd});}
+    else{res=await fetch(`https://api.telegram.org/bot${token}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:chatId,text})});}
     data=await res.json();if(!data.ok)throw new Error(data.description);
     addToJournal(type,text,img);
     btn.innerHTML=lang==='he'?'✅ נשלח!':'✅ Sent!';btn.style.background='#27500A';
     st.className='tg-status ok';st.textContent=lang==='he'?'✅ נשלח בהצלחה!':'✅ Sent successfully!';
-    setTimeout(function(){btn.textContent=prev;btn.style.background='';btn.disabled=false;},2500);
+    setTimeout(()=>{btn.textContent=prev;btn.style.background='';btn.disabled=false;},2500);
   }catch(e){btn.textContent=prev;btn.disabled=false;st.className='tg-status err';st.textContent=(lang==='he'?'שגיאה: ':'Error: ')+e.message;}
 }
 
 function switchImgTab(type,mode,btn){
-  var up=document.getElementById('img-upload-'+type),pa=document.getElementById('img-paste-'+type);
-  btn.closest('.img-tabs').querySelectorAll('.img-tab').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');
+  const up=document.getElementById(`img-upload-${type}`),pa=document.getElementById(`img-paste-${type}`);
+  btn.closest('.img-tabs').querySelectorAll('.img-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
   if(mode==='upload'){up.style.display='block';pa.style.display='none';}else{up.style.display='none';pa.style.display='flex';pa.focus();}
 }
-function handleImg(e,type){var f=e.target.files[0];if(f)readImgFile(f,type);}
-function handlePasteEvent(e,type){var items=e.clipboardData?e.clipboardData.items:[];for(var i=0;i<items.length;i++){if(items[i].type.startsWith('image/')){e.preventDefault();readImgFile(items[i].getAsFile(),type);return;}}}
+function handleImg(e,type){const f=e.target.files[0];if(f)readImgFile(f,type);}
+function handlePasteEvent(e,type){const items=e.clipboardData?.items;if(!items)return;for(const item of items){if(item.type.startsWith('image/')){e.preventDefault();readImgFile(item.getAsFile(),type);return;}}}
 function readImgFile(file,type){
-  var r=new FileReader();
-  r.onload=function(ev){
+  const r=new FileReader();
+  r.onload=ev=>{
     images[type]=ev.target.result;
-    var ul=document.getElementById('img-upload-label-'+type);if(ul)ul.textContent='✅ '+(file.name||'תמונה');
-    var pl=document.getElementById('img-paste-label-'+type);if(pl)pl.textContent=lang==='he'?'✅ תמונה מוכנה':'✅ Image ready';
-    var pa=document.getElementById('img-paste-'+type);if(pa)pa.classList.add('ready');
-    var pv=document.getElementById('img-preview-'+type);if(pv)pv.innerHTML='<div class="img-preview-wrap"><img src="'+ev.target.result+'"/><button class="img-remove" onclick="removeImg(\''+type+'\')">✕</button></div>';
+    const ul=document.getElementById(`img-upload-label-${type}`);if(ul)ul.textContent='✅ '+(file.name||'תמונה');
+    const pl=document.getElementById(`img-paste-label-${type}`);if(pl)pl.textContent=lang==='he'?'✅ תמונה מוכנה':'✅ Image ready';
+    const pa=document.getElementById(`img-paste-${type}`);if(pa)pa.classList.add('ready');
+    const pv=document.getElementById(`img-preview-${type}`);if(pv)pv.innerHTML=`<div class="img-preview-wrap"><img src="${ev.target.result}"/><button class="img-remove" onclick="removeImg('${type}')">✕</button></div>`;
   };r.readAsDataURL(file);
 }
 function removeImg(type){
   images[type]=null;
-  var ul=document.getElementById('img-upload-label-'+type);if(ul)ul.textContent=lang==='he'?'לחץ לבחירת קובץ':'Click to select file';
-  var pl=document.getElementById('img-paste-label-'+type);if(pl)pl.textContent=lang==='he'?'לחץ כאן ואז Ctrl+V':'Click here then Ctrl+V';
-  var pa=document.getElementById('img-paste-'+type);if(pa)pa.classList.remove('ready');
-  var pv=document.getElementById('img-preview-'+type);if(pv)pv.innerHTML='';
+  const ul=document.getElementById(`img-upload-label-${type}`);if(ul)ul.textContent=lang==='he'?'לחץ לבחירת קובץ':'Click to select file';
+  const pl=document.getElementById(`img-paste-label-${type}`);if(pl)pl.textContent=lang==='he'?'לחץ כאן ואז Ctrl+V':'Click here then Ctrl+V';
+  const pa=document.getElementById(`img-paste-${type}`);if(pa)pa.classList.remove('ready');
+  const pv=document.getElementById(`img-preview-${type}`);if(pv)pv.innerHTML='';
 }
 
-function calcRR(entry,sl,tp){var e=parseFloat(entry),s=parseFloat(sl),t=parseFloat(tp);if(isNaN(e)||isNaN(s)||isNaN(t)||e===s)return'';return'1:'+(Math.abs(t-e)/Math.abs(e-s)).toFixed(2);}
-function v(id){var el=document.getElementById(id);return el?el.value:'';}
-function setVal(id,val){var el=document.getElementById(id);if(el)el.value=val;}
+function calcRR(entry,sl,tp){const e=parseFloat(entry),s=parseFloat(sl),t=parseFloat(tp);if(isNaN(e)||isNaN(s)||isNaN(t)||e===s)return'';return'1:'+(Math.abs(t-e)/Math.abs(e-s)).toFixed(2);}
 
 function buildIdeaMsg(){
-  var isHe=lang==='he',ticker=v('ticker'),tf=v('tf'),z=v('zone'),i=v('inv'),o=v('obj'),rr=v('rr'),c=v('conf');
-  var msg=isHe?'📋 תרחיש מוקדם | יומן מסחר DJR\n':'📋 Pre-Market Scenario | DJR Trading Journal\n';
+  const isHe=lang==='he',ticker=v('ticker'),tf=v('tf'),z=v('zone'),i=v('inv'),o=v('obj'),rr=v('rr'),c=v('conf');
+  let msg=isHe?'📋 תרחיש מוקדם | יומן מסחר DJR\n':'📋 Pre-Market Scenario | DJR Trading Journal\n';
   msg+='━━━━━━━━━━━━━━━\n';
-  if(ticker||tf)msg+='📊 '+ticker+(tf?' | ⏱ '+tf:'')+'\n';
-  if(bias)msg+=(bias==='bull'?(isHe?'כיוון ציפייה: 📈 עולה':'Scenario Bias: 📈 Bullish'):(isHe?'כיוון ציפייה: 📉 יורד':'Scenario Bias: 📉 Bearish'))+'\n';
-  if(z)msg+=(isHe?'אזור עניין':'Area of Interest')+': '+z+'\n';
-  if(i)msg+=(isHe?'רמת ביטול':'Scenario Invalidation')+': '+i+'\n';
-  if(o)msg+=(isHe?'אזור מטרה':'Target Zone')+': '+o+'\n';
-  if(rr)msg+=(isHe?'יחס סיכון/תשואה':'Risk/Reward Ratio')+': '+rr+'\n';
-  if(c)msg+='\n'+(isHe?'ניתוח':'Analysis')+':\n'+c+'\n';
+  if(ticker||tf)msg+=`📊 ${ticker}${tf?' | ⏱ '+tf:''}\n`;
+  if(bias)msg+=(bias==='bull'?(isHe?'כיוון מצופה: 📈 עולה':'Expected Bias: 📈 Bullish'):(isHe?'כיוון מצופה: 📉 יורד':'Expected Bias: 📉 Bearish'))+'\n';
+  if(z)msg+=(isHe?'Entry Zone':'Entry Zone')+`: ${z}\n`;
+  if(i)msg+=('Stop Loss')+`: ${i}\n`;
+  if(o)msg+=('TP')+`: ${o}\n`;
+  if(rr)msg+=(isHe?'יחס סיכון/תשואה':'Risk/Reward Ratio')+`: ${rr}\n`;
+  if(c)msg+='\n'+(isHe?'ניתוח':'Analysis')+`:\n${c}\n`;
   return msg+'━━━━━━━━━━━━━━━\n'+DISC[lang];
 }
 function buildTradeMsg(){
-  var isHe=lang==='he',ticker=v('t-ticker'),tf=v('t-tf'),ep=v('ep'),sz=v('size'),rl=v('rl'),ob=v('ob'),rr=v('t-rr'),rs=v('reason');
-  var msg=isHe?'📌 תיעוד עסקה | יומן מסחר DJR\n':'📌 Documented Trade | DJR Trading Journal\n';
+  const isHe=lang==='he',ticker=v('t-ticker'),tf=v('t-tf'),ep=v('ep'),sz=v('size'),rl=v('rl'),ob=v('ob'),rr=v('t-rr'),rs=v('reason');
+  let msg=isHe?'📌 תיעוד עסקה | יומן מסחר DJR\n':'📌 Documented Trade | DJR Trading Journal\n';
   msg+='━━━━━━━━━━━━━━━\n';
-  if(ticker||tf)msg+='📊 '+ticker+(tf?' | ⏱ '+tf:'')+'\n';
+  if(ticker||tf)msg+=`📊 ${ticker}${tf?' | ⏱ '+tf:''}\n`;
   if(tradeBias)msg+=(tradeBias==='bull'?(isHe?'כיוון: 📈 עולה':'Direction: 📈 Long'):(isHe?'כיוון: 📉 יורד':'Direction: 📉 Short'))+'\n';
-  if(ep)msg+=(isHe?'נקודת כניסה מתועדת':'Documented Entry')+': '+ep+'\n';
-  if(sz)msg+=(isHe?'גודל פוזיציה':'Position Size')+': '+sz+'\n';
-  if(rl)msg+=(isHe?'רמת סיכון':'Risk Level')+': '+rl+'\n';
-  if(ob)msg+=(isHe?'אזור מטרה':'Target Zone')+': '+ob+'\n';
-  if(rr)msg+=(isHe?'יחס סיכון/תשואה':'Risk/Reward Ratio')+': '+rr+'\n';
-  if(rs)msg+='\n'+(isHe?'סיבת הכניסה':'Entry Rationale')+':\n'+rs+'\n';
+  if(ep)msg+=('Entry')+`: ${ep}\n`;
+  if(sz)msg+=(isHe?'גודל פוזיציה':'Position Size')+`: ${sz}\n`;
+  if(rl)msg+=('Stop Loss')+`: ${rl}\n`;
+  if(ob)msg+=('TP')+`: ${ob}\n`;
+  if(rr)msg+=(isHe?'יחס סיכון/תשואה':'Risk/Reward Ratio')+`: ${rr}\n`;
+  if(rs)msg+='\n'+(isHe?'הערות':'Notes')+`:\n${rs}\n`;
   return msg+'━━━━━━━━━━━━━━━\n'+DISC[lang];
 }
 function buildUpdateMsg(){
-  var isHe=lang==='he',utLabel=UTYPES[lang][utype],ticker=v('u-ticker'),nl=v('new-level'),nrr=v('new-rr'),pnl=v('pnl'),note=v('note');
-  var msg=isHe?'🔄 עדכון ניהול | יומן מסחר DJR\n':'🔄 Management Update | DJR Trading Journal\n';
-  msg+=utLabel+'\n━━━━━━━━━━━━━━━\n';
-  if(ticker)msg+='📊 '+ticker+'\n';
-  if(nl)msg+=(isHe?'רמה חדשה':'New Level')+': '+nl+'\n';
-  if(nrr)msg+=(isHe?'R:R נוכחי':'Current R:R')+': '+nrr+'\n';
-  if(pnl)msg+=(isHe?'תוצאה חלקית':'Partial Result')+': '+pnl+'\n';
-  if(note)msg+='\n'+(isHe?'הערה':'Note')+':\n'+note+'\n';
+  const isHe=lang==='he',utLabel=UTYPES[lang][utype],ticker=v('u-ticker'),nl=v('new-level'),nrr=v('new-rr'),note=v('note');
+  let msg=isHe?'🔄 ניהול פוזיציה | יומן מסחר DJR\n':'🔄 Management Update | DJR Trading Journal\n';
+  msg+=`${utLabel}\n━━━━━━━━━━━━━━━\n`;
+  if(ticker)msg+=`📊 ${ticker}\n`;
+  if(nl)msg+=('Updated Stop Loss')+`: ${nl}\n`;
+  const ntp=v('new-tp');
+  if(ntp)msg+=('Updated TP')+`: ${ntp}\n`;
+  if(nrr)msg+=(isHe?'R:R נוכחי':'Current R:R')+`: ${nrr}\n`;
+  
+  if(note)msg+='\n'+(isHe?'הערה':'Note')+`:\n${note}\n`;
   return msg+'━━━━━━━━━━━━━━━\n'+DISC[lang];
 }
 function buildCloseMsg(){
-  var isHe=lang==='he',ticker=v('c-ticker'),tf=v('c-tf'),entry=v('c-entry'),exit=v('c-exit'),sl=v('c-sl'),rr=v('c-rr'),review=v('c-review');
-  var isProfit=parseFloat(exit)>parseFloat(entry);
-  var msg=(isProfit?'✅':'❌')+' '+(isHe?'סגירת עסקה | יומן מסחר DJR':'Trade Closed | DJR Trading Journal')+'\n';
+  const isHe=lang==='he',ticker=v('c-ticker'),tf=v('c-tf'),entry=v('c-entry'),exit=v('c-exit'),sl=v('c-sl'),rr=v('c-rr'),review=v('c-review');
+  const isProfit=parseFloat(exit)>parseFloat(entry);
+  let msg=isHe?`${isProfit?'✅':'❌'} סגירת עסקה | יומן מסחר DJR\n`:`${isProfit?'✅':'❌'} Trade Closed | DJR Trading Journal\n`;
   msg+='━━━━━━━━━━━━━━━\n';
-  if(ticker||tf)msg+='📊 '+ticker+(tf?' | ⏱ '+tf:'')+'\n';
-  if(entry)msg+=(isHe?'כניסה':'Entry')+': '+entry+'\n';
-  if(exit)msg+=(isHe?'יציאה':'Exit')+': '+exit+'\n';
-  if(sl)msg+=(isHe?'רמת סיכון שהייתה':'Risk Level Was')+': '+sl+'\n';
-  if(rr)msg+=(isHe?'🎯 R:R שהושג':'🎯 R:R Achieved')+': '+rr+'\n';
-  if(review)msg+='\n'+(isHe?'סיכום ולקחים':'Review & Lessons')+':\n'+review+'\n';
+  if(ticker||tf)msg+=`📊 ${ticker}${tf?' | ⏱ '+tf:''}\n`;
+  if(entry)msg+=('Entry')+`: ${entry}\n`;
+  if(exit)msg+=('Exit')+`: ${exit}\n`;
+  if(sl)msg+=('Stop Loss')+`: ${sl}\n`;
+  if(rr)msg+=(isHe?'🎯 R:R שהושג':'🎯 R:R Achieved')+`: ${rr}\n`;
+  if(review)msg+='\n'+(isHe?'סיכום ולקחים':'Review & Lessons')+`:\n${review}\n`;
   return msg+'━━━━━━━━━━━━━━━\n'+DISC[lang];
 }
+
+function v(id){const el=document.getElementById(id);return el?el.value:'';}
+function setVal(id,val){const el=document.getElementById(id);if(el)el.value=val;}
 
 function updateIdeaPreview(){setVal('rr',calcRR(v('zone').split('-')[0],v('inv'),v('obj')));document.getElementById('idea-preview').textContent=buildIdeaMsg();}
 function updateTradePreview(){setVal('t-rr',calcRR(v('ep'),v('rl'),v('ob')));document.getElementById('trade-preview').textContent=buildTradeMsg();}
@@ -407,120 +425,99 @@ function updateClosePreview(){setVal('c-rr',calcRR(v('c-entry'),v('c-sl'),v('c-e
 
 function setBias(b){bias=b;document.getElementById('bull-btn').classList.toggle('active',b==='bull');document.getElementById('bear-btn').classList.toggle('active',b==='bear');updateIdeaPreview();}
 function setTradeBias(b){tradeBias=b;document.getElementById('bull-btn-t').classList.toggle('active',b==='bull');document.getElementById('bear-btn-t').classList.toggle('active',b==='bear');updateTradePreview();}
-function setUtype(el,t){utype=t;document.querySelectorAll('.utype').forEach(function(u){u.classList.remove('active');});el.classList.add('active');updateUpdatePreview();}
+function setUtype(el,t){utype=t;document.querySelectorAll('.utype').forEach(u=>u.classList.remove('active'));el.classList.add('active');updateUpdatePreview();}
 
 function showTab(name){
-  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
-  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('tab-'+name).classList.add('active');
   document.getElementById('panel-'+name).classList.add('active');
 }
 
 function addToJournal(type,text,img){
-  journal.unshift({type:type,text:text,img:img,time:new Date().toLocaleTimeString(lang==='he'?'he-IL':'en-GB',{hour:'2-digit',minute:'2-digit'})});
+  journal.unshift({type,text,img,time:new Date().toLocaleTimeString(lang==='he'?'he-IL':'en-GB',{hour:'2-digit',minute:'2-digit'})});
   renderJournal();
 }
 function renderJournal(){
-  var list=document.getElementById('journal-list');
+  const list=document.getElementById('journal-list');
   document.getElementById('stat1').textContent=journal.length;
-  document.getElementById('stat2').textContent=journal.filter(function(j){return j.type==='trade';}).length;
-  document.getElementById('stat3').textContent=journal.filter(function(j){return j.type==='update';}).length;
-  if(!journal.length){list.innerHTML='<div class="empty-state">'+(lang==='he'?'עדיין אין רשומות ביומן':'No journal entries yet')+'</div>';return;}
-  var badges={idea:'<span class="badge badge-idea">'+(lang==='he'?'תרחיש':'Scenario')+'</span>',trade:'<span class="badge badge-open">'+(lang==='he'?'כניסה':'Entry')+'</span>',update:'<span class="badge badge-update">'+(lang==='he'?'עדכון':'Update')+'</span>',close:'<span class="badge badge-closed">'+(lang==='he'?'סגירה':'Close')+'</span>'};
-  list.innerHTML=journal.map(function(j){return '<div class="journal-item"><div class="ji-header">'+(badges[j.type]||'')+'<span class="ji-time">'+j.time+'</span></div><div class="ji-text">'+j.text.split('\n').slice(0,3).join(' | ')+'</div>'+(j.img?'<img class="ji-img" src="'+j.img+'"/>':'')+'</div>';}).join('');
+  document.getElementById('stat2').textContent=journal.filter(j=>j.type==='trade').length;
+  document.getElementById('stat3').textContent=journal.filter(j=>j.type==='update').length;
+  if(!journal.length){list.innerHTML=`<div class="empty-state">${lang==='he'?'עדיין אין רשומות ביומן':'No journal entries yet'}</div>`;return;}
+  const badges={idea:`<span class="badge badge-idea">${lang==='he'?'תרחיש':'Scenario'}</span>`,trade:`<span class="badge badge-open">${lang==='he'?'כניסה':'Entry'}</span>`,update:`<span class="badge badge-update">${lang==='he'?'עדכון':'Update'}</span>`,close:`<span class="badge badge-closed">${lang==='he'?'סגירה':'Close'}</span>`};
+  list.innerHTML=journal.map(j=>`<div class="journal-item"><div class="ji-header">${badges[j.type]||''}<span class="ji-time">${j.time}</span></div><div class="ji-text">${j.text.split('\n').slice(0,3).join(' | ')}</div>${j.img?`<img class="ji-img" src="${j.img}"/>`:''}	</div>`).join('');
 }
 
 async function pollTVData(){
   try{
-    var r=await fetch(WEBHOOK_URL,{cache:'no-store'});
-    var json=await r.json();
-    var tvd=json.data;
+    const r=await fetch(WEBHOOK_URL,{cache:'no-store'});const json=await r.json();
+    let tvd=json.data;
     if(typeof tvd==='string'){try{tvd=JSON.parse(tvd);}catch(e){tvd=null;}}
     if(tvd&&tvd.timestamp&&tvd.timestamp!==lastTVTs){
-     if(tvd.timestamp!==lastTVTs){pendingTVData=tvd;showTVBanner(tvd);}
+      lastTVTs=tvd.timestamp;pendingTVData=tvd;showTVBanner(tvd);
     }
   }catch(e){}
 }
-
 function showTVBanner(d){
-  var typeLabel={idea:lang==='he'?'תרחיש מוקדם':'Pre-Trade Idea',trade:lang==='he'?'פוזיציה':'Position Entry',update:lang==='he'?'עדכון':'Update',close:lang==='he'?'סגירה':'Close'};
-  document.getElementById('tv-banner-msg').textContent='📡 '+(d.ticker||'TradingView')+' → '+(typeLabel[d.action||'idea']||d.action);
+  const typeLabel={idea:lang==='he'?'תרחיש מוקדם':'Pre-Trade Idea',trade:lang==='he'?'פוזיציה':'Position Entry',update:lang==='he'?'עדכון':'Update',close:lang==='he'?'סגירה':'Close'};
+  document.getElementById('tv-banner-msg').textContent=`📡 ${d.ticker||'TradingView'} → ${typeLabel[d.action||'idea']||d.action}`;
   document.getElementById('tv-open-btn').textContent=lang==='he'?'פתח טופס':'Open Form';
   document.getElementById('tv-banner').classList.add('show');
 }
 function dismissBanner(){document.getElementById('tv-banner').classList.remove('show');}
-
 function applyTVData(){
-  if(!pendingTVData)return;
-  var d=pendingTVData;
-  var type=d.action||'idea';
-  lastTVTs=d.timestamp;
+  if(!pendingTVData)return;const d=pendingTVData;const type=d.action||'idea';
   pendingTVData=null;
-  dismissBanner();
-  showTab(type);
-  var badge=document.getElementById('tv-badge-'+type);
-  if(badge)badge.classList.add('show');
+  dismissBanner();showTab(type);
+  const badge=document.getElementById('tv-badge-'+type);if(badge)badge.classList.add('show');
   setTimeout(function(){
     if(type==='idea'){
-      if(d.ticker)setVal('ticker',d.ticker);
-      if(d.timeframe)setVal('tf',d.timeframe);
-      if(d.direction)setBias(d.direction);
-      if(d.entry)setVal('zone',d.entry);
-      if(d.sl)setVal('inv',d.sl);
-      if(d.tp)setVal('obj',d.tp);
-      updateIdeaPreview();
+      if(d.ticker)setVal('ticker',d.ticker);if(d.timeframe)setVal('tf',d.timeframe);
+      if(d.direction)setBias(d.direction);if(d.entry)setVal('zone',d.entry);
+      if(d.sl)setVal('inv',d.sl);if(d.tp)setVal('obj',d.tp);updateIdeaPreview();
     }else if(type==='trade'){
-      if(d.ticker)setVal('t-ticker',d.ticker);
-      if(d.timeframe)setVal('t-tf',d.timeframe);
-      if(d.direction)setTradeBias(d.direction);
-      if(d.entry)setVal('ep',d.entry);
-      if(d.sl)setVal('rl',d.sl);
-      if(d.tp)setVal('ob',d.tp);
-      updateTradePreview();
+      if(d.ticker)setVal('t-ticker',d.ticker);if(d.timeframe)setVal('t-tf',d.timeframe);
+      if(d.direction)setTradeBias(d.direction);if(d.entry)setVal('ep',d.entry);
+      if(d.sl)setVal('rl',d.sl);if(d.tp)setVal('ob',d.tp);updateTradePreview();
     }else if(type==='update'){
-      if(d.ticker)setVal('u-ticker',d.ticker);
-      if(d.sl)setVal('new-level',d.sl);
-      if(d.rr)setVal('new-rr',d.rr);
-      updateUpdatePreview();
+      if(d.ticker)setVal('u-ticker',d.ticker);if(d.sl)setVal('new-level',d.sl);
+      if(d.rr)setVal('new-rr',d.rr);updateUpdatePreview();
     }else if(type==='close'){
-      if(d.ticker)setVal('c-ticker',d.ticker);
-      if(d.timeframe)setVal('c-tf',d.timeframe);
-      if(d.entry)setVal('c-entry',d.entry);
-      if(d.exit)setVal('c-exit',d.exit);
-      if(d.sl)setVal('c-sl',d.sl);
-      updateClosePreview();
+      if(d.ticker)setVal('c-ticker',d.ticker);if(d.timeframe)setVal('c-tf',d.timeframe);
+      if(d.entry)setVal('c-entry',d.entry);if(d.exit)setVal('c-exit',d.exit);
+      if(d.sl)setVal('c-sl',d.sl);updateClosePreview();
     }
   },150);
 }
 
 function setLang(l){
   lang=l;document.documentElement.dir=l==='he'?'rtl':'ltr';document.documentElement.lang=l;
-  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.remove('active');});
-  document.querySelector('.lang-btn[onclick="setLang(\''+l+'\')"]').classList.add('active');
-  var he=l==='he';
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`.lang-btn[onclick="setLang('${l}')"]`).classList.add('active');
+  const he=l==='he';
   document.getElementById('tg-title').textContent=he?'⚙️ הגדרות טלגרם':'⚙️ Telegram Settings';
   document.getElementById('test-btn-text').textContent=he?'בדוק':'Test';
-  document.getElementById('tab-idea').textContent=he?'רעיון מוקדם':'Pre-Trade Idea';
-  document.getElementById('tab-trade').textContent=he?'תיעוד פוזיציה':'Document Position';
-  document.getElementById('tab-update').textContent=he?'עדכון ניהול':'Management Update';
-  document.getElementById('tab-close').textContent=he?'סגירה':'Close Trade';
+  document.getElementById('tab-idea').textContent=he?'רעיון מקדים':'Pre-Trade Idea';
+  document.getElementById('tab-trade').textContent=he?'עדכון פוזיציה':'Position Update';
+  document.getElementById('tab-update').textContent=he?'ניהול פוזיציה':'Management Update';
+  document.getElementById('tab-close').textContent=he?'סגירת פוזיציה':'Close Position';
   document.getElementById('tab-journal').textContent=he?'יומן':'Journal';
   document.getElementById('sl1').textContent=he?'סה״כ היום':'Total today';
   document.getElementById('sl2').textContent=he?'פוזיציות':'Positions';
   document.getElementById('sl3').textContent=he?'עדכונים':'Updates';
-  ['idea','trade','update','close'].forEach(function(t,i){
-    var btn=document.getElementById('send-'+t+'-btn');if(btn)btn.textContent=he?'📤 שלח לטלגרם':'📤 Send to Telegram';
-    var disc=document.getElementById('disc'+(i+1));if(disc)disc.textContent=DISC[l];
-    var badge=document.getElementById('tv-badge-'+t+'-text');if(badge)badge.textContent=he?'מולא אוטומטית מ-TradingView':'Auto-filled from TradingView';
+  ['idea','trade','update','close'].forEach((t,i)=>{
+    const btn=document.getElementById(`send-${t}-btn`);if(btn)btn.textContent=he?'📤 שלח לטלגרם':'📤 Send to Telegram';
+    const disc=document.getElementById(`disc${i+1}`);if(disc)disc.textContent=DISC[l];
+    const badge=document.getElementById(`tv-badge-${t}-text`);if(badge)badge.textContent=he?'מולא אוטומטית מ-TradingView':'Auto-filled from TradingView';
   });
-  document.querySelectorAll('.it-upload').forEach(function(el){el.textContent=he?'העלאה':'Upload';});
-  document.querySelectorAll('.it-paste').forEach(function(el){el.textContent=he?'הדבקה':'Paste';});
-  document.querySelectorAll('.utype').forEach(function(el,i){el.textContent=UTYPES[l][['sl','partial','add'][i]];});
+  document.querySelectorAll('.it-upload').forEach(el=>el.textContent=he?'העלאה':'Upload');
+  document.querySelectorAll('.it-paste').forEach(el=>el.textContent=he?'הדבקה':'Paste');
+  document.querySelectorAll('.utype').forEach((el,i)=>el.textContent=UTYPES[l][['sl','partial','add'][i]]);
   updateIdeaPreview();updateTradePreview();updateUpdatePreview();updateClosePreview();renderJournal();
 }
 
 loadTgConfig();updateIdeaPreview();updateTradePreview();updateUpdatePreview();updateClosePreview();
-setInterval(pollTVData,2000);
+setInterval(pollTVData,4000);pollTVData();
 </script>
 </body>
 </html>
