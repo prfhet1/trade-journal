@@ -437,7 +437,7 @@ async function pollTVData(){
     var tvd=json.data;
     if(typeof tvd==='string'){try{tvd=JSON.parse(tvd);}catch(e){tvd=null;}}
     if(tvd&&tvd.timestamp&&tvd.timestamp!==lastTVTs){
-     if(!lastTVTs||tvd.timestamp!==lastTVTs){pendingTVData=tvd;showTVBanner(tvd);}
+     if(tvd.timestamp!==lastTVTs){pendingTVData=tvd;showTVBanner(tvd);}
     }
   }catch(e){}
 }
@@ -455,7 +455,6 @@ function applyTVData(){
   var d=pendingTVData;
   var type=d.action||'idea';
   lastTVTs=d.timestamp;
-  localStorage.setItem('lastTVTs',d.timestamp);
   pendingTVData=null;
   dismissBanner();
   showTab(type);
@@ -521,7 +520,6 @@ function setLang(l){
 }
 
 loadTgConfig();updateIdeaPreview();updateTradePreview();updateUpdatePreview();updateClosePreview();
-lastTVTs=parseInt(localStorage.getItem('lastTVTs'))||null;
 setInterval(pollTVData,2000);
 </script>
 </body>
