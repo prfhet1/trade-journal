@@ -338,6 +338,7 @@
 const WEBHOOK_URL = 'https://trade-journal-inky-tau.vercel.app/api/webhook';
 let lang='he', bias=null, tradeBias=null, utype='sl', journal=[], pendingTVData=null, lastTVTs=null;
 let images={idea:null,trade:null,update:null,close:null,weekly:null};
+let rawMessages={idea:'',trade:'',update:'',close:''};
 
 function escMD(s){return String(s).replace(/([_*\[\]()~`>#+\-=|{}.!\\])/g,'\\$1');}
 function bold(s){return '*'+escMD(s)+'*';}
@@ -345,14 +346,16 @@ const DISC={
   he:'⚠️ תוכן זה הינו חלק מיומן מסחר אישי לצורכי לימוד בלבד. אין לראות בכך ייעוץ השקעות. כל החלטה היא באחריות הקורא בלבד.',
   en:"⚠️ This content is part of a personal trading journal for educational purposes only. This is not financial advice. All decisions are the sole responsibility of the reader."
 };
-function colorize(text){
-  // Ticker in yellow, SL values in red, TP values in green
-  return text
-    .replace(/^(📊 )(.+?)( \|)/gm, '$1<span style="color:#EF9F27;font-weight:700;">$2</span>$3')
-    .replace(/(Stop Loss|Updated Stop Loss): (.+)/g, '$1: <span style="color:#E24B4A;font-weight:700;">$2</span>')
-    .replace(/(TP|Updated TP): (.+)/g, '$1: <span style="color:#1D9E75;font-weight:700;">$2</span>')
-    .replace(/\n/g, '<br>')
-    .replace(/━/g, '━');
+function colorize(text){ return text; }
+function colorizeHTML(text){
+  var t=text;
+  t=t.replace(/\*(.*?)\*/g,'<strong>$1</strong>');
+  t=t.replace(/\\([_\[\]().!|#+\-={}~`>])/g,'$1');
+  t=t.replace(/(Stop Loss|Updated Stop Loss):([^<\n]+)/g,'$1:<span style="color:#E24B4A;font-weight:700;">$2</span>');
+  t=t.replace(/TP:([^<\n]+)/g,'TP:<span style="color:#1D9E75;font-weight:700;">$1</span>');
+  t=t.replace(/\u{1F4CA} <strong>([^<]+)<\/strong>/gu,'📊 <span style="color:#EF9F27;font-weight:700;">$1</span>');
+  t=t.replace(/\n/g,'<br>');
+  return t;
 }
 const UTYPES={
   he:{sl:'Move Stop Loss',partial:'Partial Close',add:'Add to Position'},
@@ -405,8 +408,7 @@ async function sendToTelegram(type){
   const{token,chatId}=getTg();const btn=document.getElementById(`send-${type}-btn`);const st=document.getElementById('tg-status');
   if(!token||!chatId){st.className='tg-status err';st.textContent=lang==='he'?'⚠️ הגדר Token ו-Chat ID תחילה':'⚠️ Set Token and Chat ID first';return;}
   const prev=btn.textContent;btn.disabled=true;btn.innerHTML=`<span class="spinner"></span>${lang==='he'?'שולח...':'Sending...'}`;
-  const pid={idea:'idea-preview',trade:'trade-preview',update:'update-preview',close:'close-preview'}[type];
-  const text=document.getElementById(pid).innerText;const img=images[type];
+  const text=rawMessages[type]||'';const img=images[type];
   try{
     let res,data;
     if(img){const fd=new FormData();fd.append('chat_id',chatId);fd.append('caption',text);fd.append('parse_mode','MarkdownV2');const blob=await fetch(img).then(r=>r.blob());fd.append('photo',blob,'chart.jpg');res=await fetch(`https://api.telegram.org/bot${token}/sendPhoto`,{method:'POST',body:fd});}
@@ -528,10 +530,30 @@ function syncFromIdea(){
   // Recalc
   updateTradePreview();updateUpdatePreview();updateClosePreview();
 }
-function updateIdeaPreview(){setVal('rr',calcRR(v('zone').split('-')[0],v('inv'),v('obj')));syncFromIdea();document.getElementById('idea-preview').innerHTML=buildIdeaMsg();}
-function updateTradePreview(){setVal('t-rr',calcRR(v('ep'),v('rl'),v('ob')));document.getElementById('trade-preview').innerHTML=buildTradeMsg();}
-function updateUpdatePreview(){document.getElementById('update-preview').innerHTML=buildUpdateMsg();}
-function updateClosePreview(){setVal('c-rr',calcRR(v('c-entry'),v('c-sl'),v('c-exit')));document.getElementById('close-preview').innerHTML=buildCloseMsg();}
+function updateIdeaPreview(){
+  setVal('rr',calcRR(v('zone').split('-')[0],v('inv'),v('obj')));
+  syncFromIdea();
+  const raw=buildIdeaMsg();
+  rawMessages.idea=raw;
+  document.getElementById('idea-preview').innerHTML=colorizeHTML(raw);
+}
+function updateTradePreview(){
+  setVal('t-rr',calcRR(v('ep'),v('rl'),v('ob')));
+  const raw=buildTradeMsg();
+  rawMessages.trade=raw;
+  document.getElementById('trade-preview').innerHTML=colorizeHTML(raw);
+}
+function updateUpdatePreview(){
+  const raw=buildUpdateMsg();
+  rawMessages.update=raw;
+  document.getElementById('update-preview').innerHTML=colorizeHTML(raw);
+}
+function updateClosePreview(){
+  setVal('c-rr',calcRR(v('c-entry'),v('c-sl'),v('c-exit')));
+  const raw=buildCloseMsg();
+  rawMessages.close=raw;
+  document.getElementById('close-preview').innerHTML=colorizeHTML(raw);
+}
 
 function setBias(b){bias=b;document.getElementById('bull-btn').classList.toggle('active',b==='bull');document.getElementById('bear-btn').classList.toggle('active',b==='bear');updateIdeaPreview();}
 function setTradeBias(b){tradeBias=b;document.getElementById('bull-btn-t').classList.toggle('active',b==='bull');document.getElementById('bear-btn-t').classList.toggle('active',b==='bear');updateTradePreview();}
