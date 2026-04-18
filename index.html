@@ -539,7 +539,13 @@ function esc(s){
   c=c.replace(/!/g,'\\!');
   return c;
 }
-function bold(s){if(!s&&s!==0)return'';return '*'+esc(String(s))+'*';}
+function bold(s){
+  if(!s&&s!==0)return'';
+  var c=String(s);
+  c=c.replace(/\\/g,'\\\\');
+  c=c.replace(/\*/g,'\\*');
+  return '*'+c+'*';
+}
 var SEP='━━━━━━━━━━━━━━━';
 
 // ── MESSAGE BUILDERS ──────────────────────────────────────────
@@ -547,9 +553,9 @@ function buildIdea(){
   var isHe=lang==='he';
   var ticker=gv('ticker'),tf=gv('tf'),z=gv('zone'),sl=gv('inv'),tp=gv('obj'),rr=gv('rr'),c=gv('conf'),rel=gv('related');
   var lines=[];
-  lines.push(bold((isHe?'📋 רעיון מקדים':'📋 Pre-Trade Idea')+' | יומן מסחר DJR'));
+  lines.push(bold(isHe?'📋 רעיון מקדים  יומן מסחר DJR':'📋 Pre-Trade Idea  DJR Journal'));
   lines.push(SEP);
-  if(ticker||tf)lines.push('📊 '+bold(ticker)+(tf?' | ⏱ '+esc(tf):''));
+  if(ticker||tf)lines.push('📊 '+bold(ticker)+(tf?'  ⏱ '+esc(tf):''));
   if(bias)lines.push(bias==='bull'?(isHe?'כיוון מצופה: 📈 עולה':'Expected Bias: 📈 Bullish'):(isHe?'כיוון מצופה: 📉 יורד':'Expected Bias: 📉 Bearish'));
   if(z)lines.push('Entry: '+bold(z));
   if(sl)lines.push('Stop Loss: '+bold(sl));
@@ -564,9 +570,9 @@ function buildTrade(){
   var isHe=lang==='he';
   var ticker=gv('t-ticker'),tf=gv('t-tf'),ep=gv('ep'),rl=gv('rl'),ob=gv('ob'),rr=gv('t-rr'),rs=gv('reason');
   var lines=[];
-  lines.push(bold((isHe?'📌 תיעוד עסקה':'📌 Documented Trade')+' | יומן מסחר DJR'));
+  lines.push(bold(isHe?'📌 תיעוד עסקה  יומן מסחר DJR':'📌 Documented Trade  DJR Journal'));
   lines.push(SEP);
-  if(ticker||tf)lines.push('📊 '+bold(ticker)+(tf?' | ⏱ '+esc(tf):''));
+  if(ticker||tf)lines.push('📊 '+bold(ticker)+(tf?'  ⏱ '+esc(tf):''));
   if(tradeBias)lines.push(tradeBias==='bull'?(isHe?'כיוון: 📈 עולה':'Direction: 📈 Long'):(isHe?'כיוון: 📉 יורד':'Direction: 📉 Short'));
   if(ep)lines.push('Entry: '+bold(ep));
   if(rl)lines.push('Stop Loss: '+bold(rl));
@@ -581,7 +587,7 @@ function buildUpdate(){
   var utLabel=UTYPES[lang][utype]||utype;
   var ticker=gv('u-ticker'),nl=gv('new-sl'),ntp=gv('new-tp'),nrr=gv('new-rr'),note=gv('note'),pct=gv('pos-pct');
   var lines=[];
-  lines.push(bold((isHe?'🔄 ניהול עסקה':'🔄 Trade Management')+' | יומן מסחר DJR'));
+  lines.push(bold(isHe?'🔄 ניהול עסקה  יומן מסחר DJR':'🔄 Trade Management  DJR Journal'));
   lines.push(esc(utLabel));lines.push(SEP);
   if(ticker)lines.push('📊 '+bold(ticker));
   if(nl)lines.push('Updated Stop Loss: '+bold(nl));
@@ -597,9 +603,9 @@ function buildClose(){
   var ticker=gv('c-ticker'),tf=gv('c-tf'),entry=gv('c-entry'),exit=gv('c-exit'),sl=gv('c-sl'),rr=gv('c-rr'),review=gv('c-review'),reason=gv('c-reason');
   var isProfit=parseFloat(exit)>parseFloat(entry);
   var lines=[];
-  lines.push(bold((isProfit?'✅ ':'❌ ')+(isHe?'סגירת עסקה':'Trade Closed')+' | יומן מסחר DJR'));
+  lines.push(bold((isProfit?'✅ ':'❌ ')+(isHe?'סגירת עסקה  יומן מסחר DJR':'Trade Closed  DJR Journal')));
   lines.push(SEP);
-  if(ticker||tf)lines.push('📊 '+bold(ticker)+(tf?' | ⏱ '+esc(tf):''));
+  if(ticker||tf)lines.push('📊 '+bold(ticker)+(tf?'  ⏱ '+esc(tf):''));
   if(entry)lines.push('Entry: '+bold(entry));
   if(exit)lines.push('Exit: '+bold(exit));
   if(sl)lines.push('Stop Loss: '+bold(sl));
@@ -750,7 +756,7 @@ function buildStats(period,entries){
   var updates=entries.filter(function(j){return j.type==='update';}).length;
   var label=period==='weekly'?(isHe?'📊 סיכום שבועי':'📊 Weekly Summary'):(isHe?'📈 סיכום חודשי':'📈 Monthly Summary');
   var lines=[];
-  lines.push(bold(label+' | יומן מסחר DJR'));
+  lines.push(bold(label+'  יומן מסחר DJR'));
   lines.push(SEP);
   lines.push((isHe?'עסקאות':'Trades')+': '+bold(String(closes.length)));
   lines.push((isHe?'מנצחות ✅':'Winners ✅')+': '+bold(String(wins)));
