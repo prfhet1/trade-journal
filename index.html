@@ -117,6 +117,7 @@
 <div class="app" id="main-app" style="display:none;">
   <div class="topbar">
     <div class="logo">יומן<span>מסחר</span></div>
+    <div id="sync-indicator" style="font-size:11px;color:#718096;display:none;">☁️ מסנכרן...</div>
     <div class="lang-toggle">
       <button class="lang-btn active" onclick="setLang('he')">עברית</button>
       <button class="lang-btn" onclick="setLang('en')">English</button>
@@ -354,8 +355,29 @@ const UTYPES={
   en:{sl:'Move risk level',partial:'Partial close',add:'Add to position'}
 };
 
-function saveTgConfig(){localStorage.setItem('tg_token',document.getElementById('tg-token').value);localStorage.setItem('tg_chatid',document.getElementById('tg-chatid').value);}
-function loadTgConfig(){const t=localStorage.getItem('tg_token'),c=localStorage.getItem('tg_chatid');if(t)document.getElementById('tg-token').value=t;if(c)document.getElementById('tg-chatid').value=c;}
+function saveTgConfig(){
+  const token=document.getElementById('tg-token').value;
+  const chatId=document.getElementById('tg-chatid').value;
+  localStorage.setItem('tg_token',token);
+  localStorage.setItem('tg_chatid',chatId);
+  fetch('/api/webhook/settings',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token,chatId})});
+}
+function loadTgConfig(){
+  const t=localStorage.getItem('tg_token'),c=localStorage.getItem('tg_chatid');
+  if(t)document.getElementById('tg-token').value=t;
+  if(c)document.getElementById('tg-chatid').value=c;
+}
+async function syncSettingsFromCloud(){
+  try{
+    const r=await fetch('/api/webhook/settings');
+    const j=await r.json();
+    if(j.data){
+      const d=typeof j.data==='string'?JSON.parse(j.data):j.data;
+      if(d.token){document.getElementById('tg-token').value=d.token;localStorage.setItem('tg_token',d.token);}
+      if(d.chatId){document.getElementById('tg-chatid').value=d.chatId;localStorage.setItem('tg_chatid',d.chatId);}
+    }
+  }catch(e){}
+}
 function getTg(){return{token:document.getElementById('tg-token').value.trim(),chatId:document.getElementById('tg-chatid').value.trim()};}
 
 async function testTelegram(){
@@ -526,11 +548,26 @@ function addToJournal(type,text,img){
 function saveJournal(){
   const toSave=journal.map(j=>({type:j.type,text:j.text,time:j.time,date:j.date}));
   try{localStorage.setItem('djr_journal',JSON.stringify(toSave));}catch(e){}
+  fetch('/api/webhook/journal',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(toSave)});
 }
 function loadJournal(){
   try{
     const saved=localStorage.getItem('djr_journal');
     if(saved)journal=JSON.parse(saved);
+  }catch(e){}
+}
+async function syncJournalFromCloud(){
+  try{
+    const r=await fetch('/api/webhook/journal');
+    const j=await r.json();
+    if(j.data){
+      const d=typeof j.data==='string'?JSON.parse(j.data):j.data;
+      if(Array.isArray(d)&&d.length>0){
+        journal=d;
+        localStorage.setItem('djr_journal',JSON.stringify(d));
+        renderJournal();
+      }
+    }
   }catch(e){}
 }
 function getWeekStart(d){const dt=new Date(d);dt.setHours(0,0,0,0);dt.setDate(dt.getDate()-dt.getDay());return dt;}
@@ -700,9 +737,36 @@ function clearJournal(){
   }
 }
 
-function saveWeeklyNote(){localStorage.setItem('weekly_note',document.getElementById('weekly-note-text').value);}
-function loadWeeklyNote(){const n=localStorage.getItem('weekly_note');if(n&&document.getElementById('weekly-note-text'))document.getElementById('weekly-note-text').value=n;}
-loadJournal();loadWeeklyNote();loadTgConfig();updateIdeaPreview();updateTradePreview();updateUpdatePreview();updateClosePreview();
+function saveWeeklyNote(){
+  const note=document.getElementById('weekly-note-text').value;
+  localStorage.setItem('weekly_note',note);
+  fetch('/api/webhook/weekly',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({note})});
+}
+function loadWeeklyNote(){
+  const n=localStorage.getItem('weekly_note');
+  if(n&&document.getElementById('weekly-note-text'))document.getElementById('weekly-note-text').value=n;
+}
+async function syncWeeklyFromCloud(){
+  try{
+    const r=await fetch('/api/webhook/weekly');
+    const j=await r.json();
+    if(j.data){
+      const d=typeof j.data==='string'?JSON.parse(j.data):j.data;
+      if(d&&d.note){
+        localStorage.setItem('weekly_note',d.note);
+        const el=document.getElementById('weekly-note-text');
+        if(el)el.value=d.note;
+      }
+    }
+  }catch(e){}
+}
+loadJournal();loadWeeklyNote();loadTgConfig();updateIdeaPreview();
+// Sync from cloud in background
+setTimeout(async function(){
+  await syncSettingsFromCloud();
+  await syncJournalFromCloud();
+  await syncWeeklyFromCloud();
+},500);updateTradePreview();updateUpdatePreview();updateClosePreview();
 setInterval(pollTVData,4000);pollTVData();
 </script>
 </body>
