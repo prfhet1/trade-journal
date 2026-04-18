@@ -23,7 +23,7 @@
   .lang-toggle { display: flex; gap: 3px; background: var(--bg); border-radius: var(--radius-sm); padding: 3px; border: 1px solid var(--border); }
   .lang-btn { border: none; background: transparent; padding: 4px 10px; border-radius: 5px; font-size: 12px; cursor: pointer; color: var(--muted); }
   .lang-btn.active { background: var(--card); color: var(--text); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-  .tv-banner { display: none; align-items: center; justify-content: space-between; padding: 10px 16px; background: #0f1923; color: #00d4aa; font-size: 13px; font-weight: 500; flex-shrink: 0; border-bottom: 1px solid #00d4aa33; }
+  .tv-banner { display: none !important; align-items: center; justify-content: space-between; padding: 10px 16px; background: #0f1923; color: #00d4aa; font-size: 13px; font-weight: 500; flex-shrink: 0; border-bottom: 1px solid #00d4aa33; }
   .tv-banner.show { display: flex; }
   .tv-dot { width: 8px; height: 8px; background: #00d4aa; border-radius: 50%; animation: blink 1s infinite; flex-shrink: 0; }
   .tv-banner-text { display: flex; align-items: center; gap: 8px; }
@@ -152,6 +152,7 @@
           </div>
           <div class="form-group"><label id="lbl-ticker">נכס</label><input type="text" id="ticker" placeholder="לדוג׳ SPX" oninput="updateIdeaPreview()" /></div>
           <div class="form-group"><label id="lbl-tf">גרף</label><input type="text" id="tf" placeholder="לדוג׳ 5" oninput="updateIdeaPreview()" /></div>
+          <div class="form-group full"><label>נכסים אופציונליים</label><input type="text" id="related" placeholder="e.g. NQ, VIX, DXY" oninput="updateIdeaPreview()" /></div>
           <div class="form-group"><label id="lbl-zone">Entry Zone</label><input type="text" id="zone" placeholder="e.g. 5780-5800" oninput="updateIdeaPreview()" /></div>
           <div class="form-group"><label id="lbl-inv">Stop Loss</label><input type="text" id="inv" placeholder="e.g. 5750" oninput="updateIdeaPreview()" /></div>
           <div class="form-group"><label id="lbl-obj">TP</label><input type="text" id="obj" placeholder="e.g. 5850" oninput="updateIdeaPreview()" /></div>
@@ -186,7 +187,7 @@
           <div class="form-group"><label id="lbl-t-ticker">נכס</label><input type="text" id="t-ticker" placeholder="לדוג׳ SPX" oninput="updateTradePreview()" /></div>
           <div class="form-group"><label id="lbl-t-tf">גרף</label><input type="text" id="t-tf" placeholder="לדוג׳ 5m" oninput="updateTradePreview()" /></div>
           <div class="form-group"><label id="lbl-ep">Entry</label><input type="text" id="ep" placeholder="e.g. 5792.5" oninput="updateTradePreview()" /></div>
-          <div class="form-group"><label id="lbl-size">גודל פוזיציה</label><input type="text" id="size" placeholder="לדוג׳ 1 חוזה" oninput="updateTradePreview()" /></div>
+
           <div class="form-group"><label id="lbl-rl">Stop Loss</label><input type="text" id="rl" placeholder="e.g. 5778" oninput="updateTradePreview()" /></div>
           <div class="form-group"><label id="lbl-ob">TP</label><input type="text" id="ob" placeholder="e.g. 5820" oninput="updateTradePreview()" /></div>
           <div class="form-group"><label id="lbl-t-rr">יחס R:R</label><input type="text" id="t-rr" class="rr-field" readonly /></div>
@@ -214,9 +215,9 @@
       <div class="tv-prefill-badge" id="tv-badge-update"><div class="tv-dot"></div><span id="tv-badge-update-text">מולא אוטומטית מ-TradingView</span></div>
       <div class="card">
         <div class="update-types">
-          <div class="utype active" onclick="setUtype(this,'sl')" id="ut-sl">הזזת רמת סיכון</div>
-          <div class="utype" onclick="setUtype(this,'partial')" id="ut-partial">סגירה חלקית</div>
-          <div class="utype" onclick="setUtype(this,'add')" id="ut-add">הוספה לפוזיציה</div>
+          <div class="utype active" onclick="setUtype(this,'sl')" id="ut-sl">Move Stop Loss</div>
+          <div class="utype" onclick="setUtype(this,'partial')" id="ut-partial">Partial Close</div>
+          <div class="utype" onclick="setUtype(this,'add')" id="ut-add">Add to Position</div>
         </div>
         <div class="form-grid">
           <div class="form-group"><label id="lbl-u-ticker">נכס</label><input type="text" id="u-ticker" placeholder="לדוג׳ SPX" oninput="updateUpdatePreview()" /></div>
@@ -224,6 +225,7 @@
           <div class="form-group"><label id="lbl-new-tp">Updated TP</label><input type="text" id="new-tp" placeholder="e.g. 5850" oninput="updateUpdatePreview()" /></div>
           <div class="form-group"><label id="lbl-new-rr">R:R נוכחי</label><input type="text" id="new-rr" placeholder="לדוג׳ 1:1.8" oninput="updateUpdatePreview()" /></div>
 
+          <div class="form-group" id="pct-group" style="display:none;"><label>% מהפוזיציה</label><input type="text" id="pos-pct" placeholder="e.g. 50%" oninput="updateUpdatePreview()" /></div>
           <div class="form-group full"><label id="lbl-note">הערה</label><textarea id="note" placeholder="תאר את שינוי הניהול לצורכי לימוד..." oninput="updateUpdatePreview()"></textarea></div>
           <div class="form-group full"><label id="lbl-img3">צירוף תמונה</label>
             <div class="img-section"><div class="img-tabs">
@@ -295,7 +297,7 @@ const DISC={
   en:"⚠️ This content is part of a personal trading journal for educational purposes only. This is not financial advice. All decisions are the sole responsibility of the reader."
 };
 const UTYPES={
-  he:{sl:'הזזת רמת סיכון',partial:'סגירה חלקית',add:'הוספה לפוזיציה'},
+  he:{sl:'Move Stop Loss',partial:'Partial Close',add:'Add to Position'},
   en:{sl:'Move risk level',partial:'Partial close',add:'Add to position'}
 };
 
@@ -371,17 +373,18 @@ function buildIdeaMsg(){
   if(i)msg+=('Stop Loss')+`: ${i}\n`;
   if(o)msg+=('TP')+`: ${o}\n`;
   if(rr)msg+=(isHe?'יחס סיכון/תשואה':'Risk/Reward Ratio')+`: ${rr}\n`;
+  const rel=v('related');
+  if(rel)msg+=(isHe?'נכסים נלווים':'Related Assets')+`: ${rel}\n`;
   if(c)msg+='\n'+(isHe?'ניתוח':'Analysis')+`:\n${c}\n`;
   return msg+'━━━━━━━━━━━━━━━\n'+DISC[lang];
 }
 function buildTradeMsg(){
-  const isHe=lang==='he',ticker=v('t-ticker'),tf=v('t-tf'),ep=v('ep'),sz=v('size'),rl=v('rl'),ob=v('ob'),rr=v('t-rr'),rs=v('reason');
+  const isHe=lang==='he',ticker=v('t-ticker'),tf=v('t-tf'),ep=v('ep'),rl=v('rl'),ob=v('ob'),rr=v('t-rr'),rs=v('reason');
   let msg=isHe?'📌 תיעוד עסקה | יומן מסחר DJR\n':'📌 Documented Trade | DJR Trading Journal\n';
   msg+='━━━━━━━━━━━━━━━\n';
   if(ticker||tf)msg+=`📊 ${ticker}${tf?' | ⏱ '+tf:''}\n`;
   if(tradeBias)msg+=(tradeBias==='bull'?(isHe?'כיוון: 📈 עולה':'Direction: 📈 Long'):(isHe?'כיוון: 📉 יורד':'Direction: 📉 Short'))+'\n';
   if(ep)msg+=('Entry')+`: ${ep}\n`;
-  if(sz)msg+=(isHe?'גודל פוזיציה':'Position Size')+`: ${sz}\n`;
   if(rl)msg+=('Stop Loss')+`: ${rl}\n`;
   if(ob)msg+=('TP')+`: ${ob}\n`;
   if(rr)msg+=(isHe?'יחס סיכון/תשואה':'Risk/Reward Ratio')+`: ${rr}\n`;
@@ -398,6 +401,8 @@ function buildUpdateMsg(){
   if(ntp)msg+=('Updated TP')+`: ${ntp}\n`;
   if(nrr)msg+=(isHe?'R:R נוכחי':'Current R:R')+`: ${nrr}\n`;
   
+  const pct=v('pos-pct');
+  if(pct)msg+='% מהפוזיציה: '+pct+'\n';
   if(note)msg+='\n'+(isHe?'הערה':'Note')+`:\n${note}\n`;
   return msg+'━━━━━━━━━━━━━━━\n'+DISC[lang];
 }
@@ -425,7 +430,10 @@ function updateClosePreview(){setVal('c-rr',calcRR(v('c-entry'),v('c-sl'),v('c-e
 
 function setBias(b){bias=b;document.getElementById('bull-btn').classList.toggle('active',b==='bull');document.getElementById('bear-btn').classList.toggle('active',b==='bear');updateIdeaPreview();}
 function setTradeBias(b){tradeBias=b;document.getElementById('bull-btn-t').classList.toggle('active',b==='bull');document.getElementById('bear-btn-t').classList.toggle('active',b==='bear');updateTradePreview();}
-function setUtype(el,t){utype=t;document.querySelectorAll('.utype').forEach(u=>u.classList.remove('active'));el.classList.add('active');updateUpdatePreview();}
+function setUtype(el,t){utype=t;document.querySelectorAll('.utype').forEach(u=>u.classList.remove('active'));el.classList.add('active');
+  var pctGroup=document.getElementById('pct-group');
+  if(pctGroup)pctGroup.style.display=(t==='partial'||t==='add')?'flex':'none';
+  updateUpdatePreview();}
 
 function showTab(name){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
