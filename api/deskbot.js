@@ -16,7 +16,10 @@ export default async function handler(req, res) {
 
   async function kget(key) {
     try {
-      const r = await fetch(`${UPSTASH_URL}/get/${key}`, { headers });
+      const r = await fetch(`${UPSTASH_URL}`, {
+        method: 'POST', headers,
+        body: JSON.stringify(['GET', key])
+      });
       const j = await r.json();
       console.log('kget', key, '->', JSON.stringify(j).substring(0,80));
       if (!j.result || j.result === 'nil') return null;
@@ -24,21 +27,26 @@ export default async function handler(req, res) {
         try { return JSON.parse(j.result); } catch(e) { return j.result; }
       }
       return j.result;
-    } catch(e) { return null; }
+    } catch(e) { console.log('kget err:', e.message); return null; }
   }
   async function kset(key, value) {
     try {
       const strValue = typeof value === 'string' ? value : JSON.stringify(value);
-      const r = await fetch(`${UPSTASH_URL}/set/${key}`, {
+      const r = await fetch(`${UPSTASH_URL}`, {
         method: 'POST', headers,
-        body: JSON.stringify(strValue)
+        body: JSON.stringify(['SET', key, strValue])
       });
       const j = await r.json();
       console.log('kset', key, '->', j.result);
     } catch(e) { console.log('kset error:', e.message); }
   }
   async function kdel(key) {
-    try { await fetch(`${UPSTASH_URL}/del/${key}`, { method: 'POST', headers }); } catch(e) {}
+    try {
+      await fetch(`${UPSTASH_URL}`, {
+        method: 'POST', headers,
+        body: JSON.stringify(['DEL', key])
+      });
+    } catch(e) {}
   }
 
   async function tg(method, body) {
