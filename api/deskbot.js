@@ -416,9 +416,15 @@ export default async function handler(req, res) {
   if (state.step === 'ticker') {
     state.ticker = skip ? 'US500' : text;
     if (state.type === 'update') {
-      state.step = 'new_sl';
-      await kset('deskbot_' + userId, JSON.stringify(state));
-      await sendMsg(chatId, 'Updated Stop Loss? (- להשמיט)');
+      if (state.utype === 'partial' || state.utype === 'add') {
+        state.step = 'pct';
+        await kset('deskbot_' + userId, JSON.stringify(state));
+        await sendMsg(chatId, '% מהפוזיציה? (- להשמיט)');
+      } else {
+        state.step = 'new_sl';
+        await kset('deskbot_' + userId, JSON.stringify(state));
+        await sendMsg(chatId, 'Updated Stop Loss? (- להשמיט)');
+      }
     } else {
       state.step = 'tf';
       await kset('deskbot_' + userId, JSON.stringify(state));
@@ -445,23 +451,23 @@ export default async function handler(req, res) {
 
   if (state.step === 'entry') {
     state.entry = skip ? null : parseFloat(text) || text;
-    state.step = 'sl';
-    await kset('deskbot_' + userId, JSON.stringify(state));
-    await sendMsg(chatId, 'Stop Loss?');
-    return res.status(200).json({ ok: true });
-  }
-
-  if (state.step === 'sl') {
-    state.sl = skip ? null : parseFloat(text) || text;
     if (state.type === 'close') {
       state.step = 'exit';
       await kset('deskbot_' + userId, JSON.stringify(state));
       await sendMsg(chatId, 'Exit?');
     } else {
-      state.step = 'related';
+      state.step = 'sl';
       await kset('deskbot_' + userId, JSON.stringify(state));
-      await sendMsg(chatId, 'נכסים אופציונליים? (default: ES1!, - להשמיט)');
+      await sendMsg(chatId, 'Stop Loss?');
     }
+    return res.status(200).json({ ok: true });
+  }
+
+  if (state.step === 'sl') {
+    state.sl = skip ? null : parseFloat(text) || text;
+    state.step = 'related';
+    await kset('deskbot_' + userId, JSON.stringify(state));
+    await sendMsg(chatId, 'נכסים אופציונליים? (default: ES1!, - להשמיט)');
     return res.status(200).json({ ok: true });
   }
 
@@ -470,7 +476,7 @@ export default async function handler(req, res) {
     state.step = 'close_reason';
     await kset('deskbot_' + userId, JSON.stringify(state));
     await sendButtons(chatId, 'סיבת סגירה?', [
-      [{ text: 'TP', callback_data: 'reason_TP' }, { text: 'SL', callback_data: 'reason_SL' }],
+      [{ text: '✅ TP', callback_data: 'reason_TP' }, { text: '❌ SL', callback_data: 'reason_SL' }],
       [{ text: 'Trailing', callback_data: 'reason_Trailing' }, { text: 'Manual Close', callback_data: 'reason_Manual Close' }]
     ]);
     return res.status(200).json({ ok: true });
@@ -508,9 +514,9 @@ export default async function handler(req, res) {
 
   if (state.step === 'pct') {
     state.pct = skip ? null : text;
-    state.step = 'done';
+    state.step = 'new_sl';
     await kset('deskbot_' + userId, JSON.stringify(state));
-    await showPreview(chatId, state);
+    await sendMsg(chatId, 'Updated Stop Loss? (- להשמיט)');
     return res.status(200).json({ ok: true });
   }
 
