@@ -494,8 +494,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true });
   }
 
-  return res.status(200).json({ ok: true });
-
   // ── HELPER FUNCTIONS ─────────────────────────────────────────
   function buildMessage(s) {
     if (s.type === 'idea') return buildIdeaMsg(s);
@@ -516,4 +514,6 @@ export default async function handler(req, res) {
       [{ text: '📸✏️ תמונה + הערה', callback_data: 'post_both' }]
     ]);
   }
+
+  return res.status(200).json({ ok: true });
 }
