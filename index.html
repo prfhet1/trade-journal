@@ -103,6 +103,7 @@ body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;background:var(--bg);
 .b-trade{background:var(--gl);color:var(--gd);}
 .b-update{background:var(--al);color:var(--amber);}
 .b-close{background:#f0f0f0;color:#555;}
+  .b-nosetup{background:#EDF2F7;color:#4A5568;}
 .ji-txt{font-size:12px;color:var(--muted);line-height:1.5;}
 .ji-img{width:52px;height:38px;object-fit:cover;border-radius:5px;border:1px solid var(--border);margin-top:5px;}
 .spinner{display:inline-block;width:14px;height:14px;border:2px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin .6s linear infinite;vertical-align:middle;margin-right:6px;}
@@ -334,6 +335,7 @@ body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;background:var(--bg);
         <button class="btn-month" onclick="sendStats('monthly')" id="btn-month">📈 שלח סטטיסטיקה חודשית</button>
         <button class="btn-clear" onclick="clearJournal()" id="btn-clear">🗑</button>
       </div>
+      <button onclick="sendNoSetup()" style="width:100%;padding:10px;background:#718096;color:white;border:none;border-radius:var(--rs);font-size:13px;font-weight:600;cursor:pointer;margin-bottom:12px;" id="btn-nosetup">📵 אין סט אפ היום</button>
       <div class="card"><div id="jlist"><div class="empty" id="empty-j">עדיין אין רשומות ביומן</div></div></div>
     </div>
 
@@ -744,17 +746,36 @@ function renderJournal(){
   document.getElementById('st2').textContent=wins;
   document.getElementById('st3').textContent=losses;
   document.getElementById('st4').textContent=journal.filter(function(j){return j.type==='update';}).length;
+  var nosetups=weekJ.filter(function(j){return j.type==='nosetup';}).length;
   document.getElementById('st-wr').textContent=wr;
   document.getElementById('st-rr').textContent=avgRR;
   if(!journal.length){list.innerHTML='<div class="empty">'+(lang==='he'?'עדיין אין רשומות ביומן':'No journal entries yet')+'</div>';return;}
-  var badges={idea:'b-idea',trade:'b-trade',update:'b-update',close:'b-close'};
-  var labels={idea:{he:'תרחיש',en:'Idea'},trade:{he:'כניסה',en:'Entry'},update:{he:'עדכון',en:'Update'},close:{he:'סגירה',en:'Close'}};
+  var badges={idea:'b-idea',trade:'b-trade',update:'b-update',close:'b-close',nosetup:'b-nosetup'};
+  var labels={idea:{he:'תרחיש',en:'Idea'},trade:{he:'כניסה',en:'Entry'},update:{he:'עדכון',en:'Update'},close:{he:'סגירה',en:'Close'},nosetup:{he:'אין סט אפ',en:'No Setup'}};
   list.innerHTML=journal.map(function(j){
     var lbl=labels[j.type]?labels[j.type][lang]:'?';
     var bc=badges[j.type]||'b-idea';
     var txt=j.text.replace(/\*(.*?)\*/g,'$1').split('\n').slice(0,3).join(' | ');
     return '<div class="ji"><div class="ji-hdr"><span class="badge '+bc+'">'+lbl+'</span><span class="ji-time">'+j.time+'</span></div><div class="ji-txt">'+txt+'</div>'+(j.img?'<img class="ji-img" src="'+j.img+'"/>':'')+'</div>';
   }).join('');
+}
+async function sendNoSetup(){
+  var cfg=getTg();
+  if(!cfg.token||!cfg.chatId){alert('הגדר Token ו-Chat ID תחילה');return;}
+  var lines=['*📵 עדכון יומי  יומן מסחר DJR*','━━━━━━━━━━━━━━━',
+    'השוק לא מייצר סט אפ נדרש \\— הוחלט לא לבצע עסקאות היום\\.',
+    '','The market is not producing the required setup \\— decided not to trade today\\.',
+    '━━━━━━━━━━━━━━━',
+    '⚠️ '+esc(DISC['he'])];
+  var msg=lines.join('\n');
+  var r=await fetch('https://api.telegram.org/bot'+cfg.token+'/sendMessage',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:cfg.chatId,text:msg,parse_mode:'MarkdownV2'})});
+  var d=await r.json();
+  if(d.ok){
+    addJournal('nosetup',msg,null);
+    var btn=document.getElementById('btn-nosetup');
+    btn.textContent='✅ נשלח!';btn.style.background='#27500A';
+    setTimeout(function(){btn.textContent='📵 אין סט אפ היום';btn.style.background='';},2500);
+  }
 }
 function clearJournal(){
   if(confirm(lang==='he'?'האם אתה בטוח שברצונך למחוק את כל היומן?':'Are you sure you want to clear the journal?')){
@@ -775,6 +796,7 @@ function buildStats(period,entries){
   var updates=entries.filter(function(j){return j.type==='update';}).length;
   var label=period==='weekly'?(isHe?'📊 סיכום שבועי':'📊 Weekly Summary'):(isHe?'📈 סיכום חודשי':'📈 Monthly Summary');
   var lines=[];
+  var nosetups=entries.filter(function(j){return j.type==='nosetup';}).length;
   lines.push(bold(label+'  יומן מסחר DJR'));
   lines.push(SEP);
   lines.push((isHe?'עסקאות':'Trades')+': '+bold(String(closes.length)));
@@ -783,6 +805,7 @@ function buildStats(period,entries){
   lines.push('Win Rate: '+bold(wr));
   lines.push('Avg R:R: '+bold(avgRR));
   lines.push((isHe?'רעיונות':'Ideas')+': '+esc(String(ideas)));
+  if(nosetups>0)lines.push((isHe?'ימי אין סט אפ':'No Setup Days')+': '+esc(String(nosetups)));
   lines.push((isHe?'עדכונים':'Updates')+': '+esc(String(updates)));
   var note=document.getElementById('weekly-note').value;
   if(note)lines.push('',esc((isHe?'הערות':'Notes')+':'),esc(note));
