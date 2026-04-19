@@ -18,17 +18,24 @@ export default async function handler(req, res) {
     try {
       const r = await fetch(`${UPSTASH_URL}/get/${key}`, { headers });
       const j = await r.json();
-      if (!j.result) return null;
-      return typeof j.result === 'string' ? JSON.parse(j.result) : j.result;
+      if (!j.result || j.result === 'nil') return null;
+      if (typeof j.result === 'string') {
+        try { return JSON.parse(j.result); } catch(e) { return j.result; }
+      }
+      return j.result;
     } catch(e) { return null; }
   }
   async function kset(key, value) {
     try {
-      await fetch(`${UPSTASH_URL}/set/${key}`, { method: 'POST', headers, body: JSON.stringify(value) });
-    } catch(e) {}
+      const strValue = typeof value === 'string' ? value : JSON.stringify(value);
+      await fetch(`${UPSTASH_URL}/set/${encodeURIComponent(key)}`, {
+        method: 'POST', headers,
+        body: JSON.stringify(strValue)
+      });
+    } catch(e) { console.log('kset error:', e.message); }
   }
   async function kdel(key) {
-    try { await fetch(`${UPSTASH_URL}/del/${key}`, { method: 'POST', headers }); } catch(e) {}
+    try { await fetch(`${UPSTASH_URL}/del/${encodeURIComponent(key)}`, { method: 'POST', headers }); } catch(e) {}
   }
 
   async function tg(method, body) {
