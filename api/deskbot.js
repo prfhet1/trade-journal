@@ -523,7 +523,7 @@ export default async function handler(req, res) {
     const preview = buildMessage(state);
     console.log('PREVIEW STATE:', JSON.stringify(state).substring(0,150));
     console.log('PREVIEW MSG:', preview ? preview.substring(0,100) : 'EMPTY');
-    const plainText = (preview || 'No message built').replace(/\*/g,'').replace(/\/g,'');
+    const plainText = (preview || 'No message built').replace(/[*\\]/g,'');
     await sendMsg(chatId, '👁 Preview:\n\n' + plainText.substring(0,1000));
     await sendButtons(chatId, 'מה לעשות?', [
       [{ text: '✅ שלח עכשיו', callback_data: 'post_now' }],
