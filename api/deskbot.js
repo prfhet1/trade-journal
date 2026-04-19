@@ -506,11 +506,10 @@ export default async function handler(req, res) {
 
   async function showPreview(chatId, s) {
     const preview = buildMessage(s);
-    // Convert MarkdownV2 to plain text for preview
-    const plainText = preview
-      .replace(/\*([^*]+)\*/g, '$1')
-      .replace(/\\([_*[\]()~`>#+\-=|{}.!\\])/g, '$1');
-    await sendMsg(chatId, '👁 <b>תצוגה מקדימה:</b>\n\n' + plainText.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+    console.log('PREVIEW STATE:', JSON.stringify(s));
+    console.log('PREVIEW MSG:', preview ? preview.substring(0,100) : 'EMPTY');
+    const plainText = preview || 'No message built';
+    await sendMsg(chatId, '👁 Preview:\n\n' + plainText.substring(0,500));
     await sendButtons(chatId, 'מה לעשות?', [
       [{ text: '✅ שלח עכשיו', callback_data: 'post_now' }],
       [{ text: '📸 הוסף תמונה', callback_data: 'post_photo' }, { text: '✏️ הוסף הערה', callback_data: 'post_comment' }],
