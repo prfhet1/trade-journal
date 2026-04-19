@@ -224,11 +224,20 @@ export default async function handler(req, res) {
     // Message type selection
     if (data === 'type_idea' || data === 'type_trade' || data === 'type_update' || data === 'type_close') {
       const type = data.replace('type_', '');
-      await kset('deskbot_' + userId, JSON.stringify({ ...state, type, step: 'bias' }));
-      await sendButtons(chatId, '📈 כיוון?', [[
-        { text: '📈 Bull', callback_data: 'bias_bull' },
-        { text: '📉 Bear', callback_data: 'bias_bear' }
-      ]]);
+      if (type === 'update') {
+        await kset('deskbot_' + userId, JSON.stringify({ type: 'update', step: 'utype' }));
+        await sendButtons(chatId, '🔄 <b>ניהול עסקה</b>\n\nסוג עדכון?', [
+          [{ text: 'Move Stop Loss', callback_data: 'utype_sl' }],
+          [{ text: 'Partial Close', callback_data: 'utype_partial' }],
+          [{ text: 'Add to Position', callback_data: 'utype_add' }]
+        ]);
+      } else {
+        await kset('deskbot_' + userId, JSON.stringify({ ...state, type, step: 'bias' }));
+        await sendButtons(chatId, '📈 כיוון?', [[
+          { text: '📈 Bull', callback_data: 'bias_bull' },
+          { text: '📉 Bear', callback_data: 'bias_bear' }
+        ]]);
+      }
       return res.status(200).json({ ok: true });
     }
 
@@ -244,24 +253,18 @@ export default async function handler(req, res) {
     if (data === 'bias_bull' || data === 'bias_bear') {
       const bias = data === 'bias_bull' ? 'bull' : 'bear';
       const newState = { ...state, bias };
-      if (newState.type === 'update') {
-        newState.step = 'ticker';
-        await kset('deskbot_' + userId, JSON.stringify(newState));
-        await sendMsg(chatId, '📊 נכס? (Enter להשמיט, default: US500)');
-      } else {
-        newState.step = 'ticker';
-        await kset('deskbot_' + userId, JSON.stringify(newState));
-        await sendMsg(chatId, '📊 נכס? (Enter להשמיט, default: US500)');
-      }
+      newState.step = 'ticker';
+      await kset('deskbot_' + userId, JSON.stringify(newState));
+      await sendMsg(chatId, '📊 נכס? (default: US500, - להשמיט)');
       return res.status(200).json({ ok: true });
     }
 
     // Update type selection
     if (data === 'utype_sl' || data === 'utype_partial' || data === 'utype_add') {
       const utype = data.replace('utype_', '');
-      const newState = { ...state, utype, step: 'ticker' };
+      const newState = { ...state, utype, step: 'new_sl' };
       await kset('deskbot_' + userId, JSON.stringify(newState));
-      await sendMsg(chatId, '📊 נכס? (Enter להשמיט, default: US500)');
+      await sendMsg(chatId, 'Updated Stop Loss? (- להשמיט)');
       return res.status(200).json({ ok: true });
     }
 
@@ -336,12 +339,11 @@ export default async function handler(req, res) {
 
   if (text === '/update' || text === 'update') {
     await kset('deskbot_' + userId, JSON.stringify({ type: 'update', step: 'utype' }));
-    await sendButtons(chatId, '🔄 <b>ניהול עסקה</b>\n\nסוג עדכון?', [[
-      { text: 'Move Stop Loss', callback_data: 'utype_sl' }
-    ], [
-      { text: 'Partial Close', callback_data: 'utype_partial' },
-      { text: 'Add to Position', callback_data: 'utype_add' }
-    ]]);
+    await sendButtons(chatId, '🔄 <b>ניהול עסקה</b>\n\nסוג עדכון?', [
+      [{ text: 'Move Stop Loss', callback_data: 'utype_sl' }],
+      [{ text: 'Partial Close', callback_data: 'utype_partial' }],
+      [{ text: 'Add to Position', callback_data: 'utype_add' }]
+    ]);
     return res.status(200).json({ ok: true });
   }
 
