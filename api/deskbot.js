@@ -250,7 +250,7 @@ export default async function handler(req, res) {
     // Post options
     if (data === 'post_now') {
       const builtMsg = buildMessage(state);
-      await postToChannel(builtMsg, null, null);
+      await postToChannel(builtMsg, state.photoId || null, state.comment || null);
       await saveToJournal(state.type, builtMsg);
       await kdel('deskbot_state:' + userId);
       await sendMsg(chatId, '✅ נשלח לערוץ!');
