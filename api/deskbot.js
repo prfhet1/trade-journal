@@ -211,12 +211,12 @@ export default async function handler(req, res) {
   if (callbackQuery) {
     await tg('answerCallbackQuery', { callback_query_id: callbackQuery.id });
     const data = callbackQuery.data;
-    const state = await kget('deskbot_state:' + userId);
+    const state = await kget('deskbot_' + userId);
 
     // Message type selection
     if (data === 'type_idea' || data === 'type_trade' || data === 'type_update' || data === 'type_close') {
       const type = data.replace('type_', '');
-      await kset('deskbot_state:' + userId, JSON.stringify({ ...state, type, step: 'bias' }));
+      await kset('deskbot_' + userId, JSON.stringify({ ...state, type, step: 'bias' }));
       await sendButtons(chatId, '📈 כיוון?', [[
         { text: '📈 Bull', callback_data: 'bias_bull' },
         { text: '📉 Bear', callback_data: 'bias_bear' }
@@ -228,7 +228,7 @@ export default async function handler(req, res) {
       const msg2 = buildNoSetupMsg();
       await postToChannel(msg2, null, null);
       await saveToJournal('nosetup', msg2);
-      await kdel('deskbot_state:' + userId);
+      await kdel('deskbot_' + userId);
       await sendMsg(chatId, '✅ נשלח לערוץ!');
       return res.status(200).json({ ok: true });
     }
@@ -238,11 +238,11 @@ export default async function handler(req, res) {
       const newState = { ...state, bias };
       if (newState.type === 'update') {
         newState.step = 'ticker';
-        await kset('deskbot_state:' + userId, JSON.stringify(newState));
+        await kset('deskbot_' + userId, JSON.stringify(newState));
         await sendMsg(chatId, '📊 נכס? (Enter להשמיט, default: US500)');
       } else {
         newState.step = 'ticker';
-        await kset('deskbot_state:' + userId, JSON.stringify(newState));
+        await kset('deskbot_' + userId, JSON.stringify(newState));
         await sendMsg(chatId, '📊 נכס? (Enter להשמיט, default: US500)');
       }
       return res.status(200).json({ ok: true });
@@ -252,7 +252,7 @@ export default async function handler(req, res) {
     if (data === 'utype_sl' || data === 'utype_partial' || data === 'utype_add') {
       const utype = data.replace('utype_', '');
       const newState = { ...state, utype, step: 'ticker' };
-      await kset('deskbot_state:' + userId, JSON.stringify(newState));
+      await kset('deskbot_' + userId, JSON.stringify(newState));
       await sendMsg(chatId, '📊 נכס? (Enter להשמיט, default: US500)');
       return res.status(200).json({ ok: true });
     }
@@ -262,22 +262,22 @@ export default async function handler(req, res) {
       const builtMsg = buildMessage(state);
       await postToChannel(builtMsg, state.photoId || null, state.comment || null);
       await saveToJournal(state.type, builtMsg);
-      await kdel('deskbot_state:' + userId);
+      await kdel('deskbot_' + userId);
       await sendMsg(chatId, '✅ נשלח לערוץ!');
       return res.status(200).json({ ok: true });
     }
     if (data === 'post_photo') {
-      await kset('deskbot_state:' + userId, JSON.stringify({ ...state, waiting: 'photo' }));
+      await kset('deskbot_' + userId, JSON.stringify({ ...state, waiting: 'photo' }));
       await sendMsg(chatId, '📸 שלח תמונה:');
       return res.status(200).json({ ok: true });
     }
     if (data === 'post_comment') {
-      await kset('deskbot_state:' + userId, JSON.stringify({ ...state, waiting: 'comment' }));
+      await kset('deskbot_' + userId, JSON.stringify({ ...state, waiting: 'comment' }));
       await sendMsg(chatId, '✏️ שלח הערה:');
       return res.status(200).json({ ok: true });
     }
     if (data === 'post_both') {
-      await kset('deskbot_state:' + userId, JSON.stringify({ ...state, waiting: 'photo_then_comment' }));
+      await kset('deskbot_' + userId, JSON.stringify({ ...state, waiting: 'photo_then_comment' }));
       await sendMsg(chatId, '📸 שלח תמונה תחילה:');
       return res.status(200).json({ ok: true });
     }
@@ -285,7 +285,7 @@ export default async function handler(req, res) {
       const builtMsg = buildMessage(state);
       await postToChannel(builtMsg, state.photoId, state.comment);
       await saveToJournal(state.type, builtMsg);
-      await kdel('deskbot_state:' + userId);
+      await kdel('deskbot_' + userId);
       await sendMsg(chatId, '✅ נשלח לערוץ!');
       return res.status(200).json({ ok: true });
     }
@@ -294,7 +294,7 @@ export default async function handler(req, res) {
     if (data.startsWith('reason_')) {
       const reason = data.replace('reason_', '');
       const newState = { ...state, reason, step: 'done' };
-      await kset('deskbot_state:' + userId, JSON.stringify(newState));
+      await kset('deskbot_' + userId, JSON.stringify(newState));
       await showPreview(chatId, newState);
       return res.status(200).json({ ok: true });
     }
@@ -309,7 +309,7 @@ export default async function handler(req, res) {
 
   // ── COMMANDS ─────────────────────────────────────────────────
   if (text === '/idea' || text === 'idea') {
-    await kset('deskbot_state:' + userId, JSON.stringify({ type: 'idea', step: 'bias' }));
+    await kset('deskbot_' + userId, JSON.stringify({ type: 'idea', step: 'bias' }));
     await sendButtons(chatId, '📋 <b>רעיון מקדים</b>\n\nכיוון מצופה?', [[
       { text: '📈 Bull', callback_data: 'bias_bull' },
       { text: '📉 Bear', callback_data: 'bias_bear' }
@@ -318,7 +318,7 @@ export default async function handler(req, res) {
   }
 
   if (text === '/trade' || text === 'trade') {
-    await kset('deskbot_state:' + userId, JSON.stringify({ type: 'trade', step: 'bias' }));
+    await kset('deskbot_' + userId, JSON.stringify({ type: 'trade', step: 'bias' }));
     await sendButtons(chatId, '📌 <b>תיעוד עסקה</b>\n\nכיוון?', [[
       { text: '📈 Bull', callback_data: 'bias_bull' },
       { text: '📉 Bear', callback_data: 'bias_bear' }
@@ -327,7 +327,7 @@ export default async function handler(req, res) {
   }
 
   if (text === '/update' || text === 'update') {
-    await kset('deskbot_state:' + userId, JSON.stringify({ type: 'update', step: 'utype' }));
+    await kset('deskbot_' + userId, JSON.stringify({ type: 'update', step: 'utype' }));
     await sendButtons(chatId, '🔄 <b>ניהול עסקה</b>\n\nסוג עדכון?', [[
       { text: 'Move Stop Loss', callback_data: 'utype_sl' }
     ], [
@@ -338,7 +338,7 @@ export default async function handler(req, res) {
   }
 
   if (text === '/close' || text === 'close') {
-    await kset('deskbot_state:' + userId, JSON.stringify({ type: 'close', step: 'bias' }));
+    await kset('deskbot_' + userId, JSON.stringify({ type: 'close', step: 'bias' }));
     await sendButtons(chatId, '❌ <b>סגירת עסקה</b>\n\nכיוון המקורי?', [[
       { text: '📈 Bull', callback_data: 'bias_bull' },
       { text: '📉 Bear', callback_data: 'bias_bear' }
@@ -360,7 +360,7 @@ export default async function handler(req, res) {
   }
 
   // Show main menu if no command
-  if (!text.startsWith('/') && !(await kget('deskbot_state:' + userId))) {
+  if (!text.startsWith('/') && !(await kget('deskbot_' + userId))) {
     await sendButtons(chatId, '📊 <b>DJR Trading Journal</b>\n\nבחר סוג הודעה:', [
       [{ text: '📋 רעיון מקדים', callback_data: 'type_idea' }, { text: '📌 תיעוד עסקה', callback_data: 'type_trade' }],
       [{ text: '🔄 ניהול עסקה', callback_data: 'type_update' }, { text: '❌ סגירת עסקה', callback_data: 'type_close' }],
@@ -370,7 +370,7 @@ export default async function handler(req, res) {
   }
 
   // ── HANDLE STATE MACHINE ─────────────────────────────────────
-  const stateData = await kget('deskbot_state:' + userId);
+  const stateData = await kget('deskbot_' + userId);
   if (!stateData) return res.status(200).json({ ok: true });
   let state = typeof stateData === 'string' ? JSON.parse(stateData) : stateData;
 
@@ -379,11 +379,11 @@ export default async function handler(req, res) {
     if (photo && photo.length > 0) {
       const photoId = photo[photo.length - 1].file_id;
       if (state.waiting === 'photo_then_comment') {
-        await kset('deskbot_state:' + userId, JSON.stringify({ ...state, photoId, waiting: 'comment' }));
+        await kset('deskbot_' + userId, JSON.stringify({ ...state, photoId, waiting: 'comment' }));
         await sendMsg(chatId, '✏️ עכשיו שלח הערה:');
       } else {
         state = { ...state, photoId, waiting: null };
-        await kset('deskbot_state:' + userId, JSON.stringify(state));
+        await kset('deskbot_' + userId, JSON.stringify(state));
         await showPreview(chatId, state);
       }
     } else {
@@ -395,7 +395,7 @@ export default async function handler(req, res) {
   // Handle waiting for comment
   if (state.waiting === 'comment') {
     state = { ...state, comment: text, waiting: null };
-    await kset('deskbot_state:' + userId, JSON.stringify(state));
+    await kset('deskbot_' + userId, JSON.stringify(state));
     await showPreview(chatId, state);
     return res.status(200).json({ ok: true });
   }
@@ -407,11 +407,11 @@ export default async function handler(req, res) {
     state.ticker = skip ? 'US500' : text;
     if (state.type === 'update') {
       state.step = 'new_sl';
-      await kset('deskbot_state:' + userId, JSON.stringify(state));
+      await kset('deskbot_' + userId, JSON.stringify(state));
       await sendMsg(chatId, 'Updated Stop Loss? (- להשמיט)');
     } else {
       state.step = 'tf';
-      await kset('deskbot_state:' + userId, JSON.stringify(state));
+      await kset('deskbot_' + userId, JSON.stringify(state));
       await sendMsg(chatId, '⏱ גרף? (default: 5min, - להשמיט)');
     }
     return res.status(200).json({ ok: true });
@@ -420,7 +420,7 @@ export default async function handler(req, res) {
   if (state.step === 'tf') {
     state.tf = skip ? '5min' : text;
     state.step = 'tp';
-    await kset('deskbot_state:' + userId, JSON.stringify(state));
+    await kset('deskbot_' + userId, JSON.stringify(state));
     await sendMsg(chatId, state.type === 'close' ? 'TP המקורי? (- להשמיט)' : 'TP?');
     return res.status(200).json({ ok: true });
   }
@@ -428,7 +428,7 @@ export default async function handler(req, res) {
   if (state.step === 'tp') {
     state.tp = skip ? null : parseFloat(text) || text;
     state.step = 'entry';
-    await kset('deskbot_state:' + userId, JSON.stringify(state));
+    await kset('deskbot_' + userId, JSON.stringify(state));
     await sendMsg(chatId, 'Entry?');
     return res.status(200).json({ ok: true });
   }
@@ -436,7 +436,7 @@ export default async function handler(req, res) {
   if (state.step === 'entry') {
     state.entry = skip ? null : parseFloat(text) || text;
     state.step = 'sl';
-    await kset('deskbot_state:' + userId, JSON.stringify(state));
+    await kset('deskbot_' + userId, JSON.stringify(state));
     await sendMsg(chatId, 'Stop Loss?');
     return res.status(200).json({ ok: true });
   }
@@ -445,11 +445,11 @@ export default async function handler(req, res) {
     state.sl = skip ? null : parseFloat(text) || text;
     if (state.type === 'close') {
       state.step = 'exit';
-      await kset('deskbot_state:' + userId, JSON.stringify(state));
+      await kset('deskbot_' + userId, JSON.stringify(state));
       await sendMsg(chatId, 'Exit?');
     } else {
       state.step = 'related';
-      await kset('deskbot_state:' + userId, JSON.stringify(state));
+      await kset('deskbot_' + userId, JSON.stringify(state));
       await sendMsg(chatId, 'נכסים אופציונליים? (default: ES1!, - להשמיט)');
     }
     return res.status(200).json({ ok: true });
@@ -458,7 +458,7 @@ export default async function handler(req, res) {
   if (state.step === 'exit') {
     state.exit = skip ? null : parseFloat(text) || text;
     state.step = 'close_reason';
-    await kset('deskbot_state:' + userId, JSON.stringify(state));
+    await kset('deskbot_' + userId, JSON.stringify(state));
     await sendButtons(chatId, 'סיבת סגירה?', [
       [{ text: 'TP', callback_data: 'reason_TP' }, { text: 'SL', callback_data: 'reason_SL' }],
       [{ text: 'Trailing', callback_data: 'reason_Trailing' }, { text: 'Manual Close', callback_data: 'reason_Manual Close' }]
@@ -469,7 +469,7 @@ export default async function handler(req, res) {
   if (state.step === 'related') {
     state.related = skip ? 'ES1!' : text;
     state.step = 'done';
-    await kset('deskbot_state:' + userId, JSON.stringify(state));
+    await kset('deskbot_' + userId, JSON.stringify(state));
     await showPreview(chatId, state);
     return res.status(200).json({ ok: true });
   }
@@ -477,7 +477,7 @@ export default async function handler(req, res) {
   if (state.step === 'new_sl') {
     state.sl = skip ? null : text;
     state.step = 'new_tp';
-    await kset('deskbot_state:' + userId, JSON.stringify(state));
+    await kset('deskbot_' + userId, JSON.stringify(state));
     await sendMsg(chatId, 'Updated TP? (- להשמיט)');
     return res.status(200).json({ ok: true });
   }
@@ -486,11 +486,11 @@ export default async function handler(req, res) {
     state.tp = skip ? null : text;
     if (state.utype === 'partial' || state.utype === 'add') {
       state.step = 'pct';
-      await kset('deskbot_state:' + userId, JSON.stringify(state));
+      await kset('deskbot_' + userId, JSON.stringify(state));
       await sendMsg(chatId, '% מהפוזיציה? (- להשמיט)');
     } else {
       state.step = 'done';
-      await kset('deskbot_state:' + userId, JSON.stringify(state));
+      await kset('deskbot_' + userId, JSON.stringify(state));
       await showPreview(chatId, state);
     }
     return res.status(200).json({ ok: true });
@@ -499,27 +499,32 @@ export default async function handler(req, res) {
   if (state.step === 'pct') {
     state.pct = skip ? null : text;
     state.step = 'done';
-    await kset('deskbot_state:' + userId, JSON.stringify(state));
+    await kset('deskbot_' + userId, JSON.stringify(state));
     await showPreview(chatId, state);
     return res.status(200).json({ ok: true });
   }
 
   // ── HELPER FUNCTIONS ─────────────────────────────────────────
   function buildMessage(s) {
-    if (s.type === 'idea') return buildIdeaMsg(s);
-    if (s.type === 'trade') return buildTradeMsg(s);
-    if (s.type === 'update') return buildUpdateMsg(s);
-    if (s.type === 'close') return buildCloseMsg(s);
-    if (s.type === 'nosetup') return buildNoSetupMsg();
-    return '';
+    if (!s) return '';
+    // Ensure state is parsed object not string
+    const state = typeof s === 'string' ? JSON.parse(s) : s;
+    console.log('buildMessage type:', state.type, 'keys:', Object.keys(state).join(','));
+    if (state.type === 'idea') return buildIdeaMsg(state);
+    if (state.type === 'trade') return buildTradeMsg(state);
+    if (state.type === 'update') return buildUpdateMsg(state);
+    if (state.type === 'close') return buildCloseMsg(state);
+    if (state.type === 'nosetup') return buildNoSetupMsg();
+    return 'type not found: ' + state.type;
   }
 
   async function showPreview(chatId, s) {
-    const preview = buildMessage(s);
-    console.log('PREVIEW STATE:', JSON.stringify(s));
+    const state = typeof s === 'string' ? JSON.parse(s) : s;
+    const preview = buildMessage(state);
+    console.log('PREVIEW STATE:', JSON.stringify(state).substring(0,150));
     console.log('PREVIEW MSG:', preview ? preview.substring(0,100) : 'EMPTY');
-    const plainText = preview || 'No message built';
-    await sendMsg(chatId, '👁 Preview:\n\n' + plainText.substring(0,500));
+    const plainText = (preview || 'No message built').replace(/\*/g,'').replace(/\/g,'');
+    await sendMsg(chatId, '👁 Preview:\n\n' + plainText.substring(0,1000));
     await sendButtons(chatId, 'מה לעשות?', [
       [{ text: '✅ שלח עכשיו', callback_data: 'post_now' }],
       [{ text: '📸 הוסף תמונה', callback_data: 'post_photo' }, { text: '✏️ הוסף הערה', callback_data: 'post_comment' }],
