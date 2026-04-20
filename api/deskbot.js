@@ -94,7 +94,7 @@ export default async function handler(req, res) {
     const lines = [];
     lines.push(bold('📋 רעיון מקדים  יומן מסחר DJR'));
     lines.push(SEP);
-    if (d.ticker || d.tf) lines.push('📊 ' + bold(d.ticker || 'US500') + (d.tf ? '  ⏱ ' + esc(d.tf) : ''));
+    if (d.ticker || d.tf) lines.push('📊 ' + bold(d.ticker || 'US500CFD') + (d.tf ? '  ⏱ ' + esc(d.tf) : '') + (d.session ? '  🕐 ' + esc(d.session) : ''));
     if (d.bias) lines.push(d.bias === 'bull' ? 'כיוון מצופה: 📈 עולה' : 'כיוון מצופה: 📉 יורד');
     if (d.tp) lines.push('Planned TP: ' + bold(d.tp));
     const entryLabel = d.bias === 'bull' ? 'Entry after close above' : 'Entry after close below';
@@ -116,7 +116,7 @@ export default async function handler(req, res) {
     const lines = [];
     lines.push(bold('📌 תיעוד עסקה  יומן מסחר DJR'));
     lines.push(SEP);
-    if (d.ticker || d.tf) lines.push('📊 ' + bold(d.ticker || 'US500') + (d.tf ? '  ⏱ ' + esc(d.tf) : ''));
+    if (d.ticker || d.tf) lines.push('📊 ' + bold(d.ticker || 'US500CFD') + (d.tf ? '  ⏱ ' + esc(d.tf) : '') + (d.session ? '  🕐 ' + esc(d.session) : ''));
     if (d.bias) lines.push(d.bias === 'bull' ? 'כיוון: 📈 עולה' : 'כיוון: 📉 יורד');
     if (d.tp) lines.push('Planned TP: ' + bold(d.tp));
     const entryLabel = d.bias === 'bull' ? 'Entry after close above' : 'Entry after close below';
@@ -139,7 +139,7 @@ export default async function handler(req, res) {
     lines.push(bold('🔄 ניהול עסקה  יומן מסחר DJR'));
     lines.push(esc(utypeLabels[d.utype] || 'Update'));
     lines.push(SEP);
-    if (d.ticker) lines.push('📊 ' + bold(d.ticker));
+    if (d.ticker) lines.push('📊 ' + bold(d.ticker) + (d.session ? '  🕐 ' + esc(d.session) : ''));
     if (d.utype === 'sl' && d.sl) lines.push('Updated Stop Loss: ' + bold(d.sl));
     if (d.utype === 'partial' && d.pct) lines.push('Partial Close: ' + bold(d.pct + '%'));
     if (d.utype === 'add') {
@@ -157,7 +157,7 @@ export default async function handler(req, res) {
     const lines = [];
     lines.push(bold(icon + ' סגירת עסקה  יומן מסחר DJR'));
     lines.push(SEP);
-    if (d.ticker || d.tf) lines.push('📊 ' + bold(d.ticker || 'US500') + (d.tf ? '  ⏱ ' + esc(d.tf) : ''));
+    if (d.ticker || d.tf) lines.push('📊 ' + bold(d.ticker || 'US500CFD') + (d.tf ? '  ⏱ ' + esc(d.tf) : '') + (d.session ? '  🕐 ' + esc(d.session) : ''));
     if (d.exit) lines.push('Exit: ' + bold(d.exit));
     if (d.reason) lines.push('סיבת סגירה: ' + bold(esc(d.reason)));
     if (d.comment) lines.push('', esc(d.comment));
@@ -265,17 +265,17 @@ export default async function handler(req, res) {
 
     // Update type selection - each goes to its own flow
     if (data === 'utype_sl') {
-      await kset('deskbot_' + userId, JSON.stringify({ type: 'update', utype: 'sl', step: 'new_sl', ticker: 'ES1!' }));
+      await kset('deskbot_' + userId, JSON.stringify({ type: 'update', utype: 'sl', step: 'new_sl', ticker: 'US500CFD' }));
       await sendMsg(chatId, 'Updated Stop Loss?');
       return res.status(200).json({ ok: true });
     }
     if (data === 'utype_partial') {
-      await kset('deskbot_' + userId, JSON.stringify({ type: 'update', utype: 'partial', step: 'pct', ticker: 'ES1!' }));
+      await kset('deskbot_' + userId, JSON.stringify({ type: 'update', utype: 'partial', step: 'pct', ticker: 'US500CFD' }));
       await sendMsg(chatId, '% מהפוזיציה? (e.g. 50%)');
       return res.status(200).json({ ok: true });
     }
     if (data === 'utype_add') {
-      await kset('deskbot_' + userId, JSON.stringify({ type: 'update', utype: 'add', step: 'add_level', ticker: 'ES1!' }));
+      await kset('deskbot_' + userId, JSON.stringify({ type: 'update', utype: 'add', step: 'add_level', ticker: 'US500CFD' }));
       await sendMsg(chatId, 'רמת הוספה? (Entry level)');
       return res.status(200).json({ ok: true });
     }
@@ -535,6 +535,7 @@ export default async function handler(req, res) {
     else if (field === 'sl') newState.sl = skip2 ? state.sl : parseFloat(text) || text;
     else if (field === 'related') newState.related = skip2 ? state.related : text;
     else if (field === 'comment') newState.comment = skip2 ? null : text;
+    else if (field === 'session') newState.session = skip2 ? 'NY' : text;
     else if (field === 'pct') newState.pct = skip2 ? state.pct : text;
     else if (field === 'exit') newState.exit = skip2 ? state.exit : parseFloat(text) || text;
     await kset('deskbot_' + userId, JSON.stringify(newState));
@@ -546,7 +547,7 @@ export default async function handler(req, res) {
   const skip = text === '-' || text === 'skip' || text === 'ס';
 
   if (state.step === 'ticker') {
-    state.ticker = skip ? 'ES1!' : text;
+    state.ticker = skip ? 'US500CFD' : text;
     state.step = 'tf';
     await kset('deskbot_' + userId, JSON.stringify(state));
     await sendMsg(chatId, '⏱ גרף? (default: 5min, - להשמיט)');
@@ -555,6 +556,14 @@ export default async function handler(req, res) {
 
   if (state.step === 'tf') {
     state.tf = skip ? '5min' : text;
+    state.step = 'session';
+    await kset('deskbot_' + userId, JSON.stringify(state));
+    await sendMsg(chatId, 'Session? (default: NY, - להשמיט)');
+    return res.status(200).json({ ok: true });
+  }
+
+  if (state.step === 'session') {
+    state.session = skip ? 'NY' : text;
     if (state.type === 'close') {
       state.step = 'exit';
       await kset('deskbot_' + userId, JSON.stringify(state));
@@ -599,7 +608,7 @@ export default async function handler(req, res) {
     } else {
       state.step = 'related';
       await kset('deskbot_' + userId, JSON.stringify(state));
-      await sendMsg(chatId, 'Optional assets? (default: US500CFD, - להשמיט)');
+      await sendMsg(chatId, 'Optional assets? (default: ES1!, - להשמיט)');
     }
     return res.status(200).json({ ok: true });
   }
@@ -616,7 +625,7 @@ export default async function handler(req, res) {
   }
 
   if (state.step === 'related') {
-    state.related = skip ? 'US500CFD' : text;
+    state.related = skip ? 'ES1!' : text;
     state.step = 'risk_pct';
     await kset('deskbot_' + userId, JSON.stringify(state));
     await sendMsg(chatId, '% חשיפת חשבון? (default: 2%, - להשמיט)');
