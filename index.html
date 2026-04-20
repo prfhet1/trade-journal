@@ -732,7 +732,7 @@ function extractRR(text){
   var m=text&&text.match(/R:R Achieved[: ]+1:([0-9.]+)/);
   return m?parseFloat(m[1]):null;
 }
-function getWeekStart(){var d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()-d.getDay());return d;}
+function getWeekStart(){var d=new Date();d.setHours(0,0,0,0);var day=d.getDay();var diff=day===0?-6:1-day;d.setDate(d.getDate()+diff);return d;}
 function getMonthKey(d){var dt=new Date(d);return dt.getFullYear()+'-'+(dt.getMonth()+1);}
 
 function renderJournal(){
