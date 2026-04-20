@@ -96,9 +96,10 @@ export default async function handler(req, res) {
     lines.push(SEP);
     if (d.ticker || d.tf) lines.push('📊 ' + bold(d.ticker || 'US500') + (d.tf ? '  ⏱ ' + esc(d.tf) : ''));
     if (d.bias) lines.push(d.bias === 'bull' ? 'כיוון מצופה: 📈 עולה' : 'כיוון מצופה: 📉 יורד');
-    if (d.tp) lines.push('TP: ' + bold(d.tp));
-    if (d.entry) lines.push('Entry: ' + bold(d.entry));
-    if (d.sl) lines.push('Stop Loss: ' + bold(d.sl));
+    if (d.tp) lines.push('Planned TP: ' + bold(d.tp));
+    const entryLabel = d.bias === 'bull' ? 'Entry after close above' : 'Entry after close below';
+    if (d.entry) lines.push(entryLabel + ': ' + bold(d.entry));
+    if (d.sl) lines.push('Estimated Stop Loss: ' + bold(d.sl));
     if (d.entry && d.sl && d.tp) {
       const rr = (Math.abs(d.tp - d.entry) / Math.abs(d.entry - d.sl)).toFixed(2);
       lines.push('סיכון/סיכוי: ' + bold('1:' + rr));
@@ -117,9 +118,10 @@ export default async function handler(req, res) {
     lines.push(SEP);
     if (d.ticker || d.tf) lines.push('📊 ' + bold(d.ticker || 'US500') + (d.tf ? '  ⏱ ' + esc(d.tf) : ''));
     if (d.bias) lines.push(d.bias === 'bull' ? 'כיוון: 📈 עולה' : 'כיוון: 📉 יורד');
-    if (d.tp) lines.push('TP: ' + bold(d.tp));
-    if (d.entry) lines.push('Entry: ' + bold(d.entry));
-    if (d.sl) lines.push('Stop Loss: ' + bold(d.sl));
+    if (d.tp) lines.push('Planned TP: ' + bold(d.tp));
+    const entryLabel = d.bias === 'bull' ? 'Entry after close above' : 'Entry after close below';
+    if (d.entry) lines.push(entryLabel + ': ' + bold(d.entry));
+    if (d.sl) lines.push('Estimated Stop Loss: ' + bold(d.sl));
     if (d.entry && d.sl && d.tp) {
       const rr = (Math.abs(d.tp - d.entry) / Math.abs(d.entry - d.sl)).toFixed(2);
       lines.push('סיכון/סיכוי: ' + bold('1:' + rr));
