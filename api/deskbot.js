@@ -196,7 +196,7 @@ export default async function handler(req, res) {
       }
       journal.unshift({
         type, text,
-        time: new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }),
+        time: new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jerusalem' }),
         date: new Date().toISOString()
       });
       await kset('journal', JSON.stringify(journal));
