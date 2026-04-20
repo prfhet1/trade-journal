@@ -189,15 +189,19 @@ export default async function handler(req, res) {
   async function saveToJournal(type, text) {
     try {
       const journalData = await kget('journal');
-      let journal = Array.isArray(journalData) ? journalData :
-        (typeof journalData === 'string' ? JSON.parse(journalData) : []);
+      let journal = [];
+      if (journalData) {
+        journal = Array.isArray(journalData) ? journalData :
+          (typeof journalData === 'string' ? JSON.parse(journalData) : []);
+      }
       journal.unshift({
         type, text,
         time: new Date().toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' }),
         date: new Date().toISOString()
       });
       await kset('journal', JSON.stringify(journal));
-    } catch(e) {}
+      console.log('Saved to journal, type:', type, 'total:', journal.length);
+    } catch(e) { console.log('saveToJournal error:', e.message); }
   }
 
   // ── PROCESS UPDATE ───────────────────────────────────────────
@@ -257,14 +261,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
-    // Update type selection
-    if (data === 'utype_sl' || data === 'utype_partial' || data === 'utype_add') {
-      const utype = data.replace('utype_', '');
-      const newState = { ...state, utype, step: 'new_sl' };
-      await kset('deskbot_' + userId, JSON.stringify(newState));
-      await sendMsg(chatId, 'Updated Stop Loss? (- להשמיט)');
-      return res.status(200).json({ ok: true });
-    }
+    // utype handled below individually
 
     // Post options
     if (data === 'post_now') {
