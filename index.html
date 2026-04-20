@@ -158,6 +158,7 @@ body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;background:var(--bg);
     <div class="tab" onclick="showTab('update')" id="tab-update">ניהול עסקה</div>
     <div class="tab" onclick="showTab('close')" id="tab-close">סגירת עסקה</div>
     <div class="tab" onclick="showTab('journal')" id="tab-journal">יומן</div>
+    <div class="tab" onclick="showTab('members')" id="tab-members">חברים</div>
   </div>
 
   <div class="panels">
@@ -905,6 +906,73 @@ function sv(id,val){var el=document.getElementById(id);if(el)el.value=val;}
 // ── INIT ──────────────────────────────────────────────────────
 setDiscs();
 initAuth();
+
+// ── MEMBERS ──────────────────────────────────────────────────
+var allMembers=[];var filteredMembers=[];var membersCurrentPage=0;var membersPerPage=20;
+
+async function loadMembers(){
+  document.getElementById('m-list').innerHTML='<div style="text-align:center;padding:20px;color:var(--muted)">טוען...</div>';
+  try{
+    var r=await fetch(WURL+'?type=members');
+    var j=await r.json();
+    if(!j.data){document.getElementById('m-list').innerHTML='<div style="text-align:center;color:var(--muted)">שגיאה</div>';return;}
+    allMembers=Array.isArray(j.data)?j.data:(typeof j.data==='string'?JSON.parse(j.data):[]);
+    updateMemberStats();
+    filteredMembers=[...allMembers];
+    membersCurrentPage=0;
+    renderMemberList();
+  }catch(e){document.getElementById('m-list').innerHTML='<div style="text-align:center;color:var(--muted)">שגיאה: '+e.message+'</div>';}
+}
+
+function updateMemberStats(){
+  var now=Date.now();var weekMs=7*24*60*60*1000;
+  var active=allMembers.filter(function(m){return m.status==='active';});
+  var trial=allMembers.filter(function(m){return m.status==='trial';});
+  var expired=allMembers.filter(function(m){return m.status==='expired'||m.status==='inactive';});
+  var expiring=allMembers.filter(function(m){var end=m.status==='trial'?m.trialEnd:m.paidUntil;return end&&(end-now)>0&&(end-now)<weekMs;});
+  var conv=allMembers.length>0?Math.round((active.length/allMembers.length)*100)+'%':'N/A';
+  document.getElementById('m-total').textContent=allMembers.length;
+  document.getElementById('m-active').textContent=active.length;
+  document.getElementById('m-trial').textContent=trial.length;
+  document.getElementById('m-expired').textContent=expired.length;
+  document.getElementById('m-conv').textContent=conv;
+  document.getElementById('m-rev').textContent='₪'+(active.length*50);
+  document.getElementById('m-expiring').textContent=expiring.length;
+}
+
+function filterMembers(){
+  var q=document.getElementById('m-search').value.toLowerCase();
+  filteredMembers=allMembers.filter(function(m){return !q||(m.username&&m.username.toLowerCase().includes(q))||(String(m.userId).includes(q));});
+  membersCurrentPage=0;renderMemberList();
+}
+
+function membersPageNav(dir){
+  var pages=Math.max(1,Math.ceil(filteredMembers.length/membersPerPage));
+  membersCurrentPage=Math.max(0,Math.min(pages-1,membersCurrentPage+dir));
+  renderMemberList();
+}
+
+function renderMemberList(){
+  var pages=Math.max(1,Math.ceil(filteredMembers.length/membersPerPage));
+  document.getElementById('m-page-info').textContent=(membersCurrentPage+1)+' / '+pages;
+  var start=membersCurrentPage*membersPerPage;
+  var slice=filteredMembers.slice(start,start+membersPerPage);
+  var html='';
+  slice.forEach(function(m){
+    var now=Date.now();
+    var end=m.status==='trial'?m.trialEnd:(m.paidUntil||null);
+    var endStr=end?new Date(end).toLocaleDateString('he-IL'):'N/A';
+    var statusColor=m.status==='active'?'#27ae60':m.status==='trial'?'#f39c12':'#e74c3c';
+    var statusLabel=m.status==='active'?'פעיל':m.status==='trial'?'ניסיון':'פג';
+    var expiring=end&&(end-now)>0&&(end-now)<7*24*60*60*1000;
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;margin-bottom:6px;background:var(--card);border-radius:var(--rs);border-left:3px solid '+statusColor+'">';
+    html+='<div><div style="font-weight:600;font-size:13px;">@'+(m.username||'unknown')+'</div>';
+    html+='<div style="font-size:11px;color:var(--muted);">ID: '+m.userId+' | עד: '+endStr+'</div></div>';
+    html+='<div style="font-size:11px;font-weight:600;color:'+statusColor+'">'+statusLabel+(expiring?' ⚠️':'')+'</div></div>';
+  });
+  if(!html)html='<div style="text-align:center;padding:20px;color:var(--muted)">אין חברים</div>';
+  document.getElementById('m-list').innerHTML=html;
+}
 </script>
 </body>
 </html>
