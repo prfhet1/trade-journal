@@ -263,17 +263,17 @@ export default async function handler(req, res) {
 
     // Update type selection - each goes to its own flow
     if (data === 'utype_sl') {
-      await kset('deskbot_' + userId, JSON.stringify({ type: 'update', utype: 'sl', step: 'new_sl', ticker: 'US500' }));
+      await kset('deskbot_' + userId, JSON.stringify({ type: 'update', utype: 'sl', step: 'new_sl', ticker: 'ES1!' }));
       await sendMsg(chatId, 'Updated Stop Loss?');
       return res.status(200).json({ ok: true });
     }
     if (data === 'utype_partial') {
-      await kset('deskbot_' + userId, JSON.stringify({ type: 'update', utype: 'partial', step: 'pct', ticker: 'US500' }));
+      await kset('deskbot_' + userId, JSON.stringify({ type: 'update', utype: 'partial', step: 'pct', ticker: 'ES1!' }));
       await sendMsg(chatId, '% מהפוזיציה? (e.g. 50%)');
       return res.status(200).json({ ok: true });
     }
     if (data === 'utype_add') {
-      await kset('deskbot_' + userId, JSON.stringify({ type: 'update', utype: 'add', step: 'add_level', ticker: 'US500' }));
+      await kset('deskbot_' + userId, JSON.stringify({ type: 'update', utype: 'add', step: 'add_level', ticker: 'ES1!' }));
       await sendMsg(chatId, 'רמת הוספה? (Entry level)');
       return res.status(200).json({ ok: true });
     }
@@ -421,7 +421,7 @@ export default async function handler(req, res) {
   const skip = text === '-' || text === 'skip' || text === 'ס';
 
   if (state.step === 'ticker') {
-    state.ticker = skip ? 'US500' : text;
+    state.ticker = skip ? 'ES1!' : text;
     state.step = 'tf';
     await kset('deskbot_' + userId, JSON.stringify(state));
     await sendMsg(chatId, '⏱ גרף? (default: 5min, - להשמיט)');
@@ -446,7 +446,8 @@ export default async function handler(req, res) {
     state.tp = skip ? null : parseFloat(text) || text;
     state.step = 'entry';
     await kset('deskbot_' + userId, JSON.stringify(state));
-    await sendMsg(chatId, 'Entry?');
+    var entryLabel = state.bias === 'bull' ? 'Entry after close above?' : 'Entry after close below?';
+    await sendMsg(chatId, entryLabel);
     return res.status(200).json({ ok: true });
   }
 
@@ -473,7 +474,7 @@ export default async function handler(req, res) {
     } else {
       state.step = 'related';
       await kset('deskbot_' + userId, JSON.stringify(state));
-      await sendMsg(chatId, 'נכסים אופציונליים? (default: ES1!, - להשמיט)');
+      await sendMsg(chatId, 'Optional assets? (default: US500CFD, - להשמיט)');
     }
     return res.status(200).json({ ok: true });
   }
@@ -490,7 +491,7 @@ export default async function handler(req, res) {
   }
 
   if (state.step === 'related') {
-    state.related = skip ? 'ES1!' : text;
+    state.related = skip ? 'US500CFD' : text;
     state.step = 'risk_pct';
     await kset('deskbot_' + userId, JSON.stringify(state));
     await sendMsg(chatId, '% חשיפת חשבון? (default: 2%, - להשמיט)');
