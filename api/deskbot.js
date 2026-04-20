@@ -261,7 +261,22 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
-    // utype handled below individually
+    // Update type selection - each goes to its own flow
+    if (data === 'utype_sl') {
+      await kset('deskbot_' + userId, JSON.stringify({ type: 'update', utype: 'sl', step: 'new_sl', ticker: 'US500' }));
+      await sendMsg(chatId, 'Updated Stop Loss?');
+      return res.status(200).json({ ok: true });
+    }
+    if (data === 'utype_partial') {
+      await kset('deskbot_' + userId, JSON.stringify({ type: 'update', utype: 'partial', step: 'pct', ticker: 'US500' }));
+      await sendMsg(chatId, '% מהפוזיציה? (e.g. 50%)');
+      return res.status(200).json({ ok: true });
+    }
+    if (data === 'utype_add') {
+      await kset('deskbot_' + userId, JSON.stringify({ type: 'update', utype: 'add', step: 'add_level', ticker: 'US500' }));
+      await sendMsg(chatId, 'רמת הוספה? (Entry level)');
+      return res.status(200).json({ ok: true });
+    }
 
     // Post options
     if (data === 'post_now') {
