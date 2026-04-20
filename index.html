@@ -715,7 +715,7 @@ function showTab(name){
 
 // ── JOURNAL ───────────────────────────────────────────────────
 function addJournal(type,text,img){
-  journal.unshift({type:type,text:text,img:img,time:new Date().toLocaleTimeString(lang==='he'?'he-IL':'en-GB',{hour:'2-digit',minute:'2-digit'}),date:new Date().toISOString()});
+  journal.unshift({type:type,text:text,img:img,time:new Date().toLocaleTimeString(lang==='he'?'he-IL':'en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Jerusalem'}),date:new Date().toISOString()});
   saveJournal();renderJournal();
 }
 function saveJournal(){
