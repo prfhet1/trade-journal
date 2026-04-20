@@ -433,7 +433,7 @@ async function syncJournal(){
     var j=await r.json();
     if(j.data){
       var d=typeof j.data==='string'?JSON.parse(j.data):j.data;
-      if(Array.isArray(d)&&d.length>0){journal=d;localStorage.setItem('djr_journal',JSON.stringify(d));renderJournal();}
+      if(Array.isArray(d)){journal=d;localStorage.setItem('djr_journal',JSON.stringify(d));renderJournal();}
     }
   }catch(e){}
 }
