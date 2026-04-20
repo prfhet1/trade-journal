@@ -136,9 +136,12 @@ export default async function handler(req, res) {
     lines.push(esc(utypeLabels[d.utype] || 'Update'));
     lines.push(SEP);
     if (d.ticker) lines.push('📊 ' + bold(d.ticker));
-    if (d.tp) lines.push('Updated TP: ' + bold(d.tp));
-    if (d.sl) lines.push('Updated Stop Loss: ' + bold(d.sl));
-    if (d.pct) lines.push('% Position: ' + bold(d.pct));
+    if (d.utype === 'sl' && d.sl) lines.push('Updated Stop Loss: ' + bold(d.sl));
+    if (d.utype === 'partial' && d.pct) lines.push('Partial Close: ' + bold(d.pct + '%'));
+    if (d.utype === 'add') {
+      if (d.entry) lines.push('Add Level: ' + bold(d.entry));
+      if (d.pct) lines.push('% Added: ' + bold(d.pct + '%'));
+    }
     if (d.comment) lines.push('', esc(d.comment));
     lines.push(SEP);
     lines.push('⚠️ ' + DISC);
@@ -146,20 +149,13 @@ export default async function handler(req, res) {
   }
 
   function buildCloseMsg(d) {
-    const isProfit = parseFloat(d.exit) > parseFloat(d.entry);
+    const icon = d.reason === 'TP' ? '✅' : d.reason === 'SL' ? '❌' : '🔄';
     const lines = [];
-    lines.push(bold((isProfit ? '✅ ' : '❌ ') + 'סגירת עסקה  יומן מסחר DJR'));
+    lines.push(bold(icon + ' סגירת עסקה  יומן מסחר DJR'));
     lines.push(SEP);
     if (d.ticker || d.tf) lines.push('📊 ' + bold(d.ticker || 'US500') + (d.tf ? '  ⏱ ' + esc(d.tf) : ''));
-    if (d.tp) lines.push('TP: ' + bold(d.tp));
-    if (d.entry) lines.push('Entry: ' + bold(d.entry));
     if (d.exit) lines.push('Exit: ' + bold(d.exit));
-    if (d.sl) lines.push('Stop Loss: ' + bold(d.sl));
-    if (d.entry && d.sl && d.exit) {
-      const rr = (Math.abs(d.exit - d.entry) / Math.abs(d.entry - d.sl)).toFixed(2);
-      lines.push('🎯 R:R Achieved: ' + bold('1:' + rr));
-    }
-    if (d.reason) lines.push('סיבת סגירה: ' + esc(d.reason));
+    if (d.reason) lines.push('סיבת סגירה: ' + bold(esc(d.reason)));
     if (d.comment) lines.push('', esc(d.comment));
     lines.push(SEP);
     lines.push('⚠️ ' + DISC);
@@ -348,11 +344,8 @@ export default async function handler(req, res) {
   }
 
   if (text === '/close' || text === 'close') {
-    await kset('deskbot_' + userId, JSON.stringify({ type: 'close', step: 'bias' }));
-    await sendButtons(chatId, '❌ <b>סגירת עסקה</b>\n\nכיוון המקורי?', [[
-      { text: '📈 Bull', callback_data: 'bias_bull' },
-      { text: '📉 Bear', callback_data: 'bias_bear' }
-    ]]);
+    await kset('deskbot_' + userId, JSON.stringify({ type: 'close', step: 'ticker' }));
+    await sendMsg(chatId, '❌ <b>סגירת עסקה</b>\n\n📊 נכס? (- להשמיט, default: US500)');
     return res.status(200).json({ ok: true });
   }
 
@@ -415,29 +408,23 @@ export default async function handler(req, res) {
 
   if (state.step === 'ticker') {
     state.ticker = skip ? 'US500' : text;
-    if (state.type === 'update') {
-      if (state.utype === 'partial' || state.utype === 'add') {
-        state.step = 'pct';
-        await kset('deskbot_' + userId, JSON.stringify(state));
-        await sendMsg(chatId, '% מהפוזיציה? (- להשמיט)');
-      } else {
-        state.step = 'new_sl';
-        await kset('deskbot_' + userId, JSON.stringify(state));
-        await sendMsg(chatId, 'Updated Stop Loss? (- להשמיט)');
-      }
-    } else {
-      state.step = 'tf';
-      await kset('deskbot_' + userId, JSON.stringify(state));
-      await sendMsg(chatId, '⏱ גרף? (default: 5min, - להשמיט)');
-    }
+    state.step = 'tf';
+    await kset('deskbot_' + userId, JSON.stringify(state));
+    await sendMsg(chatId, '⏱ גרף? (default: 5min, - להשמיט)');
     return res.status(200).json({ ok: true });
   }
 
   if (state.step === 'tf') {
     state.tf = skip ? '5min' : text;
-    state.step = 'tp';
-    await kset('deskbot_' + userId, JSON.stringify(state));
-    await sendMsg(chatId, state.type === 'close' ? 'TP המקורי? (- להשמיט)' : 'TP?');
+    if (state.type === 'close') {
+      state.step = 'exit';
+      await kset('deskbot_' + userId, JSON.stringify(state));
+      await sendMsg(chatId, 'Exit price?');
+    } else {
+      state.step = 'tp';
+      await kset('deskbot_' + userId, JSON.stringify(state));
+      await sendMsg(chatId, 'TP?');
+    }
     return res.status(200).json({ ok: true });
   }
 
@@ -477,7 +464,7 @@ export default async function handler(req, res) {
     await kset('deskbot_' + userId, JSON.stringify(state));
     await sendButtons(chatId, 'סיבת סגירה?', [
       [{ text: '✅ TP', callback_data: 'reason_TP' }, { text: '❌ SL', callback_data: 'reason_SL' }],
-      [{ text: 'Trailing', callback_data: 'reason_Trailing' }, { text: 'Manual Close', callback_data: 'reason_Manual Close' }]
+      [{ text: '📉 Trailing', callback_data: 'reason_Trailing' }, { text: '🔄 Manual Close', callback_data: 'reason_Manual Close' }]
     ]);
     return res.status(200).json({ ok: true });
   }
@@ -492,31 +479,25 @@ export default async function handler(req, res) {
 
   if (state.step === 'new_sl') {
     state.sl = skip ? null : text;
-    state.step = 'new_tp';
+    state.step = 'done';
     await kset('deskbot_' + userId, JSON.stringify(state));
-    await sendMsg(chatId, 'Updated TP? (- להשמיט)');
-    return res.status(200).json({ ok: true });
-  }
-
-  if (state.step === 'new_tp') {
-    state.tp = skip ? null : text;
-    if (state.utype === 'partial' || state.utype === 'add') {
-      state.step = 'pct';
-      await kset('deskbot_' + userId, JSON.stringify(state));
-      await sendMsg(chatId, '% מהפוזיציה? (- להשמיט)');
-    } else {
-      state.step = 'done';
-      await kset('deskbot_' + userId, JSON.stringify(state));
-      await showPreview(chatId, state);
-    }
+    await showPreview(chatId, state);
     return res.status(200).json({ ok: true });
   }
 
   if (state.step === 'pct') {
     state.pct = skip ? null : text;
-    state.step = 'new_sl';
+    state.step = 'done';
     await kset('deskbot_' + userId, JSON.stringify(state));
-    await sendMsg(chatId, 'Updated Stop Loss? (- להשמיט)');
+    await showPreview(chatId, state);
+    return res.status(200).json({ ok: true });
+  }
+
+  if (state.step === 'add_level') {
+    state.entry = skip ? null : text;
+    state.step = 'pct';
+    await kset('deskbot_' + userId, JSON.stringify(state));
+    await sendMsg(chatId, '% מהפוזיציה?');
     return res.status(200).json({ ok: true });
   }
 
