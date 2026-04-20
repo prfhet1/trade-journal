@@ -278,6 +278,110 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
+    // Edit fields
+    if (data === 'edit_fields') {
+      const s = typeof state === 'string' ? JSON.parse(state) : state;
+      const type = s.type;
+      let editButtons = [];
+      if (type === 'idea') {
+        editButtons = [
+          [{ text: '📈📉 Bias', callback_data: 'edit_bias' }, { text: '📊 Asset', callback_data: 'edit_ticker' }],
+          [{ text: '⏱ Chart', callback_data: 'edit_tf' }, { text: '🎯 TP', callback_data: 'edit_tp' }],
+          [{ text: '📍 Entry', callback_data: 'edit_entry' }, { text: '🛑 Est. SL', callback_data: 'edit_sl' }],
+          [{ text: '🔗 Optional Assets', callback_data: 'edit_related' }, { text: '💬 Comment', callback_data: 'edit_comment' }],
+          [{ text: '🔙 חזור לתצוגה', callback_data: 'back_preview' }]
+        ];
+      } else if (type === 'trade') {
+        editButtons = [
+          [{ text: '📈📉 Bias', callback_data: 'edit_bias' }, { text: '📊 Asset', callback_data: 'edit_ticker' }],
+          [{ text: '⏱ Chart', callback_data: 'edit_tf' }, { text: '🎯 TP', callback_data: 'edit_tp' }],
+          [{ text: '📍 Entry', callback_data: 'edit_entry' }, { text: '🛑 SL', callback_data: 'edit_sl' }],
+          [{ text: '💬 Comment', callback_data: 'edit_comment' }],
+          [{ text: '🔙 חזור לתצוגה', callback_data: 'back_preview' }]
+        ];
+      } else if (type === 'update') {
+        editButtons = [
+          [{ text: '🛑 Updated SL', callback_data: 'edit_sl' }, { text: '🎯 Updated TP', callback_data: 'edit_tp' }],
+          [{ text: '% Position', callback_data: 'edit_pct' }, { text: '💬 Comment', callback_data: 'edit_comment' }],
+          [{ text: '🔙 חזור לתצוגה', callback_data: 'back_preview' }]
+        ];
+      } else if (type === 'close') {
+        editButtons = [
+          [{ text: '📊 Asset', callback_data: 'edit_ticker' }, { text: '⏱ Chart', callback_data: 'edit_tf' }],
+          [{ text: '🚪 Exit', callback_data: 'edit_exit' }, { text: '📋 Reason', callback_data: 'edit_reason' }],
+          [{ text: '💬 Comment', callback_data: 'edit_comment' }],
+          [{ text: '🔙 חזור לתצוגה', callback_data: 'back_preview' }]
+        ];
+      }
+      await sendButtons(chatId, '✏️ מה לערוך?', editButtons);
+      return res.status(200).json({ ok: true });
+    }
+
+    // Cancel
+    if (data === 'cancel_msg') {
+      await kdel('deskbot_' + userId);
+      await sendMsg(chatId, '❌ ההודעה בוטלה.');
+      return res.status(200).json({ ok: true });
+    }
+
+    // Back to preview
+    if (data === 'back_preview') {
+      await showPreview(chatId, state);
+      return res.status(200).json({ ok: true });
+    }
+
+    // Edit field handlers
+    if (data.startsWith('edit_')) {
+      const field = data.replace('edit_', '');
+      const newState = { ...(typeof state === 'string' ? JSON.parse(state) : state), editing: field, step: 'editing' };
+      await kset('deskbot_' + userId, JSON.stringify(newState));
+      const prompts = {
+        bias: null,
+        ticker: '📊 Asset? (e.g. ES1!)',
+        tf: '⏱ Chart? (e.g. 5min)',
+        tp: '🎯 TP?',
+        entry: newState.bias === 'bull' ? 'Entry after close above?' : 'Entry after close below?',
+        sl: '🛑 Stop Loss?',
+        related: '🔗 Optional assets? (e.g. US500CFD)',
+        comment: '💬 Comment? (- להשמיט)',
+        pct: '% Position?',
+        exit: '🚪 Exit price?',
+        reason: null
+      };
+      if (field === 'bias') {
+        await sendButtons(chatId, '📈📉 Bias?', [[
+          { text: '📈 Bull', callback_data: 'edit_set_bull' },
+          { text: '📉 Bear', callback_data: 'edit_set_bear' }
+        ]]);
+      } else if (field === 'reason') {
+        await sendButtons(chatId, 'סיבת סגירה?', [
+          [{ text: '✅ TP', callback_data: 'edit_set_reason_TP' }, { text: '❌ SL', callback_data: 'edit_set_reason_SL' }],
+          [{ text: '📉 Trailing', callback_data: 'edit_set_reason_Trailing' }, { text: '🔄 Manual Close', callback_data: 'edit_set_reason_Manual Close' }]
+        ]);
+      } else {
+        await sendMsg(chatId, prompts[field] || 'New value?');
+      }
+      return res.status(200).json({ ok: true });
+    }
+
+    // Edit bias set
+    if (data === 'edit_set_bull' || data === 'edit_set_bear') {
+      const bias = data === 'edit_set_bull' ? 'bull' : 'bear';
+      const newState = { ...(typeof state === 'string' ? JSON.parse(state) : state), bias, editing: null, step: 'done' };
+      await kset('deskbot_' + userId, JSON.stringify(newState));
+      await showPreview(chatId, newState);
+      return res.status(200).json({ ok: true });
+    }
+
+    // Edit reason set
+    if (data.startsWith('edit_set_reason_')) {
+      const reason = data.replace('edit_set_reason_', '');
+      const newState = { ...(typeof state === 'string' ? JSON.parse(state) : state), reason, editing: null, step: 'done' };
+      await kset('deskbot_' + userId, JSON.stringify(newState));
+      await showPreview(chatId, newState);
+      return res.status(200).json({ ok: true });
+    }
+
     // Post options
     if (data === 'post_now') {
       const builtMsg = buildMessage(state);
@@ -414,6 +518,25 @@ export default async function handler(req, res) {
     state = { ...state, comment: text, waiting: null };
     await kset('deskbot_' + userId, JSON.stringify(state));
     await showPreview(chatId, state);
+    return res.status(200).json({ ok: true });
+  }
+
+  // ── HANDLE EDITING ───────────────────────────────────────────
+  if (state.step === 'editing' && state.editing) {
+    const field = state.editing;
+    const skip2 = text === '-';
+    const newState = { ...state, editing: null, step: 'done' };
+    if (field === 'ticker') newState.ticker = skip2 ? state.ticker : text;
+    else if (field === 'tf') newState.tf = skip2 ? state.tf : text;
+    else if (field === 'tp') newState.tp = skip2 ? state.tp : parseFloat(text) || text;
+    else if (field === 'entry') newState.entry = skip2 ? state.entry : parseFloat(text) || text;
+    else if (field === 'sl') newState.sl = skip2 ? state.sl : parseFloat(text) || text;
+    else if (field === 'related') newState.related = skip2 ? state.related : text;
+    else if (field === 'comment') newState.comment = skip2 ? null : text;
+    else if (field === 'pct') newState.pct = skip2 ? state.pct : text;
+    else if (field === 'exit') newState.exit = skip2 ? state.exit : parseFloat(text) || text;
+    await kset('deskbot_' + userId, JSON.stringify(newState));
+    await showPreview(chatId, newState);
     return res.status(200).json({ ok: true });
   }
 
@@ -554,7 +677,8 @@ export default async function handler(req, res) {
     await sendButtons(chatId, 'מה לעשות?', [
       [{ text: '✅ שלח עכשיו', callback_data: 'post_now' }],
       [{ text: '📸 הוסף תמונה', callback_data: 'post_photo' }, { text: '✏️ הוסף הערה', callback_data: 'post_comment' }],
-      [{ text: '📸✏️ תמונה + הערה', callback_data: 'post_both' }]
+      [{ text: '📸✏️ תמונה + הערה', callback_data: 'post_both' }],
+      [{ text: '🔙 ערוך שדה', callback_data: 'edit_fields' }, { text: '❌ בטל', callback_data: 'cancel_msg' }]
     ]);
   }
 
