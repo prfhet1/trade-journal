@@ -173,14 +173,15 @@ body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;background:var(--bg);
               <div class="bb-btn bear" id="bear-btn" onclick="setBias('bear')">📉 Bear</div>
             </div>
           </div>
-          <div class="fg"><label id="l-ticker">נכס</label><input type="text" id="ticker" value="ES1!" oninput="syncAndUpdate('idea')"/></div>
+          <div class="fg"><label id="l-ticker">נכס</label><input type="text" id="ticker" value="US500CFD" oninput="syncAndUpdate('idea')"/></div>
           <div class="fg"><label id="l-tf">גרף</label><input type="text" id="tf" value="5min" oninput="syncAndUpdate('idea')"/></div>
+          <div class="fg"><label id="l-session">Session</label><input type="text" id="session" value="NY" oninput="syncAndUpdate('idea')"/></div>
           <div class="fg"><label id="l-zone">Entry after close above</label><input type="text" id="zone" placeholder="e.g. 5780" oninput="syncAndUpdate('idea')"/></div>
           <div class="fg"><label>Estimated Stop Loss</label><input type="text" id="inv" placeholder="e.g. 5750" oninput="syncAndUpdate('idea')"/></div>
           <div class="fg"><label>Planned TP</label><input type="text" id="obj" placeholder="e.g. 5850" oninput="syncAndUpdate('idea')"/></div>
           <div class="fg"><label id="l-rr">סיכון/סיכוי</label><input type="text" id="rr" class="rrf" readonly/></div>
           <div class="fg"><label id="l-risk-pct">% חשיפת חשבון</label><input type="text" id="risk-pct" value="2%" oninput="syncAndUpdate('idea')"/></div>
-          <div class="fg full"><label id="l-related">נכסים אופציונאליים בהתאמה</label><input type="text" id="related" value="US500CFD" oninput="syncAndUpdate('idea')"/></div>
+          <div class="fg full"><label id="l-related">נכסים אופציונאליים בהתאמה</label><input type="text" id="related" value="ES1!" oninput="syncAndUpdate('idea')"/></div>
           <div class="fg full"><label id="l-conf">ניתוח ונקודות עיקריות</label><textarea id="conf" placeholder="שתף את הניתוח שלך לצורכי לימוד..." oninput="updatePrev('idea')"></textarea></div>
           <div class="fg full"><label id="l-img1">צירוף תמונה</label>
             <div class="img-sec"><div class="img-tabs">
@@ -210,7 +211,7 @@ body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;background:var(--bg);
               <div class="bb-btn bear" id="bear-t" onclick="setTradeBias('bear')">📉 יורד</div>
             </div>
           </div>
-          <div class="fg"><label id="l-tticker">נכס</label><input type="text" id="t-ticker" value="ES1!" oninput="updatePrev('trade')"/></div>
+          <div class="fg"><label id="l-tticker">נכס</label><input type="text" id="t-ticker" value="US500CFD" oninput="updatePrev('trade')"/></div>
           <div class="fg"><label id="l-ttf">גרף</label><input type="text" id="t-tf" value="5min" oninput="updatePrev('trade')"/></div>
           <div class="fg"><label>Entry</label><input type="text" id="ep" placeholder="e.g. 5792.5" oninput="updatePrev('trade')"/></div>
           <div class="fg"><label>Stop Loss</label><input type="text" id="rl" placeholder="e.g. 5778" oninput="updatePrev('trade')"/></div>
@@ -245,7 +246,7 @@ body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;background:var(--bg);
           <div class="utype" onclick="setUtype(this,'add')" id="ut-add">Add to Position</div>
         </div>
         <div class="form-grid">
-          <div class="fg"><label id="l-uticker">נכס</label><input type="text" id="u-ticker" value="ES1!" oninput="updatePrev('update')"/></div>
+          <div class="fg"><label id="l-uticker">נכס</label><input type="text" id="u-ticker" value="US500CFD" oninput="updatePrev('update')"/></div>
           <div class="fg"><label>Updated Stop Loss</label><input type="text" id="new-sl" placeholder="e.g. 5790" oninput="updatePrev('update')"/></div>
           <div class="fg"><label>Updated TP</label><input type="text" id="new-tp" placeholder="e.g. 5860" oninput="updatePrev('update')"/></div>
           <div class="fg"><label>R:R</label><input type="text" id="new-rr" placeholder="auto or manual" oninput="updatePrev('update')"/></div>
@@ -273,7 +274,7 @@ body{font-family:-apple-system,'Segoe UI',Arial,sans-serif;background:var(--bg);
     <div class="panel" id="panel-close">
       <div class="card">
         <div class="form-grid">
-          <div class="fg"><label id="l-cticker">נכס</label><input type="text" id="c-ticker" value="ES1!" oninput="updatePrev('close')"/></div>
+          <div class="fg"><label id="l-cticker">נכס</label><input type="text" id="c-ticker" value="US500CFD" oninput="updatePrev('close')"/></div>
           <div class="fg"><label id="l-ctf">גרף</label><input type="text" id="c-tf" value="5min" oninput="updatePrev('close')"/></div>
           <div class="fg"><label>Entry</label><input type="text" id="c-entry" placeholder="e.g. 5792.5" oninput="updatePrev('close')"/></div>
           <div class="fg"><label>Exit</label><input type="text" id="c-exit" placeholder="e.g. 5835" oninput="updatePrev('close')"/></div>
