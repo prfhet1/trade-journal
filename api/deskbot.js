@@ -226,22 +226,29 @@ export default async function handler(req, res) {
     const state = await kget('deskbot_' + userId);
 
     // Message type selection
-    if (data === 'type_idea' || data === 'type_trade' || data === 'type_update' || data === 'type_close') {
+    if (data === 'type_idea' || data === 'type_trade') {
       const type = data.replace('type_', '');
-      if (type === 'update') {
-        await kset('deskbot_' + userId, JSON.stringify({ type: 'update', step: 'utype' }));
-        await sendButtons(chatId, '🔄 <b>ניהול עסקה</b>\n\nסוג עדכון?', [
-          [{ text: 'Move Stop Loss', callback_data: 'utype_sl' }],
-          [{ text: 'Partial Close', callback_data: 'utype_partial' }],
-          [{ text: 'Add to Position', callback_data: 'utype_add' }]
-        ]);
-      } else {
-        await kset('deskbot_' + userId, JSON.stringify({ ...state, type, step: 'bias' }));
-        await sendButtons(chatId, '📈 כיוון?', [[
-          { text: '📈 Bull', callback_data: 'bias_bull' },
-          { text: '📉 Bear', callback_data: 'bias_bear' }
-        ]]);
-      }
+      await kset('deskbot_' + userId, JSON.stringify({ type, step: 'bias' }));
+      await sendButtons(chatId, '📈 כיוון?', [[
+        { text: '📈 Bull', callback_data: 'bias_bull' },
+        { text: '📉 Bear', callback_data: 'bias_bear' }
+      ]]);
+      return res.status(200).json({ ok: true });
+    }
+
+    if (data === 'type_update') {
+      await kset('deskbot_' + userId, JSON.stringify({ type: 'update', step: 'utype' }));
+      await sendButtons(chatId, '🔄 <b>ניהול עסקה</b>\n\nסוג עדכון?', [
+        [{ text: 'Move Stop Loss', callback_data: 'utype_sl' }],
+        [{ text: 'Partial Close', callback_data: 'utype_partial' }],
+        [{ text: 'Add to Position', callback_data: 'utype_add' }]
+      ]);
+      return res.status(200).json({ ok: true });
+    }
+
+    if (data === 'type_close') {
+      await kset('deskbot_' + userId, JSON.stringify({ type: 'close', step: 'ticker' }));
+      await sendMsg(chatId, '❌ <b>סגירת עסקה</b>\n\n📊 נכס? (default: US500CFD, - להשמיט)');
       return res.status(200).json({ ok: true });
     }
 
@@ -259,7 +266,7 @@ export default async function handler(req, res) {
       const newState = { ...state, bias };
       newState.step = 'ticker';
       await kset('deskbot_' + userId, JSON.stringify(newState));
-      await sendMsg(chatId, '📊 נכס? (default: US500, - להשמיט)');
+      await sendMsg(chatId, '📊 נכס? (default: US500CFD, - להשמיט)');
       return res.status(200).json({ ok: true });
     }
 
