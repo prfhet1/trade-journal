@@ -103,6 +103,7 @@ export default async function handler(req, res) {
       const rr = (Math.abs(d.tp - d.entry) / Math.abs(d.entry - d.sl)).toFixed(2);
       lines.push('סיכון/סיכוי: ' + bold('1:' + rr));
     }
+    if (d.riskPct) lines.push('חשיפת חשבון: ' + bold(d.riskPct));
     if (d.related) lines.push('נכסים אופציונאליים בהתאמה: ' + esc(d.related));
     if (d.comment) lines.push('', esc(d.comment));
     lines.push(SEP);
@@ -123,6 +124,7 @@ export default async function handler(req, res) {
       const rr = (Math.abs(d.tp - d.entry) / Math.abs(d.entry - d.sl)).toFixed(2);
       lines.push('סיכון/סיכוי: ' + bold('1:' + rr));
     }
+    if (d.riskPct) lines.push('חשיפת חשבון: ' + bold(d.riskPct));
     if (d.comment) lines.push('', esc(d.comment));
     lines.push(SEP);
     lines.push('⚠️ ' + DISC);
@@ -452,9 +454,15 @@ export default async function handler(req, res) {
 
   if (state.step === 'sl') {
     state.sl = skip ? null : parseFloat(text) || text;
-    state.step = 'related';
-    await kset('deskbot_' + userId, JSON.stringify(state));
-    await sendMsg(chatId, 'נכסים אופציונליים? (default: ES1!, - להשמיט)');
+    if (state.type === 'trade') {
+      state.step = 'risk_pct';
+      await kset('deskbot_' + userId, JSON.stringify(state));
+      await sendMsg(chatId, '% חשיפת חשבון? (default: 2%, - להשמיט)');
+    } else {
+      state.step = 'related';
+      await kset('deskbot_' + userId, JSON.stringify(state));
+      await sendMsg(chatId, 'נכסים אופציונליים? (default: ES1!, - להשמיט)');
+    }
     return res.status(200).json({ ok: true });
   }
 
@@ -471,6 +479,14 @@ export default async function handler(req, res) {
 
   if (state.step === 'related') {
     state.related = skip ? 'ES1!' : text;
+    state.step = 'risk_pct';
+    await kset('deskbot_' + userId, JSON.stringify(state));
+    await sendMsg(chatId, '% חשיפת חשבון? (default: 2%, - להשמיט)');
+    return res.status(200).json({ ok: true });
+  }
+
+  if (state.step === 'risk_pct') {
+    state.riskPct = skip ? '2%' : (text.includes('%') ? text : text + '%');
     state.step = 'done';
     await kset('deskbot_' + userId, JSON.stringify(state));
     await showPreview(chatId, state);
