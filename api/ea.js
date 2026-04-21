@@ -87,7 +87,13 @@ export default async function handler(req, res) {
     msg = lines.filter(Boolean).join('\n');
   }
   else if (t === 'update') {
-    const utypeLbl = body.utype === 'sl' ? 'Move Stop Loss' : body.utype === 'partial' ? 'Partial Close' : 'Add to Position';
+    let utypeLbl;
+    if(body.utype==='partial') utypeLbl='Partial Close';
+    else if(body.utype==='add') utypeLbl='Add to Position';
+    else if(body.utype==='sltp') utypeLbl='Move Stop Loss / TP';
+    else if(body.utype==='tp') utypeLbl='Move Take Profit';
+    else if(body.utype==='sl') utypeLbl='Move Stop Loss';
+    else utypeLbl='Update';
     const lines = [
       bold('🔄 ניהול עסקה  יומן מסחר DJR'),
       esc(utypeLbl), SEP,
