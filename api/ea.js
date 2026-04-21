@@ -64,7 +64,7 @@ export default async function handler(req, res) {
       body.sl    ? 'Estimated Stop Loss: ' + bold(body.sl) : '',
       body.rr    ? 'סיכון/סיכוי: ' + bold(body.rr) : '',
       body.riskPct ? 'חשיפת חשבון: ' + bold(body.riskPct) : '',
-      body.related ? 'נכסים אופציונאליים בהתאמה: ' + esc(body.related) : '',
+      body.related ? 'נכסים אופציונאליים בהתאמה: ' + esc(body.related==='ES1'?'ES1!':body.related) : '',
       body.comment ? '\n' + esc(body.comment) : '',
       SEP, DISC
     ];
