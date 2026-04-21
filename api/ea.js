@@ -143,13 +143,14 @@ export default async function handler(req, res) {
     console.log('Posting to Telegram, token exists:', !!token, 'chatId:', chatId);
 
     if (token && chatId) {
+      console.log('MSG preview:', msg.substring(0,200));
       const tgRes = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chat_id: chatId, text: msg, parse_mode: 'MarkdownV2' })
       });
       const tgJ = await tgRes.json();
-      console.log('Telegram result:', JSON.stringify(tgJ).substring(0, 200));
+      console.log('Telegram result:', JSON.stringify(tgJ).substring(0, 300));
 
       // Save to journal
       try {
